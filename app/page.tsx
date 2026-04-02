@@ -1,196 +1,114 @@
-"use client";
-import { useState, DragEvent } from "react";
-import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, X, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { db } from "@/db";
+import { assets, favorites } from "@/db/schema";
+import { desc, eq, sql } from "drizzle-orm";
+import ImageCard from "@/components/ImageCard";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import Link from "next/link";
+import { ImageIcon, Plus, Sparkles } from "lucide-react";
 
-export default function UploadPage() {
-  const [files, setFiles] = useState<File[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [isDragActive, setIsDragActive] = useState(false);
-  const [status, setStatus] = useState("");
+export default async function HomePage() {
+  const { userId } = await auth();
 
-  // 处理文件添加
-  const handleFilesAdded = (newFiles: FileList | null) => {
-    if (!newFiles) return;
-    const incoming = Array.from(newFiles).filter((f) =>
-      f.type.startsWith("image/"),
-    );
-    setFiles((prev) => [...prev, ...incoming]);
-    setStatus("");
-  };
+  // 1. 基础查询：获取图片列表及当前用户的收藏状态
+  const assetsData = await db.query.assets.findMany({
+    orderBy: [desc(assets.createdAt)],
+    with: {
+      favoritedBy: {
+        // 修正之前的逻辑：未登录时不查任何人的收藏
+        where: userId
+          ? eq(favorites.userId, userId)
+          : eq(favorites.userId, "NO_USER"),
+      },
+    },
+  });
 
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
+  // 2. 批量提取并查询上传者信息 (保持你之前的优化逻辑)
+  const userIds = [...new Set(assetsData.map((a) => a.userId))];
+  const client = await clerkClient();
+  const usersList = await client.users.getUserList({
+    userId: userIds,
+    limit: userIds.length,
+  });
+  const userMap = new Map(usersList.data.map((u) => [u.id, u]));
 
-  // 并发上传逻辑
-  const handleUpload = async () => {
-    if (files.length === 0) return;
+  // 3. 合并数据：同时补全“上传者信息”和“总收藏数”
+  const data = await Promise.all(
+    assetsData.map(async (asset) => {
+      const uploader = userMap.get(asset.userId);
 
-    try {
-      setUploading(true);
-      setProgress(0);
-      let completedCount = 0;
+      // 核心新增：统计这张图片在数据库里被收藏了多少次
+      const [countResult] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(favorites)
+        .where(eq(favorites.assetId, asset.id));
 
-      const uploadTasks = files.map(async (file) => {
-        // 1. 获取预签名 URL
-        const {
-          data: { url, fileKey },
-        } = await axios.post("/api/upload", {
-          fileName: file.name,
-          contentType: file.type,
-        });
-
-        // 2. 直传 R2 并更新进度
-        await axios.put(url, file, {
-          headers: { "Content-Type": file.type },
-          onUploadProgress: (p) => {
-            const individualContribution =
-              p.loaded / (p.total || 100) / files.length;
-            const totalPercent = Math.round(
-              (completedCount / files.length + individualContribution) * 100,
-            );
-            setProgress(Math.min(totalPercent, 99)); // 留 1% 给数据库写入
-          },
-        });
-
-        // 3. 写入数据库
-        await axios.post("/api/assets", {
-          title: file.name.split(".")[0],
-          fileKey,
-          contentType: file.type,
-        });
-
-        completedCount++;
-        setProgress(Math.round((completedCount / files.length) * 100));
-      });
-
-      setStatus(`正在同步 ${files.length} 个资源...`);
-      await Promise.all(uploadTasks);
-
-      setStatus("全部资源已入库！");
-      setTimeout(() => {
-        setUploading(false);
-        setFiles([]);
-        setProgress(0);
-      }, 2000);
-    } catch (err) {
-      console.error(err);
-      setStatus("部分上传失败");
-      setUploading(false);
-    }
-  };
+      return {
+        ...asset,
+        favoriteCount: Number(countResult?.count || 0), // 确保是数字类型
+        uploader: {
+          imageUrl: uploader?.imageUrl || "",
+          fullName: uploader?.username || uploader?.firstName || "匿名艺术家",
+        },
+      };
+    }),
+  );
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 p-6">
-      <div className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-2xl ring-1 ring-zinc-200">
-        <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-black text-zinc-900 tracking-tight">
-            资源上传中心
-          </h2>
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
-            {files.length} Files Selected
-          </span>
-        </div>
-
-        {/* 拖拽交互区 */}
-        <div
-          onDragOver={(e: DragEvent) => {
-            e.preventDefault();
-            setIsDragActive(true);
-          }}
-          onDragLeave={() => setIsDragActive(false)}
-          onDrop={(e: DragEvent) => {
-            e.preventDefault();
-            setIsDragActive(false);
-            handleFilesAdded(e.dataTransfer.files);
-          }}
-          className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 transition-all 
-            ${isDragActive ? "border-blue-500 bg-blue-50/50 scale-[1.01]" : "border-zinc-200 bg-zinc-50"}`}
-        >
-          <UploadCloud
-            size={40}
-            className={isDragActive ? "text-blue-500" : "text-zinc-300"}
-          />
-          <p className="mt-4 text-sm text-zinc-500 text-center">
-            拖拽多张图片到这里，或者{" "}
-            <span className="text-blue-600 font-bold cursor-pointer">
-              点击浏览
-            </span>
-          </p>
-          <input
-            type="file"
-            multiple
-            onChange={(e) => handleFilesAdded(e.target.files)}
-            className="absolute inset-0 cursor-pointer opacity-0"
-            disabled={uploading}
-          />
-        </div>
-
-        {/* 预览列表 - 改为 Image 组件 */}
-        <AnimatePresence>
-          {files.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mt-6 grid grid-cols-4 gap-3"
+    <div className="p-6">
+      {data.length > 0 ? (
+        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">
+          {data.map((asset, index) => (
+            // 把 userId 加入 key。当登录状态改变，key 改变，ImageCard 会被强制销毁并重新初始化
+            <div
+              key={`${asset.id}-${userId}`}
+              className="mb-5 break-inside-avoid"
             >
-              {files.map((f, i) => (
-                <div
-                  key={i}
-                  className="group relative aspect-square rounded-xl bg-zinc-100 overflow-hidden border border-zinc-200"
-                >
-                  <Image
-                    src={URL.createObjectURL(f)}
-                    alt="preview"
-                    fill
-                    unoptimized // 本地预览图不需要优化
-                    className="object-cover"
-                  />
-                  {!uploading && (
-                    <button
-                      onClick={() => removeFile(i)}
-                      className="absolute right-1 top-1 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      <X size={12} />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 进度条逻辑 */}
-        {uploading && (
-          <div className="mt-8">
-            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
-              <span className="text-zinc-400 flex items-center gap-2">
-                <Loader2 size={12} className="animate-spin" /> {status}
-              </span>
-              <span className="text-blue-600">{progress}%</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden">
-              <motion.div
-                className="h-full bg-blue-600"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
+              <ImageCard
+                asset={asset}
+                index={index}
+                isStarredInitial={!!userId && asset.favoritedBy.length > 0}
               />
             </div>
-          </div>
-        )}
+          ))}
+        </div>
+      ) : (
+        <div className="relative group max-w-md w-full mx-auto">
+          {/* 背景装饰：改为青柠色渐变晕染 */}
+          <div className="absolute -inset-4 bg-linear-to-r from-lime-400/10 to-emerald-400/5 rounded-[40px] blur-2xl transition-all group-hover:from-lime-400/20 group-hover:to-emerald-400/10" />
 
-        <button
-          onClick={handleUpload}
-          disabled={files.length === 0 || uploading}
-          className="mt-8 w-full rounded-2xl bg-zinc-900 py-4 text-sm font-bold text-white transition-all hover:bg-black active:scale-[0.98] disabled:bg-zinc-200"
-        >
-          {uploading ? "上传同步中..." : "确认同步到画廊"}
-        </button>
-      </div>
-    </main>
+          <div className="relative flex flex-col items-center bg-white border border-zinc-100 rounded-[32px] p-12 text-center shadow-sm">
+            {/* 图标组合 */}
+            <div className="relative mb-6">
+              <div className="h-20 w-20 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-300">
+                <ImageIcon size={40} strokeWidth={1.5} />
+              </div>
+              {/* 这里的蓝色背景改为 lime-400，文字改为深色以保持对比 */}
+              <div className="absolute -right-2 -top-2 h-8 w-8 rounded-full bg-lime-400 flex items-center justify-center text-lime-950 shadow-lg shadow-lime-200 animate-bounce">
+                <Plus size={16} strokeWidth={3} />
+              </div>
+            </div>
+
+            {/* 文字描述 */}
+            <h3 className="text-xl font-black text-zinc-900 tracking-tight">
+              灵感库空空如也
+            </h3>
+            <p className="mt-2 text-zinc-500 text-sm leading-relaxed px-4">
+              这里暂时还没有任何资源。
+              <br />
+              作为先驱者，来发布第一条灵感吧！
+            </p>
+
+            {/* 操作按钮：从黑蓝改为黑绿悬停 */}
+            <Link
+              href="/upload"
+              className="mt-8 flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-3 text-sm font-bold text-white hover:bg-lime-400 hover:text-zinc-950 transition-all active:scale-95 shadow-xl shadow-zinc-200 hover:shadow-lime-200/50"
+            >
+              <Sparkles size={16} />
+              立即发布
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

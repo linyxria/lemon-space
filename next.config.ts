@@ -7,9 +7,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "img.clerk.com",
+      },
+      {
+        protocol: "https",
         hostname: "pub-b1990799b0fb4fd6a1ee43bb3167231e.r2.dev",
-        port: "",
-        pathname: "/**",
       },
     ],
   },
