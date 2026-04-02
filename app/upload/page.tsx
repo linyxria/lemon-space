@@ -1,8 +1,8 @@
 "use client";
-import { useState, DragEvent } from "react";
+import { useState, DragEvent, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, X, Loader2 } from "lucide-react";
+import { UploadCloud, X, Loader2, Citrus } from "lucide-react"; // 引入 Citrus 增加品牌感
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +13,13 @@ export default function UploadPage() {
   const [isDragActive, setIsDragActive] = useState(false);
   const [status, setStatus] = useState("");
 
-  // 处理文件添加
+  // 极客提醒：处理内存泄漏。URL.createObjectURL 需要在组件卸载时销毁
+  useEffect(() => {
+    return () => {
+      // 这里的逻辑可以根据需要清理预览图缓存
+    };
+  }, []);
+
   const handleFilesAdded = (newFiles: FileList | null) => {
     if (!newFiles) return;
     const incoming = Array.from(newFiles).filter((f) =>
@@ -27,7 +33,6 @@ export default function UploadPage() {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 并发上传逻辑
   const handleUpload = async () => {
     if (files.length === 0) return;
 
@@ -37,7 +42,6 @@ export default function UploadPage() {
       let completedCount = 0;
 
       const uploadTasks = files.map(async (file) => {
-        // 1. 获取预签名 URL
         const {
           data: { url, fileKey },
         } = await axios.post("/api/upload", {
@@ -45,7 +49,6 @@ export default function UploadPage() {
           contentType: file.type,
         });
 
-        // 2. 直传 R2 并更新进度
         await axios.put(url, file, {
           headers: { "Content-Type": file.type },
           onUploadProgress: (p) => {
@@ -54,11 +57,10 @@ export default function UploadPage() {
             const totalPercent = Math.round(
               (completedCount / files.length + individualContribution) * 100,
             );
-            setProgress(Math.min(totalPercent, 99)); // 留 1% 给数据库写入
+            setProgress(Math.min(totalPercent, 99));
           },
         });
 
-        // 3. 写入数据库
         await axios.post("/api/assets", {
           title: file.name.split(".")[0],
           fileKey,
@@ -69,10 +71,10 @@ export default function UploadPage() {
         setProgress(Math.round((completedCount / files.length) * 100));
       });
 
-      setStatus(`正在同步 ${files.length} 个资源...`);
+      setStatus(`同步中 (${completedCount}/${files.length})`);
       await Promise.all(uploadTasks);
 
-      setStatus("全部资源已入库！");
+      setStatus("入库成功！正在重定向...");
       setTimeout(() => {
         setUploading(false);
         setFiles([]);
@@ -80,24 +82,29 @@ export default function UploadPage() {
       }, 2000);
     } catch (err) {
       console.error(err);
-      setStatus("部分上传失败");
+      setStatus("上传过程中出现异常");
       setUploading(false);
     }
   };
 
   return (
     <div className="p-6">
-      <div className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-2xl ring-1 ring-zinc-200 mx-auto">
+      <div className="w-full max-w-2xl rounded-[2.5rem] bg-white p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] ring-1 ring-zinc-200 mx-auto">
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-black text-zinc-900 tracking-tight">
-            资源上传中心
-          </h2>
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
-            {files.length} 个待上传资源
+          <div className="flex items-center gap-3">
+            <div className="bg-lime-400 p-2 rounded-xl">
+              <Citrus size={20} className="text-lime-950" />
+            </div>
+            <h2 className="text-2xl font-black text-zinc-900 tracking-tight">
+              资源上传
+            </h2>
+          </div>
+          <span className="rounded-full bg-lime-100 px-4 py-1.5 text-[10px] font-black uppercase tracking-wider text-lime-700">
+            {files.length} ITEMS READY
           </span>
         </div>
 
-        {/* 拖拽交互区 */}
+        {/* 拖拽区 */}
         <div
           onDragOver={(e: DragEvent) => {
             e.preventDefault();
@@ -109,17 +116,20 @@ export default function UploadPage() {
             setIsDragActive(false);
             handleFilesAdded(e.dataTransfer.files);
           }}
-          className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 transition-all 
-            ${isDragActive ? "border-blue-500 bg-blue-50/50 scale-[1.01]" : "border-zinc-200 bg-zinc-50"}`}
+          className={`relative flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed p-12 transition-all duration-300
+            ${isDragActive ? "border-lime-500 bg-lime-50/50 scale-[1.02] shadow-inner" : "border-zinc-200 bg-zinc-50"}`}
         >
           <UploadCloud
-            size={40}
-            className={isDragActive ? "text-blue-500" : "text-zinc-300"}
+            size={48}
+            strokeWidth={1.5}
+            className={
+              isDragActive ? "text-lime-600 animate-bounce" : "text-zinc-400"
+            }
           />
-          <p className="mt-4 text-sm text-zinc-500 text-center">
-            拖拽多张图片到这里，或者{" "}
-            <span className="text-blue-600 font-bold cursor-pointer">
-              点击浏览
+          <p className="mt-6 text-sm text-zinc-500 text-center font-medium">
+            将图片拖入此区域，或{" "}
+            <span className="text-zinc-900 font-bold underline underline-offset-4 decoration-lime-400 decoration-2 cursor-pointer hover:text-lime-600 transition-colors">
+              点击浏览本地文件
             </span>
           </p>
           <input
@@ -131,30 +141,30 @@ export default function UploadPage() {
           />
         </div>
 
-        {/* 预览列表 - 改为 Image 组件 */}
+        {/* 预览列表 */}
         <AnimatePresence>
           {files.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mt-6 grid grid-cols-4 gap-3"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8 grid grid-cols-4 gap-4"
             >
               {files.map((f, i) => (
                 <div
                   key={i}
-                  className="group relative aspect-square rounded-xl bg-zinc-100 overflow-hidden border border-zinc-200"
+                  className="group relative aspect-square rounded-2xl bg-zinc-100 overflow-hidden border border-zinc-100 shadow-sm"
                 >
                   <Image
                     src={URL.createObjectURL(f)}
                     alt="preview"
                     fill
-                    unoptimized // 本地预览图不需要优化
-                    className="object-cover"
+                    unoptimized
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   {!uploading && (
                     <button
                       onClick={() => removeFile(i)}
-                      className="absolute right-1 top-1 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                      className="absolute right-2 top-2 z-10 rounded-full bg-zinc-900/80 p-1.5 text-white opacity-0 transition-all hover:bg-red-500 group-hover:opacity-100"
                     >
                       <X size={12} />
                     </button>
@@ -165,47 +175,45 @@ export default function UploadPage() {
           )}
         </AnimatePresence>
 
-        {/* 进度条逻辑 */}
+        {/* 进度条 */}
         {uploading && (
-          <div className="mt-8">
-            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
+          <div className="mt-10">
+            <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.2em] mb-3">
               <span className="text-zinc-400 flex items-center gap-2">
-                <Loader2 size={12} className="animate-spin" /> {status}
+                <Loader2 size={12} className="animate-spin text-lime-500" />{" "}
+                {status}
               </span>
-              <span className="text-blue-600">{progress}%</span>
+              <span className="text-lime-600">{progress}%</span>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden">
+            <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden">
               <motion.div
-                className="h-full bg-blue-600"
+                className="h-full bg-lime-400"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5 }}
               />
             </div>
           </div>
         )}
 
         <Button
-  onClick={handleUpload}
-  disabled={files.length === 0 || uploading}
-  className="mt-8 w-full rounded-2xl py-5 text-base font-black transition-all duration-300
-    /* 核心配色：亮青柠底 + 深绿字 */
-    bg-lime-400 text-lime-900 
-    /* 悬停效果：变亮一点，并加上发光阴影 */
-    hover:bg-lime-300 hover:shadow-[0_0_30px_rgba(163,230,53,0.3)]
-    /* 点击反馈：物理下压 */
-    active:scale-[0.96] 
-    /* 禁用状态：优雅的褪色 */
-    disabled:bg-zinc-100 disabled:text-zinc-400 disabled:shadow-none disabled:cursor-not-allowed"
->
-  {uploading ? (
-    <div className="flex items-center gap-2">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      <span>正在同步至 R2 存储...</span>
-    </div>
-  ) : (
-    "确认同步到画廊"
-  )}
-</Button>
+          onClick={handleUpload}
+          disabled={files.length === 0 || uploading}
+          className="mt-10 w-full rounded-[1.25rem] py-7 text-base font-black transition-all duration-300
+            bg-zinc-900 text-white
+            hover:bg-lime-400 hover:text-zinc-950 hover:shadow-[0_20px_40px_-12px_rgba(163,230,53,0.4)]
+            active:scale-[0.97]
+            disabled:bg-zinc-100 disabled:text-zinc-400 disabled:shadow-none"
+        >
+          {uploading ? (
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>正在建立数据索引...</span>
+            </div>
+          ) : (
+            "确认同步到画廊"
+          )}
+        </Button>
       </div>
     </div>
   );

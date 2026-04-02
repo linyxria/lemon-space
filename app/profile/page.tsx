@@ -70,15 +70,15 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex-1 flex flex-col p-8 max-w-7xl mx-auto w-full">
-      <header className="mb-10">
+      <div className="mb-10">
         <h1 className="text-4xl font-black text-zinc-900 tracking-tight">
           个人中心
         </h1>
         <p className="text-zinc-500 mt-2">管理你的灵感与上传资源</p>
-      </header>
+      </div>
 
       <Tabs defaultValue="uploads" className="w-full">
-        <TabsList className="bg-zinc-100 p-1 rounded-xl mb-8">
+        <TabsList className="bg-zinc-100 p-1 rounded-xl mb-4">
           <TabsTrigger
             value="uploads"
             className="flex items-center gap-2 rounded-lg px-6"
@@ -158,17 +158,30 @@ function EmptyState({
   description: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-zinc-100 rounded-3xl bg-zinc-50/50">
-      <div className="h-12 w-12 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-400 mb-4">
-        <Sparkles size={24} />
+    <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-zinc-100 rounded-[2.5rem] bg-zinc-50/30">
+      <div className="h-14 w-14 bg-white shadow-sm border border-zinc-100 rounded-2xl flex items-center justify-center text-lime-500 mb-6">
+        <Sparkles size={28} strokeWidth={1.5} />
       </div>
-      <h3 className="font-bold text-zinc-900">{title}</h3>
-      <p className="text-sm text-zinc-500 mt-1">{description}</p>
+
+      <h3 className="font-black text-xl text-zinc-900 tracking-tight">
+        {title}
+      </h3>
+      <p className="text-sm text-zinc-400 mt-2 max-w-50 text-center leading-relaxed">
+        {description}
+      </p>
+
       <Link
         href="/"
-        className="mt-6 text-sm font-bold text-blue-600 hover:underline"
+        className="mt-8 group relative inline-flex items-center gap-2 text-sm font-black text-zinc-900 transition-all"
       >
-        回到首页浏览 →
+        {/* 文字装饰：一个精致的青柠色下划线动画 */}
+        <span className="relative">
+          回到首页浏览
+          <span className="absolute -bottom-1 left-0 h-0.75 w-0 bg-lime-400 transition-all duration-300 group-hover:w-full" />
+        </span>
+        <span className="transition-transform duration-300 group-hover:translate-x-1">
+          →
+        </span>
       </Link>
     </div>
   );

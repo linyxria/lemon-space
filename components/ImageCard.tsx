@@ -196,15 +196,21 @@ export default function ImageCard({
                       {asset.title ?? "未命名资源"}
                     </h3>
                     <p className="text-xs text-zinc-500 font-mono mt-1">
-                      R2 Key: {asset.r2Key}
+                      R2 OBJECT: {asset.r2Key}
                     </p>
                   </div>
                   <a
                     href={asset.url}
                     target="_blank"
-                    className="flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                    className="group flex items-center gap-2.5 rounded-2xl bg-zinc-900 px-6 py-3.5 text-sm font-black text-white transition-all 
+        hover:bg-lime-400 hover:text-zinc-950 hover:shadow-[0_15px_30px_-10px_rgba(163,230,53,0.5)]
+        active:scale-95"
                   >
-                    查看原图 <ExternalLink size={14} />
+                    VIEW SOURCE
+                    <ExternalLink
+                      size={16}
+                      className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                    />
                   </a>
                 </div>
               </div>
