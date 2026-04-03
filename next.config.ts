@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "images.linyxria.tech",
+      },
+      {
+        protocol: "https",
         hostname: "pub-2120d1f9926946a7ae669453e43211dc.r2.dev",
       },
     ],
