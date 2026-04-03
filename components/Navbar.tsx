@@ -15,9 +15,9 @@ import { Image as ImageIcon, Upload, Citrus, User } from "lucide-react";
 import { Button } from "./ui/button";
 
 const navItems = [
-  { name: "画廊", href: "/", icon: ImageIcon, protected: false },
-  { name: "上传", href: "/upload", icon: Upload, protected: true },
-  { name: "我的", href: "/profile", icon: User, protected: true },
+  { name: "画廊", path: "/", icon: ImageIcon, protected: false },
+  { name: "上传", path: "/upload", icon: Upload, protected: true },
+  { name: "我的", path: "/profile", icon: User, protected: true },
 ];
 
 export default function Navbar() {
@@ -67,14 +67,13 @@ export default function Navbar() {
         {/* 导航菜单 */}
         <div className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.path;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={(e) => handleNavClick(e, item.href, item.protected)}
-                className={`relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-colors 
-      ${isActive ? "text-lime-700" : "text-zinc-500 hover:text-zinc-900"}`} // 激活时用深青柠色
+              <motion.div
+                key={item.path}
+                onClick={(e) => handleNavClick(e, item.path, item.protected)}
+                className={`relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-colors cursor-pointer
+    ${isActive ? "text-lime-700" : "text-zinc-500 hover:text-zinc-900"}`}
               >
                 <item.icon size={16} />
                 {item.name}
@@ -85,7 +84,7 @@ export default function Navbar() {
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-              </Link>
+              </motion.div>
             );
           })}
         </div>
