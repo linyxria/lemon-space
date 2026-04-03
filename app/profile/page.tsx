@@ -1,32 +1,19 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { assets, favorites } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, inArray } from "drizzle-orm";
 import ImageCard from "@/components/ImageCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FolderUp, Bookmark, Sparkles } from "lucide-react";
 import Link from "next/link";
 
-// 定义数据库查出来的原始 Asset 类型
-type RawAsset = typeof assets.$inferSelect;
-
-// 或者更直接一点，针对你这个页面
-interface EnrichResult extends RawAsset {
-  favoriteCount: number;
-  uploader: {
-    imageUrl: string;
-    fullName: string;
-  };
-}
-
 export default async function ProfilePage() {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return null;
   }
 
-  // 1. 获取当前用户信息（用于补全 uploader）
   const client = await clerkClient();
   const me = await client.users.getUser(userId);
   const myInfo = {
@@ -34,7 +21,7 @@ export default async function ProfilePage() {
     fullName: me.username || me.firstName || "艺术家",
   };
 
-  // 2. 并发查询：我的上传 & 我的收藏
+  // 3. 基础查询：拉取原始数据
   const [myUploadsRaw, myFavoritesRaw] = await Promise.all([
     db.query.assets.findMany({
       where: eq(assets.userId, userId),
@@ -42,31 +29,45 @@ export default async function ProfilePage() {
     }),
     db.query.favorites.findMany({
       where: eq(favorites.userId, userId),
-      with: {
-        asset: true,
-      },
+      with: { asset: true },
     }),
   ]);
 
-  // 3. 数据补全函数 (封装一下，避免重复代码)
-  const enrichAsset = async (asset: RawAsset): Promise<EnrichResult> => {
-    // 统计收藏数
-    const [countResult] = await db
-      .select({ count: sql<number>`count(*)` })
+  // 4. 【核心优化】批量获取所有相关图片的收藏总数 (聚合查询)
+  const allAssetIds = [
+    ...myUploadsRaw.map((a) => a.id),
+    ...myFavoritesRaw.map((f) => f.assetId),
+  ];
+
+  let favoriteCountsMap: Record<string, number> = {};
+
+  if (allAssetIds.length > 0) {
+    const counts = await db
+      .select({
+        assetId: favorites.assetId,
+        count: sql<number>`count(*)`,
+      })
       .from(favorites)
-      .where(eq(favorites.assetId, asset.id));
+      .where(inArray(favorites.assetId, allAssetIds))
+      .groupBy(favorites.assetId);
 
-    return {
-      ...asset,
-      favoriteCount: Number(countResult?.count || 0),
-      uploader: myInfo, // 个人页的上传者和收藏展示，逻辑上都可以用“我”
-    };
-  };
+    favoriteCountsMap = Object.fromEntries(
+      counts.map((c) => [c.assetId, Number(c.count)]),
+    );
+  }
 
-  const myUploads = await Promise.all(myUploadsRaw.map(enrichAsset));
-  const favoritedAssets = await Promise.all(
-    myFavoritesRaw.map((f) => enrichAsset(f.asset)),
-  );
+  // 5. 内存中合并数据 (不再请求数据库)
+  const myUploads = myUploadsRaw.map((asset) => ({
+    ...asset,
+    favoriteCount: favoriteCountsMap[asset.id] || 0,
+    uploader: myInfo,
+  }));
+
+  const favoritedAssets = myFavoritesRaw.map((f) => ({
+    ...f.asset,
+    favoriteCount: favoriteCountsMap[f.asset.id] || 0,
+    uploader: myInfo, // 收藏页也可以显示原作者，如果需要原作者信息，这里需要额外处理 userMap
+  }));
 
   return (
     <div className="flex-1 flex flex-col p-8 max-w-7xl mx-auto w-full">
@@ -100,10 +101,7 @@ export default async function ProfilePage() {
           {myUploads.length > 0 ? (
             <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">
               {myUploads.map((asset, index) => (
-                <div
-                  key={`${asset.id}-${userId}`}
-                  className="mb-5 break-inside-avoid"
-                >
+                <div key={asset.id} className="mb-5 break-inside-avoid">
                   <ImageCard
                     index={index}
                     asset={asset}
@@ -125,10 +123,7 @@ export default async function ProfilePage() {
           {favoritedAssets.length > 0 ? (
             <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">
               {favoritedAssets.map((asset, index) => (
-                <div
-                  key={`${asset.id}-${userId}`}
-                  className="mb-5 break-inside-avoid"
-                >
+                <div key={asset.id} className="mb-5 break-inside-avoid">
                   <ImageCard
                     index={index}
                     asset={asset}

@@ -3,8 +3,8 @@ import { assets, favorites } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import ImageCard from "@/components/ImageCard";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import Link from "next/link";
-import { ImageIcon, Plus, Sparkles } from "lucide-react";
+import { ImageIcon, Plus } from "lucide-react";
+import PublishButton from "@/components/PublishButton";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -58,11 +58,7 @@ export default async function HomePage() {
       {data.length > 0 ? (
         <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">
           {data.map((asset, index) => (
-            // 把 userId 加入 key。当登录状态改变，key 改变，ImageCard 会被强制销毁并重新初始化
-            <div
-              key={`${asset.id}-${userId}`}
-              className="mb-5 break-inside-avoid"
-            >
+            <div key={asset.id} className="mb-5 break-inside-avoid">
               <ImageCard
                 asset={asset}
                 index={index}
@@ -98,14 +94,7 @@ export default async function HomePage() {
               作为先驱者，来发布第一条灵感吧！
             </p>
 
-            {/* 操作按钮：从黑蓝改为黑绿悬停 */}
-            <Link
-              href="/upload"
-              className="mt-8 flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-3 text-sm font-bold text-white hover:bg-lime-400 hover:text-zinc-950 transition-all active:scale-95 shadow-xl shadow-zinc-200 hover:shadow-lime-200/50"
-            >
-              <Sparkles size={16} />
-              立即发布
-            </Link>
+            <PublishButton />
           </div>
         </div>
       )}
