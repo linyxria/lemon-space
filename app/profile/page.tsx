@@ -6,6 +6,7 @@ import ImageCard from "@/components/ImageCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FolderUp, Bookmark, Sparkles } from "lucide-react";
 import Link from "next/link";
+import MasonryGrid from "@/components/MasonryGrid";
 
 export default async function ProfilePage() {
   const { userId } = await auth();
@@ -32,6 +33,9 @@ export default async function ProfilePage() {
       with: { asset: true },
     }),
   ]);
+
+  // 创建一个 Set，存放当前用户真正收藏过的所有 Asset ID
+  const myFavoriteIdSet = new Set(myFavoritesRaw.map((f) => f.assetId));
 
   // 4. 【核心优化】批量获取所有相关图片的收藏总数 (聚合查询)
   const allAssetIds = [
@@ -70,8 +74,8 @@ export default async function ProfilePage() {
   }));
 
   return (
-    <div className="flex-1 flex flex-col p-8 max-w-7xl mx-auto w-full">
-      <div className="mb-10">
+    <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full">
+      <div className="mb-8">
         <h1 className="text-4xl font-black text-zinc-900 tracking-tight">
           个人中心
         </h1>
@@ -99,17 +103,16 @@ export default async function ProfilePage() {
         {/* --- 我的上传 Tab --- */}
         <TabsContent value="uploads">
           {myUploads.length > 0 ? (
-            <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">
-              {myUploads.map((asset, index) => (
-                <div key={asset.id} className="mb-5 break-inside-avoid">
-                  <ImageCard
-                    index={index}
-                    asset={asset}
-                    isStarredInitial={true}
-                  />
-                </div>
-              ))}
-            </div>
+            <MasonryGrid
+              items={myUploads}
+              renderItem={(asset, index) => (
+                <ImageCard
+                  index={index}
+                  asset={asset}
+                  isStarredInitial={myFavoriteIdSet.has(asset.id)}
+                />
+              )}
+            />
           ) : (
             <EmptyState
               title="尚未上传资源"
@@ -121,17 +124,16 @@ export default async function ProfilePage() {
         {/* --- 我的收藏 Tab --- */}
         <TabsContent value="favorites">
           {favoritedAssets.length > 0 ? (
-            <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">
-              {favoritedAssets.map((asset, index) => (
-                <div key={asset.id} className="mb-5 break-inside-avoid">
-                  <ImageCard
-                    index={index}
-                    asset={asset}
-                    isStarredInitial={true}
-                  />
-                </div>
-              ))}
-            </div>
+            <MasonryGrid
+              items={favoritedAssets}
+              renderItem={(asset, index) => (
+                <ImageCard
+                  index={index}
+                  asset={asset}
+                  isStarredInitial={true} // 这里的收藏状态直接设为 true，因为这是收藏页，所有图片都是已收藏的
+                />
+              )}
+            />
           ) : (
             <EmptyState
               title="暂无收藏"

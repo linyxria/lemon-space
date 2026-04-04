@@ -1,7 +1,7 @@
 "use client";
 import { useState, DragEvent, useEffect } from "react";
 import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { UploadCloud, X, Loader2, Citrus } from "lucide-react"; // 引入 Citrus 增加品牌感
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -88,7 +88,7 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="p-6">
+    <div>
       <div className="w-full max-w-2xl rounded-[2.5rem] bg-white p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] ring-1 ring-zinc-200 mx-auto">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export default function UploadPage() {
             </h2>
           </div>
           <span className="rounded-full bg-lime-100 px-4 py-1.5 text-[10px] font-black uppercase tracking-wider text-lime-700">
-            {files.length} ITEMS READY
+            {files.length} 件作品待上传
           </span>
         </div>
 
@@ -147,7 +147,7 @@ export default function UploadPage() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-8 grid grid-cols-4 gap-4"
+              className="mt-8 grid grid-cols-4 gap-0.5 sm:gap-1 md:gap-2 lg:gap-3 xl:gap-4"
             >
               {files.map((f, i) => (
                 <div
@@ -199,11 +199,7 @@ export default function UploadPage() {
         <Button
           onClick={handleUpload}
           disabled={files.length === 0 || uploading}
-          className="mt-10 w-full rounded-[1.25rem] py-7 text-base font-black transition-all duration-300
-            bg-zinc-900 text-white
-            hover:bg-lime-400 hover:text-zinc-950 hover:shadow-[0_20px_40px_-12px_rgba(163,230,53,0.4)]
-            active:scale-[0.97]
-            disabled:bg-zinc-100 disabled:text-zinc-400 disabled:shadow-none"
+          className="mt-6 w-full"
         >
           {uploading ? (
             <div className="flex items-center gap-3">

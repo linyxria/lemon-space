@@ -5,6 +5,7 @@ import ImageCard from "@/components/ImageCard";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { ImageIcon, Plus } from "lucide-react";
 import PublishButton from "@/components/PublishButton";
+import MasonryGrid from "@/components/MasonryGrid";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -53,51 +54,50 @@ export default async function HomePage() {
     }),
   );
 
-  return (
-    <div className="p-6">
-      {data.length > 0 ? (
-        <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">
-          {data.map((asset, index) => (
-            <div key={asset.id} className="mb-5 break-inside-avoid">
-              <ImageCard
-                asset={asset}
-                index={index}
-                isStarredInitial={!!userId && asset.favoritedBy.length > 0}
-              />
+  if (data.length === 0) {
+    return (
+      <div className="relative group max-w-md w-full mx-auto">
+        {/* 背景装饰：改为青柠色渐变晕染 */}
+        <div className="absolute -inset-4 bg-linear-to-r from-lime-400/10 to-emerald-400/5 rounded-[40px] blur-2xl transition-all group-hover:from-lime-400/20 group-hover:to-emerald-400/10" />
+
+        <div className="relative flex flex-col items-center bg-white border border-zinc-100 rounded-[32px] p-12 text-center shadow-sm">
+          {/* 图标组合 */}
+          <div className="relative mb-6">
+            <div className="h-20 w-20 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-300">
+              <ImageIcon size={40} strokeWidth={1.5} />
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="relative group max-w-md w-full mx-auto">
-          {/* 背景装饰：改为青柠色渐变晕染 */}
-          <div className="absolute -inset-4 bg-linear-to-r from-lime-400/10 to-emerald-400/5 rounded-[40px] blur-2xl transition-all group-hover:from-lime-400/20 group-hover:to-emerald-400/10" />
-
-          <div className="relative flex flex-col items-center bg-white border border-zinc-100 rounded-[32px] p-12 text-center shadow-sm">
-            {/* 图标组合 */}
-            <div className="relative mb-6">
-              <div className="h-20 w-20 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-300">
-                <ImageIcon size={40} strokeWidth={1.5} />
-              </div>
-              {/* 这里的蓝色背景改为 lime-400，文字改为深色以保持对比 */}
-              <div className="absolute -right-2 -top-2 h-8 w-8 rounded-full bg-lime-400 flex items-center justify-center text-lime-950 shadow-lg shadow-lime-200 animate-bounce">
-                <Plus size={16} strokeWidth={3} />
-              </div>
+            {/* 这里的蓝色背景改为 lime-400，文字改为深色以保持对比 */}
+            <div className="absolute -right-2 -top-2 h-8 w-8 rounded-full bg-lime-400 flex items-center justify-center text-lime-950 shadow-lg shadow-lime-200 animate-bounce">
+              <Plus size={16} strokeWidth={3} />
             </div>
-
-            {/* 文字描述 */}
-            <h3 className="text-xl font-black text-zinc-900 tracking-tight">
-              灵感库空空如也
-            </h3>
-            <p className="mt-2 text-zinc-500 text-sm leading-relaxed px-4">
-              这里暂时还没有任何资源。
-              <br />
-              作为先驱者，来发布第一条灵感吧！
-            </p>
-
-            <PublishButton />
           </div>
+
+          {/* 文字描述 */}
+          <h3 className="text-xl font-black text-zinc-900 tracking-tight">
+            灵感库空空如也
+          </h3>
+          <p className="mt-2 mb-8 text-zinc-500 text-sm leading-relaxed px-4">
+            这里暂时还没有任何资源。
+            <br />
+            作为先驱者，来发布第一条灵感吧！
+          </p>
+
+          <PublishButton />
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <MasonryGrid
+      items={data}
+      renderItem={(asset, index) => (
+        <ImageCard
+          asset={asset}
+          index={index}
+          isStarredInitial={!!userId && asset.favoritedBy.length > 0}
+        />
       )}
-    </div>
+    />
   );
 }

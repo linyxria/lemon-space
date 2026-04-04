@@ -18,7 +18,7 @@ export default function PublishButton() {
   };
 
   return (
-    <Button className="mt-8 flex items-center gap-2" onClick={handlePublish}>
+    <Button onClick={handlePublish}>
       <Sparkles size={16} />
       立即发布
     </Button>
