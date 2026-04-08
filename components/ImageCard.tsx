@@ -1,25 +1,25 @@
-"use client";
+'use client'
 
-import { useClerk, useUser } from "@clerk/nextjs";
-import { Heart,Loader2 } from "lucide-react";
-import { motion } from "motion/react";
-import Image from "next/image";
-import { useState, useTransition } from "react";
+import { useClerk, useUser } from '@clerk/nextjs'
+import { Heart, Loader2 } from 'lucide-react'
+import { motion } from 'motion/react'
+import Image from 'next/image'
+import { useState, useTransition } from 'react'
 
-import { toggleLike } from "@/app/actions/like";
+import { toggleLike } from '@/app/actions/like'
 
-import ImageModal from "./ImageModal";
+import ImageModal from './ImageModal'
 
 interface Asset {
-  id: string;
-  title: string;
-  url: string;
+  id: string
+  title: string
+  url: string
   uploader: {
-    imageUrl: string;
-    fullName: string;
-  };
-  likeCount: number;
-  createdAt: Date;
+    imageUrl: string
+    fullName: string
+  }
+  likeCount: number
+  createdAt: Date
 }
 
 export default function ImageCard({
@@ -27,40 +27,40 @@ export default function ImageCard({
   index,
   isLikedInitial,
 }: {
-  asset: Asset;
-  index: number;
-  isLikedInitial: boolean;
+  asset: Asset
+  index: number
+  isLikedInitial: boolean
 }) {
-  const { isSignedIn } = useUser();
-  const { openSignIn } = useClerk();
+  const { isSignedIn } = useUser()
+  const { openSignIn } = useClerk()
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [isLiked, setIsLiked] = useState(isLikedInitial);
-  const [displayCount, setDisplayCount] = useState(asset.likeCount);
+  const [isOpen, setIsOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [isLiked, setIsLiked] = useState(isLikedInitial)
+  const [displayCount, setDisplayCount] = useState(asset.likeCount)
 
   const handleLikeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation()
 
     if (!isSignedIn) {
-      openSignIn({ fallbackRedirectUrl: window.location.pathname });
-      return;
+      openSignIn({ fallbackRedirectUrl: window.location.pathname })
+      return
     }
 
-    const newLiked = !isLiked;
-    setIsLiked(newLiked);
-    setDisplayCount((prev) => (newLiked ? prev + 1 : prev - 1));
+    const newLiked = !isLiked
+    setIsLiked(newLiked)
+    setDisplayCount((prev) => (newLiked ? prev + 1 : prev - 1))
 
     startTransition(async () => {
       try {
-        await toggleLike(asset.id);
+        await toggleLike(asset.id)
       } catch (err) {
-        setIsLiked(!newLiked);
-        setDisplayCount(asset.likeCount);
-        console.error("Like failed", err);
+        setIsLiked(!newLiked)
+        setDisplayCount(asset.likeCount)
+        console.error('Like failed', err)
       }
-    });
-  };
+    })
+  }
 
   return (
     <>
@@ -81,7 +81,7 @@ export default function ImageCard({
           <div className="w-full h-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105">
             <Image
               src={asset.url}
-              alt={asset.title ?? "Inspiration"}
+              alt={asset.title ?? 'Inspiration'}
               width={400}
               height={600}
               priority={index < 6}
@@ -96,7 +96,7 @@ export default function ImageCard({
               onClick={handleLikeClick}
               disabled={isPending}
               className={`p-2 rounded-full backdrop-blur-md bg-black/20 transition-all active:scale-90 ${
-                isLiked ? "text-lime-400" : "text-white/80 hover:text-white"
+                isLiked ? 'text-lime-400' : 'text-white/80 hover:text-white'
               }`}
             >
               {isPending ? (
@@ -104,7 +104,7 @@ export default function ImageCard({
               ) : (
                 <Heart
                   size={20}
-                  fill={isLiked ? "currentColor" : "none"}
+                  fill={isLiked ? 'currentColor' : 'none'}
                   strokeWidth={isLiked ? 0 : 2}
                 />
               )}
@@ -137,8 +137,8 @@ export default function ImageCard({
               flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all active:scale-95 shrink-0
               ${
                 isLiked
-                  ? "bg-lime-400/10 text-lime-600"
-                  : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100"
+                  ? 'bg-lime-400/10 text-lime-600'
+                  : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
               }
             `}
           >
@@ -148,7 +148,7 @@ export default function ImageCard({
               <Heart
                 size={13}
                 strokeWidth={isLiked ? 0 : 2.5}
-                fill={isLiked ? "currentColor" : "none"}
+                fill={isLiked ? 'currentColor' : 'none'}
               />
             )}
             <span className="text-[11px] font-mono font-bold tabular-nums">
@@ -165,5 +165,5 @@ export default function ImageCard({
         onClose={() => setIsOpen(false)}
       />
     </>
-  );
+  )
 }

@@ -1,10 +1,10 @@
-import { clerkClient } from "@clerk/nextjs/server";
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { clerkClient } from '@clerk/nextjs/server'
+import { desc, eq, inArray, sql } from 'drizzle-orm'
 
-import { assets, assetTags, likes, tags } from "@/db/schema";
-import { formatAssetUrl } from "@/lib/utils";
+import { assets, assetTags, likes, tags } from '@/db/schema'
+import { formatAssetUrl } from '@/lib/utils'
 
-import { db } from "..";
+import { db } from '..'
 
 export async function getAssets(
   activeTagSlug: string | undefined,
@@ -17,7 +17,7 @@ export async function getAssets(
       join ${tags} t on at.tag_id = t.id 
       where at.asset_id = ${assets.id} and t.slug = ${activeTagSlug}
     )`
-    : undefined;
+    : undefined
 
   // 2. 基础查询
   const assetsData = await db.query.assets.findMany({
@@ -30,16 +30,16 @@ export async function getAssets(
         ? { likedBy: { where: eq(likes.userId, currentUserId) } }
         : {}),
     },
-  });
+  })
 
   // 【优化点 1】：如果第一步就没数据，直接返回空，不再往下执行耗时操作
-  if (assetsData.length === 0) return [];
+  if (assetsData.length === 0) return []
 
-  const assetIds = assetsData.map((a) => a.id);
-  const userIds = [...new Set(assetsData.map((a) => a.userId))];
+  const assetIds = assetsData.map((a) => a.id)
+  const userIds = [...new Set(assetsData.map((a) => a.userId))]
 
   // 3. 并行执行收藏统计和用户信息查询
-  const client = await clerkClient();
+  const client = await clerkClient()
 
   const [allLikeCounts, usersList] = await Promise.all([
     db
@@ -51,26 +51,26 @@ export async function getAssets(
     userIds.length > 0
       ? client.users.getUserList({ userId: userIds, limit: userIds.length })
       : Promise.resolve({ data: [] }),
-  ]);
+  ])
 
   // 4. 组装数据映射
   const likeCountMap = new Map(
     allLikeCounts.map((c) => [c.assetId, Number(c.count)]),
-  );
-  const userMap = new Map(usersList.data.map((u) => [u.id, u]));
+  )
+  const userMap = new Map(usersList.data.map((u) => [u.id, u]))
 
   // 5. 格式化返回
   return assetsData.map((asset) => {
-    const uploader = userMap.get(asset.userId);
+    const uploader = userMap.get(asset.userId)
     return {
       ...asset,
       url: formatAssetUrl(asset.objectKey),
       tags: asset.tags.map((t) => t.tag.name),
       likeCount: likeCountMap.get(asset.id) || 0,
       uploader: {
-        imageUrl: uploader?.imageUrl || "",
-        fullName: uploader?.username || uploader?.firstName || "匿名艺术家",
+        imageUrl: uploader?.imageUrl || '',
+        fullName: uploader?.username || uploader?.firstName || '匿名艺术家',
       },
-    };
-  });
+    }
+  })
 }

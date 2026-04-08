@@ -1,32 +1,32 @@
-import "./globals.css";
+import './globals.css'
 
-import { zhCN } from "@clerk/localizations";
-import { ClerkProvider } from "@clerk/nextjs";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { zhCN } from '@clerk/localizations'
+import { ClerkProvider } from '@clerk/nextjs'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
 
-import Header from "@/components/Header";
+import Header from '@/components/Header'
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+})
 
 export const metadata: Metadata = {
-  title: "Lemon Gallery",
-  description: "Gallery preview for Lemon Squeezy",
-};
+  title: 'Lemon Gallery',
+  description: 'Gallery preview for Lemon Squeezy',
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
@@ -43,5 +43,5 @@ export default function RootLayout({
         <SpeedInsights />
       </body>
     </html>
-  );
+  )
 }

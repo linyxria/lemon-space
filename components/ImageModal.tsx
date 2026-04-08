@@ -1,19 +1,19 @@
-"use client";
+'use client'
 
-import { ExternalLink,X } from "lucide-react";
-import { AnimatePresence,motion } from "motion/react";
-import Image from "next/image";
+import { ExternalLink, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import Image from 'next/image'
 
-import { Button } from "./ui/button";
+import { Button } from './ui/button'
 
 interface ImageModalProps {
   asset: {
-    id: string;
-    url: string;
-    title: string | null;
-  };
-  isOpen: boolean;
-  onClose: () => void;
+    id: string
+    url: string
+    title: string | null
+  }
+  isOpen: boolean
+  onClose: () => void
 }
 
 export default function ImageModal({
@@ -69,7 +69,7 @@ export default function ImageModal({
               <div className="relative w-full h-full p-4 md:p-8">
                 <Image
                   src={asset.url}
-                  alt={asset.title ?? "Preview"}
+                  alt={asset.title ?? 'Preview'}
                   fill
                   priority
                   className="object-contain block z-10"
@@ -83,7 +83,7 @@ export default function ImageModal({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div className="space-y-1.5">
                   <h3 className="text-xl md:text-2xl font-black text-zinc-900 tracking-tight leading-tight truncate max-w-70 sm:max-w-md">
-                    {asset.title ?? "未命名灵感"}
+                    {asset.title ?? '未命名灵感'}
                   </h3>
                   <div className="flex items-center gap-2 text-zinc-400 font-mono text-[9px] font-bold uppercase tracking-widest">
                     <span>ID: {asset.id.slice(-8)}</span>
@@ -108,5 +108,5 @@ export default function ImageModal({
         </div>
       )}
     </AnimatePresence>
-  );
+  )
 }

@@ -1,22 +1,22 @@
-"use client";
-import { useAuth, useClerk } from "@clerk/nextjs";
-import { ImageIcon, Plus, Sparkles } from "lucide-react";
-import { useRouter } from "next/navigation";
+'use client'
+import { useAuth, useClerk } from '@clerk/nextjs'
+import { ImageIcon, Plus, Sparkles } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
-import { Button } from "./ui/button";
+import { Button } from './ui/button'
 
 export default function Empty() {
-  const { isSignedIn } = useAuth();
-  const { openSignIn } = useClerk();
-  const router = useRouter();
+  const { isSignedIn } = useAuth()
+  const { openSignIn } = useClerk()
+  const router = useRouter()
 
   const handlePublish = () => {
     if (isSignedIn) {
-      router.push("/upload"); // 已登录，去上传
+      router.push('/upload') // 已登录，去上传
     } else {
-      openSignIn({ fallbackRedirectUrl: "/upload" });
+      openSignIn({ fallbackRedirectUrl: '/upload' })
     }
-  };
+  }
 
   return (
     <div className="relative group max-w-md w-full mx-auto">
@@ -51,5 +51,5 @@ export default function Empty() {
         </Button>
       </div>
     </div>
-  );
+  )
 }

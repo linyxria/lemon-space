@@ -1,28 +1,28 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { desc, eq, inArray,sql } from "drizzle-orm";
-import { FolderUp, Heart,Sparkles } from "lucide-react";
-import Link from "next/link";
+import { auth, clerkClient } from '@clerk/nextjs/server'
+import { desc, eq, inArray, sql } from 'drizzle-orm'
+import { FolderUp, Heart, Sparkles } from 'lucide-react'
+import Link from 'next/link'
 
-import ImageCard from "@/components/ImageCard";
-import MasonryGrid from "@/components/MasonryGrid";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { db } from "@/db";
-import { assets, likes } from "@/db/schema";
-import { formatAssetUrl } from "@/lib/utils";
+import ImageCard from '@/components/ImageCard'
+import MasonryGrid from '@/components/MasonryGrid'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { db } from '@/db'
+import { assets, likes } from '@/db/schema'
+import { formatAssetUrl } from '@/lib/utils'
 
 export default async function ProfilePage() {
-  const { userId } = await auth();
+  const { userId } = await auth()
 
   if (!userId) {
-    return null;
+    return null
   }
 
-  const client = await clerkClient();
-  const me = await client.users.getUser(userId);
+  const client = await clerkClient()
+  const me = await client.users.getUser(userId)
   const myInfo = {
     imageUrl: me.imageUrl,
-    fullName: me.username || me.firstName || "艺术家",
-  };
+    fullName: me.username || me.firstName || '艺术家',
+  }
 
   // 3. 基础查询：拉取原始数据
   const [myUploadsRaw, myLikesRaw] = await Promise.all([
@@ -34,18 +34,18 @@ export default async function ProfilePage() {
       where: eq(likes.userId, userId),
       with: { asset: true },
     }),
-  ]);
+  ])
 
   // 创建一个 Set，存放当前用户真正收藏过的所有 Asset ID
-  const myLikeIdSet = new Set(myLikesRaw.map((f) => f.assetId));
+  const myLikeIdSet = new Set(myLikesRaw.map((f) => f.assetId))
 
   // 4. 【核心优化】批量获取所有相关图片的收藏总数 (聚合查询)
   const allAssetIds = [
     ...myUploadsRaw.map((a) => a.id),
     ...myLikesRaw.map((f) => f.assetId),
-  ];
+  ]
 
-  let likeCountsMap: Record<string, number> = {};
+  let likeCountsMap: Record<string, number> = {}
 
   if (allAssetIds.length > 0) {
     const counts = await db
@@ -55,11 +55,11 @@ export default async function ProfilePage() {
       })
       .from(likes)
       .where(inArray(likes.assetId, allAssetIds))
-      .groupBy(likes.assetId);
+      .groupBy(likes.assetId)
 
     likeCountsMap = Object.fromEntries(
       counts.map((c) => [c.assetId, Number(c.count)]),
-    );
+    )
   }
 
   // 5. 内存中合并数据 (不再请求数据库)
@@ -68,14 +68,14 @@ export default async function ProfilePage() {
     url: formatAssetUrl(asset.objectKey),
     likeCount: likeCountsMap[asset.id] || 0,
     uploader: myInfo,
-  }));
+  }))
 
   const likedAssets = myLikesRaw.map((f) => ({
     ...f.asset,
     url: formatAssetUrl(f.asset.objectKey),
     likeCount: likeCountsMap[f.asset.id] || 0,
     uploader: myInfo, // 收藏页也可以显示原作者，如果需要原作者信息，这里需要额外处理 userMap
-  }));
+  }))
 
   return (
     <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full">
@@ -147,7 +147,7 @@ export default async function ProfilePage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
 
 // 简单的内部空状态组件
@@ -155,8 +155,8 @@ function EmptyState({
   title,
   description,
 }: {
-  title: string;
-  description: string;
+  title: string
+  description: string
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-zinc-100 rounded-[2.5rem] bg-zinc-50/30">
@@ -185,5 +185,5 @@ function EmptyState({
         </span>
       </Link>
     </div>
-  );
+  )
 }

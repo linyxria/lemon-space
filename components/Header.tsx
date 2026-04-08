@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { Show,SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import { Citrus, LayoutGrid,Upload } from "lucide-react";
-import Link from "next/link";
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
+import { Citrus, LayoutGrid, Upload } from 'lucide-react'
+import Link from 'next/link'
 
-import { Button } from "./ui/button";
+import { Button } from './ui/button'
 
 export default function Header() {
   return (
@@ -56,11 +56,11 @@ export default function Header() {
                   appearance={{
                     elements: {
                       avatarBox:
-                        "h-9 w-9 border-2 border-white shadow-sm ring-1 ring-zinc-200",
-                      userButtonBox: "flex-row-reverse",
+                        'h-9 w-9 border-2 border-white shadow-sm ring-1 ring-zinc-200',
+                      userButtonBox: 'flex-row-reverse',
                       // 精准隐藏手机端名称
                       userButtonOuterIdentifier:
-                        "hidden sm:block font-bold text-zinc-700 ml-2",
+                        'hidden sm:block font-bold text-zinc-700 ml-2',
                     },
                   }}
                 >
@@ -79,5 +79,5 @@ export default function Header() {
         </div>
       </div>
     </header>
-  );
+  )
 }
