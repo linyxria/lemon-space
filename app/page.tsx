@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
-import { eq } from 'drizzle-orm'
+import { desc, eq, sql } from 'drizzle-orm'
 import Link from 'next/link'
 
 import Empty from '@/components/Empty'
@@ -7,8 +7,8 @@ import ImageCard from '@/components/ImageCard'
 import MasonryGrid from '@/components/MasonryGrid'
 import TagBar from '@/components/TagBar'
 import { db } from '@/db'
-import { getAssets } from '@/db/queries/assets'
-import { assetTags } from '@/db/schema'
+import { hydrateAssets } from '@/db/queries/assets'
+import { assets, assetTags, tags } from '@/db/schema'
 
 export default async function HomePage({
   searchParams,
@@ -17,10 +17,24 @@ export default async function HomePage({
 }) {
   const { tag: activeTagSlug } = await searchParams
 
-  // 1. 【核心：第一步】获取 Asset 数据
-  // 先不管鉴权，先看有没有我们要展示的内容
+  // 过滤查询
+  const assetsData = await db.query.assets.findMany({
+    where: activeTagSlug
+      ? sql`exists (
+      select 1 from ${assetTags} at 
+      join ${tags} t on at.tag_id = t.id 
+      where at.asset_id = ${assets.id} and t.slug = ${activeTagSlug}
+    )`
+      : undefined,
+    orderBy: [desc(assets.createdAt)],
+    with: {
+      tags: { with: { tag: true } },
+    },
+  })
+
   const { userId } = await auth()
-  const data = await getAssets(activeTagSlug, userId)
+
+  const data = await hydrateAssets(assetsData, userId)
 
   // 2. 【分流处理】
   // 如果当前“既没有选标签”且“结果还是空的”，那说明画廊是真的彻底空了
@@ -61,7 +75,7 @@ export default async function HomePage({
             <ImageCard
               asset={asset}
               index={index}
-              isLikedInitial={!!userId && asset.likedBy.length > 0}
+              isLikedInitial={asset.isLikedByMe}
             />
           )}
         />

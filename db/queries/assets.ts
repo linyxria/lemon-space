@@ -1,76 +1,110 @@
-import { clerkClient } from '@clerk/nextjs/server'
-import { desc, eq, inArray, sql } from 'drizzle-orm'
+import { clerkClient, User } from '@clerk/nextjs/server'
+import {
+  and,
+  BuildQueryResult,
+  eq,
+  ExtractTablesWithRelations,
+  inArray,
+  sql,
+} from 'drizzle-orm'
 
-import { assets, assetTags, likes, tags } from '@/db/schema'
+import * as schema from '@/db/schema'
+import { likes } from '@/db/schema'
 import { formatAssetUrl } from '@/lib/utils'
 
 import { db } from '..'
 
-export async function getAssets(
-  activeTagSlug: string | undefined,
-  currentUserId: string | null,
-) {
-  // 1. 构造基础过滤器
-  const assetFilter = activeTagSlug
-    ? sql`exists (
-      select 1 from ${assetTags} at 
-      join ${tags} t on at.tag_id = t.id 
-      where at.asset_id = ${assets.id} and t.slug = ${activeTagSlug}
-    )`
-    : undefined
+// 1. 获取所有表及其关系
+type TSchema = ExtractTablesWithRelations<typeof schema>
 
-  // 2. 基础查询
-  const assetsData = await db.query.assets.findMany({
-    where: assetFilter,
-    orderBy: [desc(assets.createdAt)],
+// 2. 构造包含 tags 关联的 Assets 类型
+export type RawAssetWithRelations = BuildQueryResult<
+  TSchema,
+  TSchema['assets'], // 指定资产表
+  {
     with: {
-      tags: { with: { tag: true } },
-      // 【优化点】：如果没登录，直接不查 likedBy，减少 JOIN 或子查询负担
-      ...(currentUserId
-        ? { likedBy: { where: eq(likes.userId, currentUserId) } }
-        : {}),
-    },
-  })
+      tags: { with: { tag: true } } // 必须和你在 getAssets 里写的 with 结构完全一致
+    }
+  }
+>
 
-  // 【优化点 1】：如果第一步就没数据，直接返回空，不再往下执行耗时操作
-  if (assetsData.length === 0) return []
+// 3. 定义补全后的类型 (供 UI 使用)
+export type HydratedAsset = Omit<RawAssetWithRelations, 'tags'> & {
+  url: string
+  likeCount: number
+  isLikedByMe: boolean
+  user: {
+    id: string
+    username: string
+    imageUrl: string
+  }
+  tags: string[] // 补全后我们将复杂的 tags 对象数组拍平为 string[]
+}
 
-  const assetIds = assetsData.map((a) => a.id)
-  const userIds = [...new Set(assetsData.map((a) => a.userId))]
+function clerkUserToProfile(user: User | undefined) {
+  if (!user) return { id: '', username: '未知用户', imageUrl: '' }
 
-  // 3. 并行执行收藏统计和用户信息查询
+  return {
+    id: user.id,
+    username: user.username || user.firstName || '艺术家',
+    imageUrl: user.imageUrl,
+  }
+}
+
+export async function hydrateAssets(
+  rawAssets: RawAssetWithRelations[],
+  currentUserId?: string | null, // 👈 新增可选参数
+): Promise<HydratedAsset[]> {
+  if (rawAssets.length === 0) return []
+
+  const assetIds = rawAssets.map((a) => a.id)
+  const userIds = [...new Set(rawAssets.map((a) => a.userId))]
+
   const client = await clerkClient()
 
-  const [allLikeCounts, usersList] = await Promise.all([
+  const [allLikeCounts, userList, currentUserLikes] = await Promise.all([
+    // 1. 查所有人的点赞总数
     db
       .select({ assetId: likes.assetId, count: sql<number>`count(*)` })
       .from(likes)
       .where(inArray(likes.assetId, assetIds))
       .groupBy(likes.assetId),
-    // Clerk 这里的查询建议加上兜底，防止 userIds 为空（虽然 assetsData 有数据理论上 userId 不为空）
+
+    // 2. 查上传者信息
     userIds.length > 0
       ? client.users.getUserList({ userId: userIds, limit: userIds.length })
       : Promise.resolve({ data: [] }),
+
+    // 3. 【核心回归】：查当前用户是否点赞过这些图
+    currentUserId
+      ? db
+          .select({ assetId: likes.assetId })
+          .from(likes)
+          .where(
+            and(
+              eq(likes.userId, currentUserId),
+              inArray(likes.assetId, assetIds),
+            ),
+          )
+      : Promise.resolve([]),
   ])
 
-  // 4. 组装数据映射
   const likeCountMap = new Map(
     allLikeCounts.map((c) => [c.assetId, Number(c.count)]),
   )
-  const userMap = new Map(usersList.data.map((u) => [u.id, u]))
+  const userMap = new Map(userList.data.map((u) => [u.id, u]))
+  // 将当前用户点赞过的 ID 存入 Set，方便 O(1) 查询
+  const likedByMeSet = new Set(currentUserLikes.map((l) => l.assetId))
 
-  // 5. 格式化返回
-  return assetsData.map((asset) => {
-    const uploader = userMap.get(asset.userId)
+  return rawAssets.map((asset) => {
+    const user = userMap.get(asset.userId)
     return {
       ...asset,
       url: formatAssetUrl(asset.objectKey),
       tags: asset.tags.map((t) => t.tag.name),
       likeCount: likeCountMap.get(asset.id) || 0,
-      uploader: {
-        imageUrl: uploader?.imageUrl || '',
-        fullName: uploader?.username || uploader?.firstName || '匿名艺术家',
-      },
+      isLikedByMe: likedByMeSet.has(asset.id), // 👈 给前端用的标记
+      user: clerkUserToProfile(user),
     }
   })
 }

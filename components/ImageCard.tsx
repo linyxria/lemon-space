@@ -14,9 +14,9 @@ interface Asset {
   id: string
   title: string
   url: string
-  uploader: {
+  user: {
     imageUrl: string
-    fullName: string
+    username: string
   }
   likeCount: number
   createdAt: Date
@@ -117,15 +117,15 @@ export default function ImageCard({
           <div className="flex items-center gap-2 overflow-hidden">
             <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full ring-1 ring-zinc-100">
               <Image
-                src={asset.uploader.imageUrl}
-                alt={asset.uploader.fullName}
+                src={asset.user.imageUrl}
+                alt={asset.user.username || 'Artist'}
                 fill
                 className="object-cover"
                 sizes="24px"
               />
             </div>
             <span className="text-[12px] font-bold text-zinc-900 truncate">
-              {asset.uploader.fullName}
+              {asset.user.username}
             </span>
           </div>
 
