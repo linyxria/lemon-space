@@ -43,7 +43,7 @@ export default function Header() {
             <div className="flex items-center gap-2 sm:gap-4">
               {/* 发布按钮：手机端 shrink-0 保证不被挤压成椭圆 */}
               <Link href="/upload" className="shrink-0">
-                <Button variant="outline">
+                <Button variant="secondary">
                   <Upload size={18} />
                   <span className="hidden sm:inline">发布灵感</span>
                 </Button>
