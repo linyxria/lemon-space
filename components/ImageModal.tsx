@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, AnimatePresence } from "motion/react";
+import { ExternalLink,X } from "lucide-react";
+import { AnimatePresence,motion } from "motion/react";
 import Image from "next/image";
-import { X, ExternalLink } from "lucide-react";
+
 import { Button } from "./ui/button";
 
 interface ImageModalProps {

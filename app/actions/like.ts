@@ -1,11 +1,12 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
-import { db } from "@/db";
-import { favorites } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-export async function toggleFavorite(assetId: string) {
+import { db } from "@/db";
+import { likes } from "@/db/schema";
+
+export async function toggleLike(assetId: string) {
   const { userId } = await auth();
 
   if (!userId) {
@@ -14,18 +15,18 @@ export async function toggleFavorite(assetId: string) {
 
   const existing = await db
     .select()
-    .from(favorites)
-    .where(and(eq(favorites.userId, userId), eq(favorites.assetId, assetId)));
+    .from(likes)
+    .where(and(eq(likes.userId, userId), eq(likes.assetId, assetId)));
 
   if (existing.length > 0) {
     await db
-      .delete(favorites)
-      .where(and(eq(favorites.userId, userId), eq(favorites.assetId, assetId)));
+      .delete(likes)
+      .where(and(eq(likes.userId, userId), eq(likes.assetId, assetId)));
   } else {
-    await db.insert(favorites).values({ userId, assetId });
+    await db.insert(likes).values({ userId, assetId });
   }
 
   // 关键：通知 Next.js 刷新数据缓存
-  revalidatePath("/gallery");
+  revalidatePath("/");
   revalidatePath("/profile");
 }

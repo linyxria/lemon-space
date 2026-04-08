@@ -1,9 +1,10 @@
 "use client";
-import { useState, DragEvent, useEffect } from "react";
 import axios from "axios";
-import { motion, AnimatePresence } from "motion/react";
-import { UploadCloud, X, Loader2, Citrus } from "lucide-react"; // 引入 Citrus 增加品牌感
+import { Citrus,Loader2, UploadCloud, X } from "lucide-react"; // 引入 Citrus 增加品牌感
+import { AnimatePresence,motion } from "motion/react";
 import Image from "next/image";
+import { DragEvent,useState } from "react";
+
 import { Button } from "@/components/ui/button";
 
 export default function UploadPage() {
@@ -13,12 +14,24 @@ export default function UploadPage() {
   const [isDragActive, setIsDragActive] = useState(false);
   const [status, setStatus] = useState("");
 
-  // 极客提醒：处理内存泄漏。URL.createObjectURL 需要在组件卸载时销毁
-  useEffect(() => {
-    return () => {
-      // 这里的逻辑可以根据需要清理预览图缓存
-    };
-  }, []);
+  const [batchTitle, setBatchTitle] = useState("");
+  const [batchTags, setBatchTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+
+  const handleTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      const tag = tagInput.trim();
+      if (tag && !batchTags.includes(tag)) {
+        setBatchTags([...batchTags, tag]);
+      }
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setBatchTags(batchTags.filter((t) => t !== tagToRemove));
+  };
 
   const handleFilesAdded = (newFiles: FileList | null) => {
     if (!newFiles) return;
@@ -41,15 +54,17 @@ export default function UploadPage() {
       setProgress(0);
       let completedCount = 0;
 
-      const uploadTasks = files.map(async (file) => {
-        const {
-          data: { url, fileKey },
-        } = await axios.post("/api/upload", {
+      const uploadTasks = files.map(async (file, index) => {
+        // 1. 获取预签名 URL 和对象键
+        const res = await axios.post("/api/assets/presigned-url", {
           fileName: file.name,
           contentType: file.type,
         });
 
-        await axios.put(url, file, {
+        const { signedUrl, objectKey } = res.data;
+
+        // 2. 上传文件到 R2
+        await axios.put(signedUrl, file, {
           headers: { "Content-Type": file.type },
           onUploadProgress: (p) => {
             const individualContribution =
@@ -61,10 +76,17 @@ export default function UploadPage() {
           },
         });
 
+        const finalTitle = batchTitle
+          ? files.length > 1
+            ? `${batchTitle} - ${(index + 1).toString().padStart(2, "0")}`
+            : batchTitle
+          : file.name.split(".")[0];
+
+        // 3. 同步到数据库
         await axios.post("/api/assets", {
-          title: file.name.split(".")[0],
-          fileKey,
-          contentType: file.type,
+          title: finalTitle,
+          objectKey,
+          tags: batchTags,
         });
 
         completedCount++;
@@ -149,31 +171,91 @@ export default function UploadPage() {
               animate={{ opacity: 1, y: 0 }}
               className="mt-8 grid grid-cols-4 gap-0.5 sm:gap-1 md:gap-2 lg:gap-3 xl:gap-4"
             >
-              {files.map((f, i) => (
-                <div
-                  key={i}
-                  className="group relative aspect-square rounded-2xl bg-zinc-100 overflow-hidden border border-zinc-100 shadow-sm"
-                >
-                  <Image
-                    src={URL.createObjectURL(f)}
-                    alt="preview"
-                    fill
-                    unoptimized
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  {!uploading && (
-                    <button
-                      onClick={() => removeFile(i)}
-                      className="absolute right-2 top-2 z-10 rounded-full bg-zinc-900/80 p-1.5 text-white opacity-0 transition-all hover:bg-red-500 group-hover:opacity-100"
-                    >
-                      <X size={12} />
-                    </button>
-                  )}
-                </div>
-              ))}
+              {files.map((f, i) => {
+                const previewUrl = URL.createObjectURL(f);
+                return (
+                  <div
+                    key={i}
+                    className="group relative aspect-square rounded-2xl bg-zinc-100 overflow-hidden border border-zinc-100 shadow-sm"
+                  >
+                    <Image
+                      src={previewUrl}
+                      alt="preview"
+                      fill
+                      unoptimized
+                      onLoad={() => URL.revokeObjectURL(previewUrl)}
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    {!uploading && (
+                      <button
+                        onClick={() => removeFile(i)}
+                        className="absolute right-2 top-2 z-10 rounded-full bg-zinc-900/80 p-1.5 text-white opacity-0 transition-all hover:bg-red-500 group-hover:opacity-100"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* 元数据配置区 */}
+        {files.length > 0 && !uploading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-8 p-6 rounded-3xl bg-zinc-50 border border-zinc-100 space-y-6"
+          >
+            {/* 批量标题 */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                批量设置标题 (可选)
+              </label>
+              <input
+                type="text"
+                placeholder="如果不填写，将使用原文件名"
+                value={batchTitle}
+                onChange={(e) => setBatchTitle(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border-none ring-1 ring-zinc-200 focus:ring-2 focus:ring-lime-400 outline-none transition-all text-sm"
+              />
+            </div>
+
+            {/* 批量标签 */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                添加标签 (空格或回车确认)
+              </label>
+              <div className="flex flex-wrap gap-2 p-2 min-h-12.5 bg-white rounded-xl ring-1 ring-zinc-200 focus-within:ring-2 focus-within:ring-lime-400 transition-all">
+                {batchTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="flex items-center gap-1 px-3 py-1 bg-lime-100 text-lime-700 text-xs font-bold rounded-lg group"
+                  >
+                    {tag}
+                    <button
+                      onClick={() => removeTag(tag)}
+                      className="hover:text-red-500"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  placeholder={
+                    batchTags.length === 0 ? "例如: UI设计 极简 Mobile..." : ""
+                  }
+                  className="flex-1 min-w-30 outline-none text-sm px-2 py-1"
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* 进度条 */}
         {uploading && (

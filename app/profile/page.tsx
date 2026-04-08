@@ -1,12 +1,14 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { db } from "@/db";
-import { assets, favorites } from "@/db/schema";
-import { eq, desc, sql, inArray } from "drizzle-orm";
-import ImageCard from "@/components/ImageCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FolderUp, Bookmark, Sparkles } from "lucide-react";
+import { desc, eq, inArray,sql } from "drizzle-orm";
+import { FolderUp, Heart,Sparkles } from "lucide-react";
 import Link from "next/link";
+
+import ImageCard from "@/components/ImageCard";
 import MasonryGrid from "@/components/MasonryGrid";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { db } from "@/db";
+import { assets, likes } from "@/db/schema";
+import { formatAssetUrl } from "@/lib/utils";
 
 export default async function ProfilePage() {
   const { userId } = await auth();
@@ -23,39 +25,39 @@ export default async function ProfilePage() {
   };
 
   // 3. 基础查询：拉取原始数据
-  const [myUploadsRaw, myFavoritesRaw] = await Promise.all([
+  const [myUploadsRaw, myLikesRaw] = await Promise.all([
     db.query.assets.findMany({
       where: eq(assets.userId, userId),
       orderBy: [desc(assets.createdAt)],
     }),
-    db.query.favorites.findMany({
-      where: eq(favorites.userId, userId),
+    db.query.likes.findMany({
+      where: eq(likes.userId, userId),
       with: { asset: true },
     }),
   ]);
 
   // 创建一个 Set，存放当前用户真正收藏过的所有 Asset ID
-  const myFavoriteIdSet = new Set(myFavoritesRaw.map((f) => f.assetId));
+  const myLikeIdSet = new Set(myLikesRaw.map((f) => f.assetId));
 
   // 4. 【核心优化】批量获取所有相关图片的收藏总数 (聚合查询)
   const allAssetIds = [
     ...myUploadsRaw.map((a) => a.id),
-    ...myFavoritesRaw.map((f) => f.assetId),
+    ...myLikesRaw.map((f) => f.assetId),
   ];
 
-  let favoriteCountsMap: Record<string, number> = {};
+  let likeCountsMap: Record<string, number> = {};
 
   if (allAssetIds.length > 0) {
     const counts = await db
       .select({
-        assetId: favorites.assetId,
+        assetId: likes.assetId,
         count: sql<number>`count(*)`,
       })
-      .from(favorites)
-      .where(inArray(favorites.assetId, allAssetIds))
-      .groupBy(favorites.assetId);
+      .from(likes)
+      .where(inArray(likes.assetId, allAssetIds))
+      .groupBy(likes.assetId);
 
-    favoriteCountsMap = Object.fromEntries(
+    likeCountsMap = Object.fromEntries(
       counts.map((c) => [c.assetId, Number(c.count)]),
     );
   }
@@ -63,13 +65,15 @@ export default async function ProfilePage() {
   // 5. 内存中合并数据 (不再请求数据库)
   const myUploads = myUploadsRaw.map((asset) => ({
     ...asset,
-    favoriteCount: favoriteCountsMap[asset.id] || 0,
+    url: formatAssetUrl(asset.objectKey),
+    likeCount: likeCountsMap[asset.id] || 0,
     uploader: myInfo,
   }));
 
-  const favoritedAssets = myFavoritesRaw.map((f) => ({
+  const likedAssets = myLikesRaw.map((f) => ({
     ...f.asset,
-    favoriteCount: favoriteCountsMap[f.asset.id] || 0,
+    url: formatAssetUrl(f.asset.objectKey),
+    likeCount: likeCountsMap[f.asset.id] || 0,
     uploader: myInfo, // 收藏页也可以显示原作者，如果需要原作者信息，这里需要额外处理 userMap
   }));
 
@@ -92,11 +96,11 @@ export default async function ProfilePage() {
             我的上传 ({myUploads.length})
           </TabsTrigger>
           <TabsTrigger
-            value="favorites"
+            value="likes"
             className="flex items-center gap-2 rounded-lg px-6"
           >
-            <Bookmark size={16} />
-            我的收藏 ({favoritedAssets.length})
+            <Heart size={16} />
+            我喜爱的 ({likedAssets.length})
           </TabsTrigger>
         </TabsList>
 
@@ -109,7 +113,7 @@ export default async function ProfilePage() {
                 <ImageCard
                   index={index}
                   asset={asset}
-                  isStarredInitial={myFavoriteIdSet.has(asset.id)}
+                  isLikedInitial={myLikeIdSet.has(asset.id)}
                 />
               )}
             />
@@ -122,21 +126,21 @@ export default async function ProfilePage() {
         </TabsContent>
 
         {/* --- 我的收藏 Tab --- */}
-        <TabsContent value="favorites">
-          {favoritedAssets.length > 0 ? (
+        <TabsContent value="likes">
+          {likedAssets.length > 0 ? (
             <MasonryGrid
-              items={favoritedAssets}
+              items={likedAssets}
               renderItem={(asset, index) => (
                 <ImageCard
                   index={index}
                   asset={asset}
-                  isStarredInitial={true} // 这里的收藏状态直接设为 true，因为这是收藏页，所有图片都是已收藏的
+                  isLikedInitial={true} // 这里的收藏状态直接设为 true，因为这是收藏页，所有图片都是已收藏的
                 />
               )}
             />
           ) : (
             <EmptyState
-              title="暂无收藏"
+              title="暂无喜爱的资源"
               description="浏览首页并保存你喜欢的灵感。"
             />
           )}

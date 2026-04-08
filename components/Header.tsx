@@ -1,8 +1,9 @@
 "use client";
 
+import { Show,SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { Citrus, LayoutGrid,Upload } from "lucide-react";
 import Link from "next/link";
-import { UserButton, SignInButton, SignUpButton, Show } from "@clerk/nextjs";
-import { Citrus, Upload, LayoutGrid } from "lucide-react";
+
 import { Button } from "./ui/button";
 
 export default function Header() {

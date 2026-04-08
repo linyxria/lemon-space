@@ -1,44 +1,45 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useClerk, useUser } from "@clerk/nextjs";
+import { Heart,Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { Loader2, Star } from "lucide-react";
-import { toggleFavorite } from "@/app/actions/favorite";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useState, useTransition } from "react";
+
+import { toggleLike } from "@/app/actions/like";
+
 import ImageModal from "./ImageModal";
 
 interface Asset {
   id: string;
-  title: string | null;
+  title: string;
   url: string;
-  r2Key: string;
   uploader: {
     imageUrl: string;
     fullName: string;
   };
-  favoriteCount: number;
+  likeCount: number;
   createdAt: Date;
 }
 
 export default function ImageCard({
   asset,
   index,
-  isStarredInitial,
+  isLikedInitial,
 }: {
   asset: Asset;
   index: number;
-  isStarredInitial: boolean;
+  isLikedInitial: boolean;
 }) {
   const { isSignedIn } = useUser();
   const { openSignIn } = useClerk();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [isStarred, setIsStarred] = useState(isStarredInitial);
-  const [displayCount, setDisplayCount] = useState(asset.favoriteCount);
+  const [isLiked, setIsLiked] = useState(isLikedInitial);
+  const [displayCount, setDisplayCount] = useState(asset.likeCount);
 
-  const handleStarClick = (e: React.MouseEvent) => {
+  const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!isSignedIn) {
@@ -46,17 +47,17 @@ export default function ImageCard({
       return;
     }
 
-    const newStarred = !isStarred;
-    setIsStarred(newStarred);
-    setDisplayCount((prev) => (newStarred ? prev + 1 : prev - 1));
+    const newLiked = !isLiked;
+    setIsLiked(newLiked);
+    setDisplayCount((prev) => (newLiked ? prev + 1 : prev - 1));
 
     startTransition(async () => {
       try {
-        await toggleFavorite(asset.id);
+        await toggleLike(asset.id);
       } catch (err) {
-        setIsStarred(!newStarred);
-        setDisplayCount(asset.favoriteCount);
-        console.error("Star failed", err);
+        setIsLiked(!newLiked);
+        setDisplayCount(asset.likeCount);
+        console.error("Like failed", err);
       }
     });
   };
@@ -92,19 +93,19 @@ export default function ImageCard({
           {/* PC端悬浮收藏按钮：绝对定位，不随图片缩放 */}
           <div className="absolute inset-0 z-10 p-3 hidden md:flex items-start justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
-              onClick={handleStarClick}
+              onClick={handleLikeClick}
               disabled={isPending}
               className={`p-2 rounded-full backdrop-blur-md bg-black/20 transition-all active:scale-90 ${
-                isStarred ? "text-lime-400" : "text-white/80 hover:text-white"
+                isLiked ? "text-lime-400" : "text-white/80 hover:text-white"
               }`}
             >
               {isPending ? (
                 <Loader2 size={20} className="animate-spin text-white" />
               ) : (
-                <Star
+                <Heart
                   size={20}
-                  fill={isStarred ? "currentColor" : "none"}
-                  strokeWidth={isStarred ? 0 : 2}
+                  fill={isLiked ? "currentColor" : "none"}
+                  strokeWidth={isLiked ? 0 : 2}
                 />
               )}
             </button>
@@ -130,12 +131,12 @@ export default function ImageCard({
 
           {/* 交互小胶囊 */}
           <button
-            onClick={handleStarClick}
+            onClick={handleLikeClick}
             disabled={isPending}
             className={`
               flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all active:scale-95 shrink-0
               ${
-                isStarred
+                isLiked
                   ? "bg-lime-400/10 text-lime-600"
                   : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100"
               }
@@ -144,10 +145,10 @@ export default function ImageCard({
             {isPending ? (
               <Loader2 size={12} className="animate-spin" />
             ) : (
-              <Star
+              <Heart
                 size={13}
-                strokeWidth={isStarred ? 0 : 2.5}
-                fill={isStarred ? "currentColor" : "none"}
+                strokeWidth={isLiked ? 0 : 2.5}
+                fill={isLiked ? "currentColor" : "none"}
               />
             )}
             <span className="text-[11px] font-mono font-bold tabular-nums">
