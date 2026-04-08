@@ -89,12 +89,19 @@ export default function ImageModal({
                     <span>ID: {asset.id.slice(-8)}</span>
                   </div>
                 </div>
-                <Button asChild>
-                  <a href={asset.url} target="_blank" rel="noopener noreferrer">
-                    查看原图
-                    <ExternalLink size={20} />
-                  </a>
-                </Button>
+                <Button
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={asset.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      查看原图
+                      <ExternalLink size={20} />
+                    </a>
+                  }
+                />
               </div>
             </div>
           </motion.div>
