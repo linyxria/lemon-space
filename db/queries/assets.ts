@@ -1,14 +1,7 @@
-import type { User } from '@clerk/nextjs/server';
+import type { User } from '@clerk/nextjs/server'
 import { clerkClient } from '@clerk/nextjs/server'
-import type {
-  BuildQueryResult,
-  ExtractTablesWithRelations} from 'drizzle-orm';
-import {
-  and,
-  eq,
-  inArray,
-  sql,
-} from 'drizzle-orm'
+import type { BuildQueryResult, ExtractTablesWithRelations } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 
 import type * as schema from '@/db/schema'
 import { likes } from '@/db/schema'
@@ -55,7 +48,8 @@ function clerkUserToProfile(user: User | undefined) {
 
 export async function hydrateAssets(
   rawAssets: RawAssetWithRelations[],
-  currentUserId?: string | null, // 👈 新增可选参数
+  currentUserId: string | null,
+  forceLiked = false,
 ): Promise<HydratedAsset[]> {
   if (rawAssets.length === 0) return []
 
@@ -78,7 +72,7 @@ export async function hydrateAssets(
       : Promise.resolve({ data: [] }),
 
     // 3. 【核心回归】：查当前用户是否点赞过这些图
-    currentUserId
+    currentUserId && !forceLiked
       ? db
           .select({ assetId: likes.assetId })
           .from(likes)
@@ -105,7 +99,7 @@ export async function hydrateAssets(
       url: formatAssetUrl(asset.objectKey),
       tags: asset.tags.map((t) => t.tag.name),
       likeCount: likeCountMap.get(asset.id) || 0,
-      isLikedByMe: likedByMeSet.has(asset.id), // 👈 给前端用的标记
+      isLikedByMe: forceLiked || likedByMeSet.has(asset.id), // 👈 给前端用的标记
       user: clerkUserToProfile(user),
     }
   })

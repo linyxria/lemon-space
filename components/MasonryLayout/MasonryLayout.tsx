@@ -1,25 +1,36 @@
 'use client'
-import type { ReactNode } from 'react'
-import Masonry from 'react-masonry-css'
+import { Masonry } from 'masonic'
+import { useWindowSize } from 'react-use'
 
-interface MasonryLayoutProps {
-  children: ReactNode
+import { GalleryProvider } from '../GalleryProvider'
+import ImageCard, { type AssetData } from '../ImageCard'
+
+function getCoulumnCount(width: number) {
+  if (width < 768) return 2
+  if (width < 1024) return 3
+  return 4
 }
 
-const breakpointColumnsObj = {
-  default: 4,
-  1024: 3,
-  640: 2,
+function getColumnGlutter(width: number) {
+  if (width < 768) return 8
+  return 16
 }
 
-export default function MasonryLayout({ children }: MasonryLayoutProps) {
+export default function MasonryLayout({ items }: { items: AssetData[] }) {
+  const { width } = useWindowSize()
+
+  const columnCount = getCoulumnCount(width)
+  const columnGutter = getColumnGlutter(width)
+
   return (
-    <Masonry
-      breakpointCols={breakpointColumnsObj}
-      className="flex w-auto -ml-2 md:-ml-4"
-      columnClassName="bg-clip-padding pl-2 md:pl-4 *:mb-2 md:*:mb-4"
-    >
-      {children}
-    </Masonry>
+    <GalleryProvider>
+      <Masonry
+        key={items.length}
+        items={items}
+        columnCount={columnCount}
+        columnGutter={columnGutter}
+        render={ImageCard}
+      />
+    </GalleryProvider>
   )
 }

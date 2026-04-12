@@ -1,6 +1,5 @@
 import { desc, eq } from 'drizzle-orm'
 
-import ImageCard from '@/components/ImageCard'
 import MasonryLayout from '@/components/MasonryLayout'
 import { db } from '@/db'
 import { hydrateAssets } from '@/db/queries/assets'
@@ -24,18 +23,7 @@ export default async function UploadList({ userId }: { userId: string }) {
     )
   }
 
-  const data = await hydrateAssets(assetsData, userId)
+  const items = await hydrateAssets(assetsData, userId)
 
-  return (
-    <MasonryLayout>
-      {data.map((asset, index) => (
-        <ImageCard
-          key={asset.id}
-          index={index}
-          asset={asset}
-          isLikedInitial={asset.isLikedByMe}
-        />
-      ))}
-    </MasonryLayout>
-  )
+  return <MasonryLayout items={items} />
 }

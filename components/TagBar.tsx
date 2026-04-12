@@ -13,7 +13,7 @@ interface TagBarProps {
 
 export default function TagBar({ tags, activeTagSlug }: TagBarProps) {
   return (
-    <nav className="w-full">
+    <nav className="w-full overflow-hidden">
       <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
         <div className="flex items-center gap-1 md:gap-2 pb-2 md:pb-0">
           {tags.map((tag) => {

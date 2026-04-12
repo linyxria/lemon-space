@@ -3,7 +3,6 @@ import { desc, eq, sql } from 'drizzle-orm'
 import Link from 'next/link'
 
 import Empty from '@/components/Empty'
-import ImageCard from '@/components/ImageCard'
 import MasonryLayout from '@/components/MasonryLayout'
 import TagBar from '@/components/TagBar'
 import { db } from '@/db'
@@ -34,11 +33,11 @@ export default async function HomePage({
 
   const { userId } = await auth()
 
-  const data = await hydrateAssets(assetsData, userId)
+  const items = await hydrateAssets(assetsData, userId)
 
   // 2. 【分流处理】
   // 如果当前“既没有选标签”且“结果还是空的”，那说明画廊是真的彻底空了
-  if (data.length === 0 && !activeTagSlug) {
+  if (items.length === 0 && !activeTagSlug) {
     return <Empty />
   }
 
@@ -58,7 +57,7 @@ export default async function HomePage({
       )}
 
       {/* 图片瀑布流 */}
-      {data.length === 0 ? (
+      {items.length === 0 ? (
         <div className="py-20 text-center">
           <p className="text-zinc-400 font-medium">该分类下暂时没有资源</p>
           <Link
@@ -69,16 +68,7 @@ export default async function HomePage({
           </Link>
         </div>
       ) : (
-        <MasonryLayout>
-          {data.map((asset, index) => (
-            <ImageCard
-              key={asset.id}
-              asset={asset}
-              index={index}
-              isLikedInitial={asset.isLikedByMe}
-            />
-          ))}
-        </MasonryLayout>
+        <MasonryLayout items={items} />
       )}
     </div>
   )
