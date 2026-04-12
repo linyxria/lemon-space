@@ -1,7 +1,7 @@
 import { desc, eq } from 'drizzle-orm'
 
 import ImageCard from '@/components/ImageCard'
-import MasonryGrid from '@/components/MasonryGrid'
+import MasonryLayout from '@/components/MasonryLayout'
 import { db } from '@/db'
 import { hydrateAssets } from '@/db/queries/assets'
 import { assets } from '@/db/schema'
@@ -27,15 +27,15 @@ export default async function UploadList({ userId }: { userId: string }) {
   const data = await hydrateAssets(assetsData, userId)
 
   return (
-    <MasonryGrid
-      items={data}
-      renderItem={(asset, index) => (
+    <MasonryLayout>
+      {data.map((asset, index) => (
         <ImageCard
+          key={asset.id}
           index={index}
           asset={asset}
           isLikedInitial={asset.isLikedByMe}
         />
-      )}
-    />
+      ))}
+    </MasonryLayout>
   )
 }

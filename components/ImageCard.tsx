@@ -67,7 +67,7 @@ export default function ImageCard({
       {/* 1. 列表卡片：layoutId 负责布局投影 */}
       <motion.div
         layoutId={`card-${asset.id}`}
-        className="group relative break-inside-avoid mb-4 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-xl hover:ring-zinc-300"
+        className="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-xl hover:ring-zinc-300"
       >
         {/* 图片区域容器 */}
         <div

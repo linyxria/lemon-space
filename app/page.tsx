@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 import Empty from '@/components/Empty'
 import ImageCard from '@/components/ImageCard'
-import MasonryGrid from '@/components/MasonryGrid'
+import MasonryLayout from '@/components/MasonryLayout'
 import TagBar from '@/components/TagBar'
 import { db } from '@/db'
 import { hydrateAssets } from '@/db/queries/assets'
@@ -69,16 +69,16 @@ export default async function HomePage({
           </Link>
         </div>
       ) : (
-        <MasonryGrid
-          items={data}
-          renderItem={(asset, index) => (
+        <MasonryLayout>
+          {data.map((asset, index) => (
             <ImageCard
+              key={asset.id}
               asset={asset}
               index={index}
               isLikedInitial={asset.isLikedByMe}
             />
-          )}
-        />
+          ))}
+        </MasonryLayout>
       )}
     </div>
   )
