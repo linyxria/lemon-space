@@ -3,7 +3,8 @@ import axios from 'axios'
 import { Citrus, Loader2, UploadCloud, X } from 'lucide-react' // 引入 Citrus 增加品牌感
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
-import { DragEvent, useState } from 'react'
+import type { DragEvent} from 'react';
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 

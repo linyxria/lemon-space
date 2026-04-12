@@ -1,14 +1,16 @@
-import { clerkClient, User } from '@clerk/nextjs/server'
+import type { User } from '@clerk/nextjs/server';
+import { clerkClient } from '@clerk/nextjs/server'
+import type {
+  BuildQueryResult,
+  ExtractTablesWithRelations} from 'drizzle-orm';
 import {
   and,
-  BuildQueryResult,
   eq,
-  ExtractTablesWithRelations,
   inArray,
   sql,
 } from 'drizzle-orm'
 
-import * as schema from '@/db/schema'
+import type * as schema from '@/db/schema'
 import { likes } from '@/db/schema'
 import { formatAssetUrl } from '@/lib/utils'
 
