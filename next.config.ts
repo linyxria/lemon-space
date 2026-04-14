@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'images.linyxria.tech',
+        hostname: 'cdn.linyxria.tech',
       },
       {
         protocol: 'http',
