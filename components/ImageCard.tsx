@@ -5,7 +5,7 @@ import { Heart } from 'lucide-react'
 import type { RenderComponentProps } from 'masonic'
 import { motion } from 'motion/react'
 import Image from 'next/image'
-import { useRef, useState, useTransition } from 'react'
+import { useOptimistic, useTransition } from 'react'
 
 import { toggleLike } from '@/app/actions/like'
 
@@ -42,11 +42,14 @@ export default function ImageCard({
   const { isSignedIn } = useUser()
   const { openSignIn } = useClerk()
 
-  const [isPending, startTransition] = useTransition()
-  const [isLiked, setIsLiked] = useState(isLikedByMe)
-  const [displayCount, setDisplayCount] = useState(likeCount)
-
-  const lastClickTime = useRef(0)
+  const [, startTransition] = useTransition()
+  const [optimisticLike, setOptimisticLike] = useOptimistic(
+    { isLiked: isLikedByMe, count: likeCount },
+    (state, newLiked: boolean) => ({
+      isLiked: newLiked,
+      count: newLiked ? state.count + 1 : state.count - 1,
+    }),
+  )
 
   const gallery = useGallery()
 
@@ -58,31 +61,23 @@ export default function ImageCard({
       return
     }
 
-    // 立即进行乐观更新 (UI 响应)
-    const newLiked = !isLiked
-    setIsLiked(newLiked)
-    setDisplayCount((prev) => (newLiked ? prev + 1 : prev - 1))
+    // 1. 立即触发 UI 变化（支持连续叠加）
+    const nextIsLiked = !optimisticLike.isLiked
 
     // 记录点击时间戳
-    const now = Date.now()
-    lastClickTime.current = now
 
     startTransition(async () => {
+      setOptimisticLike(nextIsLiked)
       try {
         await toggleLike(id)
-        // 请求成功后，不需要做任何事，UI 已经更新过了
-      } catch {
-        // 只有当这是最后一次操作时，才回滚（防止多次点击的回滚冲突）
-        if (now === lastClickTime.current) {
-          setIsLiked(!newLiked)
-          setDisplayCount(likeCount)
-        }
+      } catch (error) {
+        console.error('Like failed', error)
       }
     })
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-xl hover:ring-zinc-300">
+    <div className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-lg hover:ring-zinc-300">
       {/* 图片区域容器 */}
       <div
         className="relative cursor-zoom-in overflow-hidden bg-zinc-50"
@@ -104,24 +99,24 @@ export default function ImageCard({
           />
         </div>
 
-        {/* PC端悬浮收藏按钮：绝对定位，不随图片缩放 */}
         <div className="absolute inset-0 z-10 hidden items-start justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:flex">
           <button
             onClick={handleLikeClick}
-            disabled={isPending}
             className={`rounded-full bg-black/20 p-2 backdrop-blur-md transition-all active:scale-90 ${
-              isLiked ? 'text-lime-400' : 'text-white/80 hover:text-white'
+              optimisticLike.isLiked
+                ? 'text-primary'
+                : 'text-white/80 hover:text-white'
             }`}
           >
             <motion.div
               initial={false}
-              animate={isLiked ? 'liked' : 'unliked'}
+              animate={optimisticLike.isLiked ? 'liked' : 'unliked'}
               variants={heartVariants}
             >
               <Heart
                 size={20}
-                fill={isLiked ? 'currentColor' : 'none'}
-                strokeWidth={isLiked ? 0 : 2}
+                fill={optimisticLike.isLiked ? 'currentColor' : 'none'}
+                strokeWidth={optimisticLike.isLiked ? 0 : 2}
               />
             </motion.div>
           </button>
@@ -147,31 +142,30 @@ export default function ImageCard({
         {/* 交互小胶囊 */}
         <button
           onClick={handleLikeClick}
-          disabled={isPending}
           className={`flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
-            isLiked
-              ? 'bg-lime-400/10 text-lime-600'
+            optimisticLike.isLiked
+              ? 'bg-primary/10 text-primary'
               : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
           } `}
         >
           <motion.div
             initial={false}
-            animate={isLiked ? 'liked' : 'unliked'}
+            animate={optimisticLike.isLiked ? 'liked' : 'unliked'}
             variants={heartVariants}
           >
             <Heart
               size={13}
-              strokeWidth={isLiked ? 0 : 2.5}
-              fill={isLiked ? 'currentColor' : 'none'}
+              strokeWidth={optimisticLike.isLiked ? 0 : 2.5}
+              fill={optimisticLike.isLiked ? 'currentColor' : 'none'}
             />
           </motion.div>
           <motion.span
-            key={displayCount}
+            key={optimisticLike.count}
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="font-mono text-[11px] font-bold tabular-nums"
           >
-            {displayCount}
+            {optimisticLike.count}
           </motion.span>
         </button>
       </div>

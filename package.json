@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
-    "db:push": "NODE_ENV=development drizzle-kit push",
+    "db:push:dev": "NODE_ENV=development drizzle-kit push",
+    "db:push:prod": "NODE_ENV=production drizzle-kit push",
     "db:migrate": "NODE_ENV=production drizzle-kit migrate"
   },
   "dependencies": {
