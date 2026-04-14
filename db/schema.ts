@@ -5,24 +5,34 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core'
+
+const timestamptz = (name: string) =>
+  timestamp(name, { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 
 export const tags = pgTable('tags', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull().unique(),
   slug: text('slug').notNull().unique(),
+  creatorId: text('creator_id').notNull(),
+  createdAt: timestamptz('created_at'),
 })
 
-export const assets = pgTable('assets', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(),
-  title: text('title').notNull(),
-  objectKey: text('object_key').notNull(),
-  width: integer('width').notNull(),
-  height: integer('height').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+export const assets = pgTable(
+  'assets',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id').notNull(),
+    title: text('title').notNull(),
+    objectKey: text('object_key').notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    createdAt: timestamptz('created_at'),
+  },
+  (t) => [unique('user_object_idx').on(t.userId, t.objectKey)],
+)
 
 export const assetTags = pgTable(
   'asset_tags',
@@ -44,7 +54,7 @@ export const likes = pgTable(
     assetId: uuid('asset_id')
       .references(() => assets.id, { onDelete: 'cascade' })
       .notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamptz('created_at'),
   },
   (t) => [primaryKey({ columns: [t.userId, t.assetId] })],
 )

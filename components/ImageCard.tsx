@@ -3,7 +3,7 @@
 import { useClerk, useUser } from '@clerk/nextjs'
 import { Heart } from 'lucide-react'
 import type { RenderComponentProps } from 'masonic'
-import { motion, type Variants } from 'motion/react'
+import { motion } from 'motion/react'
 import Image from 'next/image'
 import { useRef, useState, useTransition } from 'react'
 
@@ -23,26 +23,6 @@ export interface AssetData {
   }
   likeCount: number
   isLikedByMe: boolean
-}
-
-const cardVariants: Variants = {
-  // 初始隐藏状态
-  hidden: {
-    opacity: 0,
-    scale: 0.92, // 初始缩小 8%
-  },
-  // 目标可见状态
-  visible: (index: number) => ({
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 80,
-      damping: 20,
-      // 利用 custom 传进来的 index 实现错峰入场
-      delay: Math.min(index * 0.06, 0.4),
-    },
-  }),
 }
 
 const heartVariants = {
@@ -102,14 +82,7 @@ export default function ImageCard({
   }
 
   return (
-    <motion.div
-      variants={cardVariants}
-      custom={index}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-50px' }} // 视口内 50px 触发
-      className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-xl hover:ring-zinc-300"
-    >
+    <div className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-xl hover:ring-zinc-300">
       {/* 图片区域容器 */}
       <div
         className="relative cursor-zoom-in overflow-hidden bg-zinc-50"
@@ -154,7 +127,6 @@ export default function ImageCard({
           </button>
         </div>
       </div>
-
       {/* 2. 底部作者栏 */}
       <div className="flex items-center justify-between border-t border-zinc-100/50 bg-white px-3.5 py-3">
         <div className="flex items-center gap-2 overflow-hidden">
@@ -203,6 +175,6 @@ export default function ImageCard({
           </motion.span>
         </button>
       </div>
-    </motion.div>
+    </div>
   )
 }
