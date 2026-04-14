@@ -60,10 +60,10 @@ export default async function HomePage({
       {/* 图片瀑布流 */}
       {items.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-zinc-400 font-medium">该分类下暂时没有资源</p>
+          <p className="font-medium text-zinc-400">该分类下暂时没有资源</p>
           <Link
             href="/"
-            className="mt-2 inline-block text-lime-600 text-sm font-bold hover:underline"
+            className="mt-2 inline-block text-sm font-bold text-lime-600 hover:underline"
           >
             返回画廊
           </Link>

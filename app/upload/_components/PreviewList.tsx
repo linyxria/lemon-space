@@ -43,7 +43,7 @@ export default function PreviewList({
                 layout: { duration: 0.3, ease: 'easeOut' },
                 opacity: { duration: 0.2 },
               }}
-              className="group relative aspect-square rounded overflow-hidden border border-border shadow"
+              className="group border-border relative aspect-square overflow-hidden rounded border shadow"
             >
               <Image
                 src={file.preview}
@@ -55,7 +55,7 @@ export default function PreviewList({
               {!uploading && (
                 <Button
                   size="icon-xs"
-                  className="absolute right-1 top-1 z-10 rounded-full bg-zinc-800/80 text-white opacity-0 transition hover:bg-destructive group-hover:opacity-100"
+                  className="hover:bg-destructive absolute top-1 right-1 z-10 rounded-full bg-zinc-800/80 text-white opacity-0 transition group-hover:opacity-100"
                   onClick={() => onRemove(file.id)}
                 >
                   <X size={12} />

@@ -34,10 +34,10 @@ export default function RootLayout({
       lang="zh-CN"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col">
         <ClerkProvider localization={zhCN}>
           <Header />
-          <main className="flex-1 w-full max-w-7xl mx-auto px-3 md:px-5 py-6 md:py-8">
+          <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 md:px-5 md:py-8">
             {children}
           </main>
         </ClerkProvider>

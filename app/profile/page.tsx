@@ -30,16 +30,16 @@ export default async function ProfilePage() {
   ])
 
   return (
-    <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full">
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col">
       <div className="mb-8">
-        <h1 className="text-4xl font-black text-zinc-900 tracking-tight">
+        <h1 className="text-4xl font-black tracking-tight text-zinc-900">
           个人中心
         </h1>
-        <p className="text-zinc-500 mt-2">管理你的灵感与上传资源</p>
+        <p className="mt-2 text-zinc-500">管理你的灵感与上传资源</p>
       </div>
 
       <Tabs defaultValue="my" className="w-full">
-        <TabsList className="bg-zinc-100 p-1 rounded-xl mb-4">
+        <TabsList className="mb-4 rounded-xl bg-zinc-100 p-1">
           <TabsTrigger
             value="my"
             className="flex items-center gap-2 rounded-lg px-6"

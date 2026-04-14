@@ -27,7 +27,7 @@ export default function GalleryEmpty() {
   }
 
   return (
-    <Empty className="border border-dashed bg-muted/30">
+    <Empty className="bg-muted/30 border border-dashed">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <ImageIcon />

@@ -9,21 +9,21 @@ export default function EmptyState({
   description: string
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-zinc-100 rounded-[2.5rem] bg-zinc-50/30">
-      <div className="h-14 w-14 bg-white shadow-sm border border-zinc-100 rounded-2xl flex items-center justify-center text-lime-500 mb-6">
+    <div className="flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-zinc-50/30 py-20">
+      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-100 bg-white text-lime-500 shadow-sm">
         <Sparkles size={28} strokeWidth={1.5} />
       </div>
 
-      <h3 className="font-black text-xl text-zinc-900 tracking-tight">
+      <h3 className="text-xl font-black tracking-tight text-zinc-900">
         {title}
       </h3>
-      <p className="text-sm text-zinc-400 mt-2 max-w-50 text-center leading-relaxed">
+      <p className="mt-2 max-w-50 text-center text-sm leading-relaxed text-zinc-400">
         {description}
       </p>
 
       <Link
         href="/"
-        className="mt-8 group relative inline-flex items-center gap-2 text-sm font-black text-zinc-900 transition-all"
+        className="group relative mt-8 inline-flex items-center gap-2 text-sm font-black text-zinc-900 transition-all"
       >
         {/* 文字装饰：一个精致的青柠色下划线动画 */}
         <span className="relative">

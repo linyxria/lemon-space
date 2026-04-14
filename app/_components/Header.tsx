@@ -21,20 +21,20 @@ export default function Header() {
         {/* 左侧：Logo - 确保不缩水 */}
         <Link
           href="/"
-          className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-xl font-black tracking-tighter text-zinc-900 group shrink-0"
+          className="group flex shrink-0 items-center gap-1.5 text-lg font-black tracking-tighter text-zinc-900 sm:gap-2 sm:text-xl"
         >
-          <div className="rounded-xl bg-zinc-900 p-1.5 text-white transition-all duration-300 group-hover:bg-lime-400 group-hover:text-zinc-900 group-hover:rotate-12 group-hover:scale-110 shadow-sm">
-            <Citrus size={18} className="sm:w-5 sm:h-5" strokeWidth={2.5} />
+          <div className="rounded-xl bg-zinc-900 p-1.5 text-white shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:bg-lime-400 group-hover:text-zinc-900">
+            <Citrus size={18} className="sm:h-5 sm:w-5" strokeWidth={2.5} />
           </div>
-          <span className="flex items-baseline gap-0.5 sm:gap-1 select-none">
+          <span className="flex items-baseline gap-0.5 select-none sm:gap-1">
             LEMON
-            <span className="text-lime-500 font-extrabold tracking-widest italic">
+            <span className="font-extrabold tracking-widest text-lime-500 italic">
               GALLERY
             </span>
           </span>
         </Link>
         {/* 右侧：状态控制 */}
-        <div className="flex items-center gap-2 md:gap-4 ml-2">
+        <div className="ml-2 flex items-center gap-2 md:gap-4">
           <ClerkLoading>
             <div className="flex w-fit items-center gap-4">
               <div className="grid gap-2">
@@ -66,7 +66,7 @@ export default function Header() {
                 </Link>
 
                 {/* 用户按钮 */}
-                <div className="shrink-0 flex items-center">
+                <div className="flex shrink-0 items-center">
                   <UserButton
                     showName
                     appearance={{
