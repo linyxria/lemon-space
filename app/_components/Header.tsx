@@ -23,12 +23,12 @@ export default function Header() {
           href="/"
           className="group flex shrink-0 items-center gap-1.5 text-lg font-black tracking-tighter text-zinc-900 sm:gap-2 sm:text-xl"
         >
-          <div className="rounded-xl bg-zinc-900 p-1.5 text-white shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:bg-lime-400 group-hover:text-zinc-900">
+          <div className="group-hover:bg-primary rounded-xl bg-zinc-900 p-1.5 text-white shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:text-zinc-900">
             <Citrus size={18} className="sm:h-5 sm:w-5" strokeWidth={2.5} />
           </div>
           <span className="flex items-baseline gap-0.5 select-none sm:gap-1">
             LEMON
-            <span className="font-extrabold tracking-widest text-lime-500 italic">
+            <span className="text-primary font-extrabold tracking-widest italic">
               GALLERY
             </span>
           </span>

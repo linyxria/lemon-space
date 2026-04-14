@@ -63,7 +63,7 @@ export default async function HomePage({
           <p className="font-medium text-zinc-400">该分类下暂时没有资源</p>
           <Link
             href="/"
-            className="mt-2 inline-block text-sm font-bold text-lime-600 hover:underline"
+            className="text-primary mt-2 inline-block text-sm font-bold hover:underline"
           >
             返回画廊
           </Link>

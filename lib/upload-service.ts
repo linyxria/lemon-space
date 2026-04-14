@@ -3,7 +3,7 @@ import axios from 'axios'
 import type {
   PresignedUrlRequest,
   PresignedUrlResponse,
-} from '@/app/api/assets/presigned-url/route'
+} from '@/app/api/s3/presigned-url/route'
 import { getFileHash } from '@/lib/utils'
 
 /**
@@ -20,7 +20,7 @@ export async function uploadFileToCloud(
   // 2. 请求预签名 URL
   const {
     data: { signedUrl, objectKey },
-  } = await axios.post<PresignedUrlResponse>('/api/assets/presigned-url', {
+  } = await axios.post<PresignedUrlResponse>('/api/s3/presigned-url', {
     filename: file.name,
     hash,
     contentType: file.type,

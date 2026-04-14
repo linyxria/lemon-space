@@ -5,7 +5,7 @@ import { db } from '@/db'
 import { hydrateAssets } from '@/db/queries/assets'
 import { likes } from '@/db/schema'
 
-import EmptyState from './EmptyState'
+import TabsEmpty from './TabsEmpty'
 
 export default async function LikedList({ userId }: { userId: string }) {
   const likesData = await db.query.likes.findMany({
@@ -16,7 +16,7 @@ export default async function LikedList({ userId }: { userId: string }) {
 
   if (likesData.length === 0) {
     return (
-      <EmptyState
+      <TabsEmpty
         title="暂无喜爱的资源"
         description="浏览首页并保存你喜欢的灵感。"
       />

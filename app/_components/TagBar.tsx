@@ -24,7 +24,7 @@ export default function TagBar({ tags, activeTagSlug }: TagBarProps) {
                 href={`/?tag=${tag.slug}`}
                 className={`rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm ${
                   isActive
-                    ? 'bg-lime-100 text-lime-700 shadow-sm shadow-lime-100/20'
+                    ? 'bg-primary/10 text-primary'
                     : 'bg-transparent text-zinc-400 hover:bg-zinc-100/50 hover:text-zinc-600'
                 } `}
               >

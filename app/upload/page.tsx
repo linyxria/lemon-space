@@ -102,13 +102,14 @@ export default function UploadPage() {
       await Promise.all(uploadTasks)
 
       setProgress(100)
-      setStatus('入库成功！正在重定向...')
+      setStatus('入库成功！')
 
       setTimeout(() => {
         setUploading(false)
         setFiles([])
         setProgress(0)
         setStatus('')
+        setFormValues({ title: '', tags: [] })
       }, 2000)
     } catch (err) {
       console.error(err)
