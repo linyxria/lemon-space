@@ -51,7 +51,7 @@ export default async function HomePage({
   })
 
   return (
-    <div className="space-y-3 md:space-y-6">
+    <div className="space-y-4">
       {/* 顶部标签筛选区 */}
       {allTags.length > 0 && (
         <TagBar tags={allTags} activeTagSlug={activeTagSlug} />
