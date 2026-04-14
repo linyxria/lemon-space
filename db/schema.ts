@@ -1,5 +1,12 @@
 import { relations } from 'drizzle-orm'
-import { pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import {
+  integer,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 export const tags = pgTable('tags', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -12,6 +19,8 @@ export const assets = pgTable('assets', {
   userId: text('user_id').notNull(),
   title: text('title').notNull(),
   objectKey: text('object_key').notNull(),
+  width: integer('width').notNull(),
+  height: integer('height').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 

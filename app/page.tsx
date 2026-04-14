@@ -2,12 +2,13 @@ import { auth } from '@clerk/nextjs/server'
 import { desc, eq, sql } from 'drizzle-orm'
 import Link from 'next/link'
 
-import Empty from '@/components/Empty'
 import MasonryLayout from '@/components/MasonryLayout'
-import TagBar from '@/components/TagBar'
 import { db } from '@/db'
 import { hydrateAssets } from '@/db/queries/assets'
 import { assets, assetTags, tags } from '@/db/schema'
+
+import GalleryEmpty from './_components/GalleryEmpty'
+import TagBar from './_components/TagBar'
 
 export default async function HomePage({
   searchParams,
@@ -38,7 +39,7 @@ export default async function HomePage({
   // 2. 【分流处理】
   // 如果当前“既没有选标签”且“结果还是空的”，那说明画廊是真的彻底空了
   if (items.length === 0 && !activeTagSlug) {
-    return <Empty />
+    return <GalleryEmpty />
   }
 
   // 3. 【延迟加载】

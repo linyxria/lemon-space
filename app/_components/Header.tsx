@@ -8,11 +8,11 @@ import {
   SignUpButton,
   UserButton,
 } from '@clerk/nextjs'
-import { Citrus, LayoutGrid, Upload } from 'lucide-react'
+import { Citrus, LayoutGrid, UploadCloud } from 'lucide-react'
 import Link from 'next/link'
 
-import { SkeletonAvatar } from './SkeletonAvatar'
-import { Button } from './ui/button'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Header() {
   return (
@@ -33,11 +33,16 @@ export default function Header() {
             </span>
           </span>
         </Link>
-
         {/* 右侧：状态控制 */}
         <div className="flex items-center gap-2 md:gap-4 ml-2">
           <ClerkLoading>
-            <SkeletonAvatar />
+            <div className="flex w-fit items-center gap-4">
+              <div className="grid gap-2">
+                <Skeleton className="h-4 w-24 md:w-37.5" />
+                <Skeleton className="h-4 w-16 md:w-25" />
+              </div>
+              <Skeleton className="size-10 shrink-0 rounded-full" />
+            </div>
           </ClerkLoading>
           <ClerkLoaded>
             <Show when="signed-out">
@@ -55,7 +60,7 @@ export default function Header() {
                 {/* 发布按钮：手机端 shrink-0 保证不被挤压成椭圆 */}
                 <Link href="/upload" className="shrink-0">
                   <Button variant="secondary">
-                    <Upload size={18} />
+                    <UploadCloud size={18} />
                     <span className="hidden sm:inline">发布灵感</span>
                   </Button>
                 </Link>

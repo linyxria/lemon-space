@@ -15,10 +15,13 @@ const nextConfig: NextConfig = {
         hostname: 'images.linyxria.tech',
       },
       {
-        protocol: 'https',
-        hostname: 'pub-2120d1f9926946a7ae669453e43211dc.r2.dev',
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '9000',
+        pathname: '/lemon-gallery/**',
       },
     ],
+    dangerouslyAllowLocalIP: true,
   },
 }
 

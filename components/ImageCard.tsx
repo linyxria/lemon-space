@@ -15,6 +15,8 @@ export interface AssetData {
   id: string
   title: string
   url: string
+  width: number
+  height: number
   user: {
     imageUrl: string
     username: string
@@ -55,7 +57,7 @@ export default function ImageCard({
   data,
   index,
 }: RenderComponentProps<AssetData>) {
-  const { id, title, url, user, likeCount, isLikedByMe } = data
+  const { id, title, url, width, height, user, likeCount, isLikedByMe } = data
 
   const { isSignedIn } = useUser()
   const { openSignIn } = useClerk()
@@ -106,7 +108,7 @@ export default function ImageCard({
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-50px' }} // 视口内 50px 触发
-      className="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-xl hover:ring-zinc-300"
+      className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-xl hover:ring-zinc-300"
     >
       {/* 图片区域容器 */}
       <div
@@ -117,24 +119,24 @@ export default function ImageCard({
              这里的 duration 和 timing-function 调教得与 Framer Motion 一致。
              只有在 hover 图片容器时，内部 div 才缩放。
           */}
-        <div className="w-full h-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105">
+        <div className="h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105">
           <Image
             src={url}
             alt={title}
-            width={400}
-            height={600}
+            width={width}
+            height={height}
             priority={index < 6}
-            className="h-auto w-full object-cover block"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="block h-auto w-full object-cover"
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         </div>
 
         {/* PC端悬浮收藏按钮：绝对定位，不随图片缩放 */}
-        <div className="absolute inset-0 z-10 p-3 hidden md:flex items-start justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute inset-0 z-10 hidden items-start justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:flex">
           <button
             onClick={handleLikeClick}
             disabled={isPending}
-            className={`p-2 rounded-full backdrop-blur-md bg-black/20 transition-all active:scale-90 ${
+            className={`rounded-full bg-black/20 p-2 backdrop-blur-md transition-all active:scale-90 ${
               isLiked ? 'text-lime-400' : 'text-white/80 hover:text-white'
             }`}
           >
@@ -154,7 +156,7 @@ export default function ImageCard({
       </div>
 
       {/* 2. 底部作者栏 */}
-      <div className="flex items-center justify-between px-3.5 py-3 bg-white border-t border-zinc-100/50">
+      <div className="flex items-center justify-between border-t border-zinc-100/50 bg-white px-3.5 py-3">
         <div className="flex items-center gap-2 overflow-hidden">
           <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full ring-1 ring-zinc-100">
             <Image
@@ -165,7 +167,7 @@ export default function ImageCard({
               sizes="24px"
             />
           </div>
-          <span className="text-[12px] font-bold text-zinc-900 truncate">
+          <span className="truncate text-[12px] font-bold text-zinc-900">
             {user.username}
           </span>
         </div>
@@ -174,14 +176,11 @@ export default function ImageCard({
         <button
           onClick={handleLikeClick}
           disabled={isPending}
-          className={`
-              flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all active:scale-95 shrink-0
-              ${
-                isLiked
-                  ? 'bg-lime-400/10 text-lime-600'
-                  : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
-              }
-            `}
+          className={`flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
+            isLiked
+              ? 'bg-lime-400/10 text-lime-600'
+              : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
+          } `}
         >
           <motion.div
             initial={false}
@@ -198,7 +197,7 @@ export default function ImageCard({
             key={displayCount}
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-[11px] font-mono font-bold tabular-nums"
+            className="font-mono text-[11px] font-bold tabular-nums"
           >
             {displayCount}
           </motion.span>

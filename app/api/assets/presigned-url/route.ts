@@ -2,15 +2,28 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { NextResponse } from 'next/server'
 
-import { client } from '@/lib/r2'
+import { s3client } from '@/lib/s3'
+import { getSafeExtension } from '@/lib/utils'
+
+export interface PresignedUrlRequest {
+  filename: string
+  hash: string
+  contentType: string
+  folder: 'images'
+}
+
+export interface PresignedUrlResponse {
+  signedUrl: string
+  objectKey: string
+}
 
 export async function POST(request: Request) {
   try {
-    const { fileName, contentType } = await request.json()
+    const { filename, hash, contentType, folder }: PresignedUrlRequest =
+      await request.json()
 
     // 优雅的文件名：UUID + 原始后缀
-    const fileExtension = fileName.split('.').pop()
-    const objectKey = `uploads/${crypto.randomUUID()}.${fileExtension}`
+    const objectKey = `${folder}/${hash}.${getSafeExtension(filename) || 'bin'}`
 
     // 1. 生成 R2 预签名 URL
     const clientMethod = new PutObjectCommand({
@@ -19,11 +32,11 @@ export async function POST(request: Request) {
       ContentType: contentType,
     })
 
-    const signedUrl = await getSignedUrl(client, clientMethod, {
+    const signedUrl = await getSignedUrl(s3client, clientMethod, {
       expiresIn: 60,
     })
 
-    return NextResponse.json({ signedUrl, objectKey })
+    return NextResponse.json<PresignedUrlResponse>({ signedUrl, objectKey })
   } catch (err) {
     console.error(err)
     return NextResponse.json({ error: 'Failed' }, { status: 500 })

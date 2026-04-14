@@ -15,7 +15,7 @@ export default async function ProfilePage() {
 
   if (!userId) return null
 
-  const [uploadsCount, likesCount] = await Promise.all([
+  const [myCount, likeCount] = await Promise.all([
     db
       .select({ count: sql<number>`count(*)` })
       .from(assets)
@@ -38,26 +38,26 @@ export default async function ProfilePage() {
         <p className="text-zinc-500 mt-2">管理你的灵感与上传资源</p>
       </div>
 
-      <Tabs defaultValue="uploads" className="w-full">
+      <Tabs defaultValue="my" className="w-full">
         <TabsList className="bg-zinc-100 p-1 rounded-xl mb-4">
           <TabsTrigger
-            value="uploads"
+            value="my"
             className="flex items-center gap-2 rounded-lg px-6"
           >
             <FolderUp size={16} />
-            我的上传 ({uploadsCount})
+            我的上传 ({myCount})
           </TabsTrigger>
           <TabsTrigger
             value="likes"
             className="flex items-center gap-2 rounded-lg px-6"
           >
             <Heart size={16} />
-            我喜爱的 ({likesCount})
+            我喜爱的 ({likeCount})
           </TabsTrigger>
         </TabsList>
 
         {/* --- 我的上传 Tab --- */}
-        <TabsContent value="uploads">
+        <TabsContent value="my">
           <Suspense
             fallback={
               <div className="py-20 text-center text-zinc-400">

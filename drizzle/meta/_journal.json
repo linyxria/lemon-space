@@ -8,6 +8,13 @@
       "when": 1775651641230,
       "tag": "0000_tense_pyro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776092157526,
+      "tag": "0001_daffy_korath",
+      "breakpoints": true
     }
   ]
 }

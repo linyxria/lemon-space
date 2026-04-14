@@ -10,7 +10,13 @@ export async function POST(request: Request) {
 
   if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { title, objectKey, tags: tagNames = [] } = await request.json()
+  const {
+    title,
+    objectKey,
+    width,
+    height,
+    tags: tagNames = [],
+  } = await request.json()
 
   try {
     // 使用数据库事务 (Transaction)，保证要么全成功，要么全失败
@@ -18,7 +24,13 @@ export async function POST(request: Request) {
       // 1. 插入资产并获取 ID
       const [newAsset] = await tx
         .insert(assets)
-        .values({ userId, title, objectKey })
+        .values({
+          userId,
+          title,
+          objectKey,
+          width,
+          height,
+        })
         .returning()
 
       if (tagNames.length > 0) {
