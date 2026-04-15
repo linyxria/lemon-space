@@ -69,7 +69,7 @@ export async function hydrateAssets(
     // 2. 查上传者信息
     userIds.length > 0
       ? client.users.getUserList({ userId: userIds, limit: userIds.length })
-      : Promise.resolve({ data: [] }),
+      : Promise.resolve({ data: [], totalCount: 0 }),
 
     // 3. 【核心回归】：查当前用户是否点赞过这些图
     currentUserId && !forceLiked
@@ -82,7 +82,7 @@ export async function hydrateAssets(
               inArray(likes.assetId, assetIds),
             ),
           )
-      : Promise.resolve([]),
+      : Promise.resolve<{ assetId: string }[]>([]),
   ])
 
   const likeCountMap = new Map(

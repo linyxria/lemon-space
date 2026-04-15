@@ -22,6 +22,13 @@
       "when": 1776180472452,
       "tag": "0002_low_jocasta",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776243665354,
+      "tag": "0003_chunky_rage",
+      "breakpoints": true
     }
   ]
 }
