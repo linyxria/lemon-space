@@ -10,7 +10,7 @@ import { useOptimistic, useTransition } from 'react'
 import { toggleLike } from '@/app/actions/like'
 import { authClient } from '@/lib/auth-client'
 
-import { useGallery } from './GalleryProvider'
+import { useGallery } from './gallery-provider'
 import UserAvatar from './user-avatar'
 
 export interface AssetData {

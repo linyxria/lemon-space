@@ -9,7 +9,7 @@ import {
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from './ui/input-group'
 
-export function PasswordInput(
+export default function PasswordInput(
   props: Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     'type'

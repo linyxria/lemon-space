@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import z from 'zod'
 
 import AuthScreen from '@/components/auth-screen'
-import { PasswordInput } from '@/components/password-input'
+import PasswordInput from '@/components/password-input'
 import {
   Field,
   FieldError,

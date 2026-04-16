@@ -1,14 +1,14 @@
 import { and, desc, eq, exists, sql } from 'drizzle-orm'
 import Link from 'next/link'
 
-import MasonryLayout from '@/components/MasonryLayout'
+import MasonryLayout from '@/components/masonry-layout'
 import { db } from '@/db'
 import { asset, assetTag, like, tag, user } from '@/db/schema'
 import { getSession } from '@/lib/auth'
 import { objectKey2Url } from '@/lib/utils'
 
-import GalleryEmpty from './_components/GalleryEmpty'
-import TagBar from './_components/TagBar'
+import GalleryEmpty from './_components/gallery-empty'
+import TagBar from './_components/tag-bar'
 
 export default async function HomePage({
   searchParams,

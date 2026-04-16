@@ -21,10 +21,10 @@ import { Spinner } from '@/components/ui/spinner'
 import { uploadFileToCloud } from '@/lib/upload-service'
 import { getImageDimensions } from '@/lib/utils'
 
-import MetadataForm, { type MetadataValues } from './_components/MetadataForm'
-import type { PreviewFile } from './_components/PreviewList'
-import PreviewList from './_components/PreviewList'
-import UploadArea from './_components/UploadArea'
+import MetadataForm, { type MetadataValues } from './_components/metadata-form'
+import type { PreviewFile } from './_components/preview-list'
+import PreviewList from './_components/preview-list'
+import UploadArea from './_components/upload-area'
 
 export default function UploadPage() {
   const [files, setFiles] = useState<PreviewFile[]>([])

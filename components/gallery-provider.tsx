@@ -3,14 +3,18 @@
 import { AnimatePresence } from 'motion/react'
 import { createContext, useContext, useState } from 'react'
 
-import type { AssetData } from './ImageCard'
-import ImageModal from './ImageModal'
+import type { AssetData } from './image-card'
+import ImageModal from './image-modal'
 
 const GalleryContext = createContext<{
   openAsset: (asset: AssetData) => void
 } | null>(null)
 
-export function GalleryProvider({ children }: { children: React.ReactNode }) {
+export default function GalleryProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const [asset, setAsset] = useState<AssetData | null>(null)
 

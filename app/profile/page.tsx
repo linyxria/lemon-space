@@ -7,8 +7,8 @@ import { db } from '@/db'
 import { asset, like } from '@/db/schema'
 import { getSession } from '@/lib/auth'
 
-import LikedList from './_components/LikedList'
-import UploadList from './_components/UploadList'
+import LikedList from './_components/liked-list'
+import UploadList from './_components/upload-list'
 
 export default async function ProfilePage() {
   const session = await getSession()

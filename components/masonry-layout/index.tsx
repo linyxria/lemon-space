@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic'
 
 import { Spinner } from '../ui/spinner'
 
-const MasonryLayout = dynamic(() => import('./MasonryLayout'), {
+const MasonryLayout = dynamic(() => import('./masonry-layout'), {
   ssr: false,
   // 选填：这里可以放一个骨架屏，防止加载时的闪烁
   loading: () => (

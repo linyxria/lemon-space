@@ -4,7 +4,7 @@ import { ExternalLink, X } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 
-import type { AssetData } from './ImageCard'
+import type { AssetData } from './image-card'
 import { Button } from './ui/button'
 
 interface ImageModalProps {

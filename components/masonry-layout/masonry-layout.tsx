@@ -2,8 +2,8 @@
 import { Masonry } from 'masonic'
 import { useWindowSize } from 'react-use'
 
-import { GalleryProvider } from '../GalleryProvider'
-import ImageCard, { type AssetData } from '../ImageCard'
+import GalleryProvider from '../gallery-provider'
+import ImageCard, { type AssetData } from '../image-card'
 
 function getCoulumnCount(width: number) {
   if (width < 768) return 2

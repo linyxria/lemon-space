@@ -1,11 +1,11 @@
 import { desc, eq, sql } from 'drizzle-orm'
 
-import MasonryLayout from '@/components/MasonryLayout'
+import MasonryLayout from '@/components/masonry-layout'
 import { db } from '@/db'
 import { asset, like } from '@/db/schema'
 import { objectKey2Url } from '@/lib/utils'
 
-import TabsEmpty from './TabsEmpty'
+import TabsEmpty from './tabs-empty'
 
 export default async function UploadList({ userId }: { userId: string }) {
   const assetsData = await db

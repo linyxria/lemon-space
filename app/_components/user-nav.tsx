@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import UserAvatar from '@/components/user-avatar'
 import { authClient } from '@/lib/auth-client'
 
-export function UserNav() {
+export default function UserNav() {
   const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
 

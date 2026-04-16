@@ -1,7 +1,9 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
-import { type ReactNode } from 'react'
+import { type MouseEventHandler, type ReactNode, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -12,12 +14,40 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { authClient } from '@/lib/auth-client'
 
 import { Field } from './ui/field'
 import { Spinner } from './ui/spinner'
 
-// TODO 未处理
-const isLoading = false
+function SocialButton({
+  title,
+  image,
+  isLoading,
+  onClick,
+}: {
+  title: string
+  image: string
+  isLoading: boolean
+  onClick: MouseEventHandler<HTMLButtonElement>
+}) {
+  return (
+    <Button
+      className="flex items-center gap-3"
+      variant="outline"
+      disabled={isLoading}
+      onClick={onClick}
+    >
+      {isLoading ? (
+        <Spinner className="size-4" />
+      ) : (
+        <Image src={image} alt="Github" width={16} height={16} />
+      )}
+      {title}
+    </Button>
+  )
+}
+
+type Provider = 'github' | 'google' | 'wechat' | 'apple'
 
 export default function AuthScreen({
   title,
@@ -40,20 +70,21 @@ export default function AuthScreen({
   }
   form: ReactNode
 }) {
-  // 1. 处理社交登录 (GitHub)
-  // const handleSocialSignIn = async (provider: 'github' | 'google') => {
-  //   setIsLoading(true)
-  //   await authClient.signIn.social(
-  //     {
-  //       provider,
-  //       callbackURL: '/dashboard',
-  //     },
-  //     {
-  //       onError: (ctx) => void toast.error(ctx.error.message),
-  //       onResponse: () => setIsLoading(false),
-  //     },
-  //   )
-  // }
+  const [providing, setProviding] = useState<Provider>()
+  const handleSocialSignIn = async (provider: Provider) => {
+    setProviding(provider)
+    await authClient.signIn.social(
+      {
+        provider,
+        // TODO 这里需要从 url 获取
+        callbackURL: '/', // 登录成功后的跳转地址
+      },
+      {
+        onError: (ctx) => void toast.error(ctx.error.message),
+        onResponse: () => setProviding(undefined),
+      },
+    )
+  }
 
   return (
     <Card className="mx-auto max-w-xs gap-8 shadow-lg md:max-w-md">
@@ -64,20 +95,30 @@ export default function AuthScreen({
       <CardContent className="px-10">
         {/* 社交登录按钮 */}
         <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            // onClick={() => handleSocialSignIn('github')}
-            disabled={isLoading}
-          >
-            {isLoading ? <Spinner /> : 'Github'}
-          </Button>
-          <Button
-            variant="outline"
-            // onClick={() => handleSocialSignIn('google')}
-            disabled={isLoading}
-          >
-            {isLoading ? <Spinner /> : 'Google'}
-          </Button>
+          <SocialButton
+            title="Github"
+            image="/github.svg"
+            isLoading={providing === 'github'}
+            onClick={() => handleSocialSignIn('github')}
+          />
+          <SocialButton
+            title="Google"
+            image="/google.svg"
+            isLoading={providing === 'google'}
+            onClick={() => handleSocialSignIn('google')}
+          />
+          <SocialButton
+            title="Apple"
+            image="/apple.svg"
+            isLoading={providing === 'apple'}
+            onClick={() => handleSocialSignIn('apple')}
+          />
+          <SocialButton
+            title="微信"
+            image="/wechat.svg"
+            isLoading={providing === 'wechat'}
+            onClick={() => handleSocialSignIn('wechat')}
+          />
         </div>
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">

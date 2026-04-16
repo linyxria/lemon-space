@@ -1,4 +1,4 @@
-import TagInput from '@/components/TagInput'
+import TagInput from '@/components/tag-input'
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 
