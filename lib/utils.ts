@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatAssetUrl(objectKey: string) {
+export function objectKey2Url(objectKey: string) {
   return `${process.env.R2_PUBLIC_DOMAIN}/${objectKey}`
 }
 

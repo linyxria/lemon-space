@@ -1,11 +1,11 @@
-import { auth } from '@clerk/nextjs/server'
-import { desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, exists, sql } from 'drizzle-orm'
 import Link from 'next/link'
 
 import MasonryLayout from '@/components/MasonryLayout'
 import { db } from '@/db'
-import { hydrateAssets } from '@/db/queries/assets'
-import { assets, assetTags, tags } from '@/db/schema'
+import { asset, assetTag, like, tag, user } from '@/db/schema'
+import { getSession } from '@/lib/auth'
+import { objectKey2Url } from '@/lib/utils'
 
 import GalleryEmpty from './_components/GalleryEmpty'
 import TagBar from './_components/TagBar'
@@ -15,47 +15,99 @@ export default async function HomePage({
 }: {
   searchParams: Promise<{ tag?: string }>
 }) {
-  const { tag: activeTagSlug } = await searchParams
+  const { tag: tagSlug } = await searchParams
 
-  // 过滤查询
-  const assetsData = await db.query.assets.findMany({
-    where: activeTagSlug
-      ? sql`exists (
-      select 1 from ${assetTags} at 
-      join ${tags} t on at.tag_id = t.id 
-      where at.asset_id = ${assets.id} and t.slug = ${activeTagSlug}
-    )`
-      : undefined,
-    orderBy: [desc(assets.createdAt)],
-    with: {
-      tags: { with: { tag: true } },
-    },
-  })
+  const session = await getSession()
 
-  const { userId } = await auth()
+  const assetsData = await db
+    .select({
+      // 基础字段
+      id: asset.id,
+      title: asset.title,
+      objectKey: asset.objectKey,
+      width: asset.width,
+      height: asset.height,
+      createdAt: asset.createdAt,
 
-  const items = await hydrateAssets(assetsData, userId)
+      // 1. 用户对象 (直接在 SQL 里构造)
+      user: {
+        id: user.id,
+        name: user.name,
+        image: user.image,
+      },
+
+      // 2. 点赞总数
+      likeCount:
+        sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
+          Number,
+        ),
+
+      // 3. 标签数组 (将关联查询结果聚合成 JSON 数组)
+      tags: sql<string[]>`coalesce(
+        json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null), 
+        '[]'
+      )`.as('tags'),
+
+      // 4. 当前用户是否点赞
+      ...(session
+        ? {
+            likedByMe: sql<boolean>`exists(
+              select 1 from ${like} 
+              where ${like.assetId} = ${asset.id} 
+              and ${like.userId} = ${session.user.id}
+            )`,
+          }
+        : {}),
+    })
+    .from(asset)
+    // 关联用户
+    .innerJoin(user, eq(asset.userId, user.id))
+    // 关联点赞 (用于 count)
+    .leftJoin(like, eq(asset.id, like.assetId))
+    // 关联标签 (两层 join 拿到标签名)
+    .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
+    .leftJoin(tag, eq(assetTag.tagId, tag.id))
+    // 过滤逻辑
+    .where(
+      tagSlug
+        ? exists(
+            db
+              .select()
+              .from(assetTag)
+              .innerJoin(tag, eq(assetTag.tagId, tag.id))
+              .where(
+                and(eq(assetTag.assetId, asset.id), eq(tag.slug, tagSlug)),
+              ),
+          )
+        : undefined,
+    )
+    // 分组：必须包含所有非聚合字段
+    .groupBy(asset.id, user.id)
+    .orderBy(desc(asset.createdAt))
 
   // 2. 【分流处理】
   // 如果当前“既没有选标签”且“结果还是空的”，那说明画廊是真的彻底空了
-  if (items.length === 0 && !activeTagSlug) {
+  if (assetsData.length === 0 && !tagSlug) {
     return <GalleryEmpty />
   }
 
   // 3. 【延迟加载】
   // 走到这里，说明要么有数据，要么是在筛选某个标签。
   // 此时我们再去查标签列表，用于渲染顶部的筛选条。
-  const allTags = await db.query.tags.findMany({
+  const allTags = await db.query.tag.findMany({
     where: (t, { exists }) =>
-      exists(db.select().from(assetTags).where(eq(assetTags.tagId, t.id))),
+      exists(db.select().from(assetTag).where(eq(assetTag.tagId, t.id))),
   })
+
+  const items = assetsData.map(({ objectKey, ...item }) => ({
+    ...item,
+    url: objectKey2Url(objectKey),
+  }))
 
   return (
     <div className="space-y-4">
       {/* 顶部标签筛选区 */}
-      {allTags.length > 0 && (
-        <TagBar tags={allTags} activeTagSlug={activeTagSlug} />
-      )}
+      {allTags.length > 0 && <TagBar tags={allTags} selected={tagSlug} />}
 
       {/* 图片瀑布流 */}
       {items.length === 0 ? (

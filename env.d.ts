@@ -8,7 +8,7 @@ declare namespace NodeJS {
     R2_BUCKET_NAME: string
     R2_PUBLIC_DOMAIN: string
 
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: string
-    CLERK_SECRET_KEY: string
+    BETTER_AUTH_SECRET: string
+    BETTER_AUTH_URL: string
   }
 }

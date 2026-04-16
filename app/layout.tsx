@@ -1,11 +1,10 @@
 import './globals.css'
 
-import { zhCN } from '@clerk/localizations'
-import { ClerkProvider } from '@clerk/nextjs'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Toaster } from 'sonner'
 
 import Header from './_components/Header'
 import ProgressProvider from './_components/ProgressProvider'
@@ -37,13 +36,13 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <ProgressProvider>
-          <ClerkProvider localization={zhCN}>
-            <Header />
-            <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 md:px-5 md:py-8">
-              {children}
-            </main>
-          </ClerkProvider>
+          <Header />
+          <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 md:px-5 md:py-8">
+            {children}
+          </main>
+          <Toaster />
         </ProgressProvider>
+
         <Analytics />
         <SpeedInsights />
       </body>

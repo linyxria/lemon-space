@@ -10,15 +10,15 @@ interface Tag {
 
 interface TagBarProps {
   tags: Tag[]
-  activeTagSlug?: string
+  selected?: string
 }
 
-export default function TagBar({ tags, activeTagSlug }: TagBarProps) {
+export default function TagBar({ tags, selected }: TagBarProps) {
   return (
     <ScrollArea>
       <div className="flex w-max items-center gap-1 pb-4 md:gap-2">
         {tags.map((tag) => {
-          const isActive = activeTagSlug === tag.slug
+          const isActive = selected === tag.slug
           return (
             <Link
               key={tag.id}

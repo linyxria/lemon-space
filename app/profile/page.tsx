@@ -1,31 +1,33 @@
-import { auth } from '@clerk/nextjs/server'
 import { eq, sql } from 'drizzle-orm'
 import { FolderUp, Heart } from 'lucide-react'
 import { Suspense } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { db } from '@/db'
-import { assets, likes } from '@/db/schema'
+import { asset, like } from '@/db/schema'
+import { getSession } from '@/lib/auth'
 
 import LikedList from './_components/LikedList'
 import UploadList from './_components/UploadList'
 
 export default async function ProfilePage() {
-  const { userId } = await auth()
+  const session = await getSession()
 
-  if (!userId) return null
+  if (!session) return null
+
+  const userId = session.user.id
 
   const [myCount, likeCount] = await Promise.all([
     db
       .select({ count: sql<number>`count(*)` })
-      .from(assets)
-      .where(eq(assets.userId, userId))
+      .from(asset)
+      .where(eq(asset.userId, userId))
       .then((res) => Number(res[0].count)),
 
     db
       .select({ count: sql<number>`count(*)` })
-      .from(likes)
-      .where(eq(likes.userId, userId))
+      .from(like)
+      .where(eq(like.userId, userId))
       .then((res) => Number(res[0].count)),
   ])
 

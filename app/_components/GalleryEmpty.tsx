@@ -1,6 +1,6 @@
 'use client'
+
 import { useRouter } from '@bprogress/next/app'
-import { useAuth, useClerk } from '@clerk/nextjs'
 import { ImageIcon, UploadCloud } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -12,18 +12,17 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
+import { authClient } from '@/lib/auth-client'
 
 export default function GalleryEmpty() {
-  const { isSignedIn } = useAuth()
-  const { openSignIn } = useClerk()
+  const { data: session } = authClient.useSession()
   const router = useRouter()
 
   const handlePublish = () => {
-    if (isSignedIn) {
-      router.push('/upload') // 已登录，去上传
-    } else {
-      openSignIn({ fallbackRedirectUrl: '/upload' })
-    }
+    const href = session
+      ? '/upload'
+      : `/sign-in?callbackURL=${encodeURIComponent('/upload')}`
+    router.push(href)
   }
 
   return (

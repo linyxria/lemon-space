@@ -1,9 +1,9 @@
-import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 
 import { db } from '@/db'
-import { assets, assetTags, tags } from '@/db/schema'
+import { asset, assetTag, tag } from '@/db/schema'
+import { getSession } from '@/lib/auth'
 import { chineseSlugify } from '@/lib/utils'
 
 interface CreateAssetRequest {
@@ -15,9 +15,11 @@ interface CreateAssetRequest {
 }
 
 export async function POST(request: Request) {
-  const { userId } = await auth()
+  const session = await getSession()
 
-  if (!userId) return new NextResponse('Unauthorized', { status: 401 })
+  if (!session) return new NextResponse('Unauthorized', { status: 401 })
+
+  const userId = session.user.id
 
   const {
     title,
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
     const result = await db.transaction(async (tx) => {
       // 插入资产并获取 ID
       const [newAsset] = await tx
-        .insert(assets)
+        .insert(asset)
         .values({
           userId,
           objectKey,
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
           height,
         })
         .onConflictDoUpdate({
-          target: [assets.userId, assets.objectKey],
+          target: [asset.userId, asset.objectKey],
           set: {
             title,
             width,
@@ -52,7 +54,7 @@ export async function POST(request: Request) {
 
       // 如果是更新旧资产，建议先清理掉旧的标签关联，再重新插入
       // 这样可以保证标签始终以最后一次上传为准
-      await tx.delete(assetTags).where(eq(assetTags.assetId, newAsset.id))
+      await tx.delete(assetTag).where(eq(assetTag.assetId, newAsset.id))
 
       // 处理标签
       if (tagNames.length > 0) {
@@ -64,11 +66,11 @@ export async function POST(request: Request) {
         }))
 
         const insertedTags = await tx
-          .insert(tags)
+          .insert(tag)
           .values(tagsToInsert)
           .onConflictDoUpdate({
-            target: tags.slug,
-            set: { slug: tags.slug }, // 关键：保持 slug 不变，触发 upsert 行为但不修改数据
+            target: tag.slug,
+            set: { slug: tag.slug }, // 关键：保持 slug 不变，触发 upsert 行为但不修改数据
           })
           .returning()
 
@@ -76,7 +78,7 @@ export async function POST(request: Request) {
 
         // 批量插入中间表关联关系
         if (insertedTagIds.length > 0) {
-          await tx.insert(assetTags).values(
+          await tx.insert(assetTag).values(
             insertedTagIds.map((tagId) => ({
               assetId: newAsset.id,
               tagId,

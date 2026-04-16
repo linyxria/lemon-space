@@ -1,15 +1,17 @@
 'use client'
 
-import { useClerk, useUser } from '@clerk/nextjs'
 import { Heart } from 'lucide-react'
 import type { RenderComponentProps } from 'masonic'
 import { motion } from 'motion/react'
 import Image from 'next/image'
+import { usePathname, useRouter } from 'next/navigation'
 import { useOptimistic, useTransition } from 'react'
 
 import { toggleLike } from '@/app/actions/like'
+import { authClient } from '@/lib/auth-client'
 
 import { useGallery } from './GalleryProvider'
+import UserAvatar from './user-avatar'
 
 export interface AssetData {
   id: string
@@ -17,12 +19,12 @@ export interface AssetData {
   url: string
   width: number
   height: number
-  user: {
-    imageUrl: string
-    username: string
+  user?: {
+    name: string
+    image: string | null
   }
   likeCount: number
-  isLikedByMe: boolean
+  likedByMe?: boolean
 }
 
 const heartVariants = {
@@ -37,14 +39,14 @@ export default function ImageCard({
   data,
   index,
 }: RenderComponentProps<AssetData>) {
-  const { id, title, url, width, height, user, likeCount, isLikedByMe } = data
-
-  const { isSignedIn } = useUser()
-  const { openSignIn } = useClerk()
+  const { id, title, url, width, height, user, likeCount, likedByMe } = data
+  const { data: session } = authClient.useSession()
+  const router = useRouter()
+  const pathname = usePathname()
 
   const [, startTransition] = useTransition()
   const [optimisticLike, setOptimisticLike] = useOptimistic(
-    { isLiked: isLikedByMe, count: likeCount },
+    { isLiked: likedByMe, count: likeCount },
     (state, newLiked: boolean) => ({
       isLiked: newLiked,
       count: newLiked ? state.count + 1 : state.count - 1,
@@ -56,8 +58,8 @@ export default function ImageCard({
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation()
 
-    if (!isSignedIn) {
-      openSignIn({ fallbackRedirectUrl: window.location.pathname })
+    if (!session) {
+      router.push(`/sign-in?callbackURL=${encodeURIComponent(pathname)}`)
       return
     }
 
@@ -123,26 +125,20 @@ export default function ImageCard({
         </div>
       </div>
       {/* 2. 底部作者栏 */}
-      <div className="flex items-center justify-between border-t border-zinc-100/50 bg-white px-3.5 py-3">
-        <div className="flex items-center gap-2 overflow-hidden">
-          <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full ring-1 ring-zinc-100">
-            <Image
-              src={user.imageUrl}
-              alt={user.username || 'Artist'}
-              fill
-              className="object-cover"
-              sizes="24px"
-            />
+      <div className="flex items-center border-t border-zinc-100/50 bg-white px-3.5 py-2.5">
+        {user ? (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <UserAvatar size="sm" image={user.image} alt={user.name} />
+            <span className="truncate text-[12px] font-bold text-zinc-900">
+              {user.name}
+            </span>
           </div>
-          <span className="truncate text-[12px] font-bold text-zinc-900">
-            {user.username}
-          </span>
-        </div>
+        ) : null}
 
         {/* 交互小胶囊 */}
         <button
           onClick={handleLikeClick}
-          className={`flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
+          className={`ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
             optimisticLike.isLiked
               ? 'bg-primary/10 text-primary'
               : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
