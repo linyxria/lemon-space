@@ -99,10 +99,16 @@ export default async function HomePage({
       exists(db.select().from(assetTag).where(eq(assetTag.tagId, t.id))),
   })
 
-  const items = assetsData.map(({ objectKey, ...item }) => ({
-    ...item,
-    url: objectKey2Url(objectKey),
-  }))
+  const items = assetsData.map(
+    ({ objectKey, user: { image, ...user }, ...item }) => ({
+      ...item,
+      url: objectKey2Url(objectKey),
+      user: {
+        ...user,
+        image: image ? objectKey2Url(image) : null,
+      },
+    }),
+  )
 
   return (
     <div className="space-y-4">
