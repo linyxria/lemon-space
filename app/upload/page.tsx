@@ -55,19 +55,21 @@ export default function UploadPage() {
 
       const uploadTasks = files.map(async ({ origin: file }, index) => {
         // 1. 上传文件到云端 (R2)
-        const { objectKey } = await uploadFileToCloud(file, (percent) => {
-          // 更新当前文件的进度
-          fileProgressRef.current[index] = percent
+        const { objectKey } = await uploadFileToCloud('assets', file, {
+          onProgress: (percent) => {
+            // 更新当前文件的进度
+            fileProgressRef.current[index] = percent
 
-          // 计算全局平均进度
-          const sum = Object.values(fileProgressRef.current).reduce(
-            (a, b) => a + b,
-            0,
-          )
-          const globalProgress = Math.round(sum / totalFiles)
+            // 计算全局平均进度
+            const sum = Object.values(fileProgressRef.current).reduce(
+              (a, b) => a + b,
+              0,
+            )
+            const globalProgress = Math.round(sum / totalFiles)
 
-          // 留 1% 给最后的数据库同步状态
-          setProgress(Math.min(globalProgress, 99))
+            // 留 1% 给最后的数据库同步状态
+            setProgress(Math.min(globalProgress, 99))
+          },
         })
 
         // 2. 准备元数据

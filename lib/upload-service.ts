@@ -11,25 +11,29 @@ import { getFileHash } from '@/lib/utils'
  * 返回 objectKey，不涉及任何具体的业务数据库操作
  */
 export async function uploadFileToCloud(
+  folder: PresignedUrlRequest['folder'],
   file: File,
-  onProgress?: (percent: number) => void,
+  { onProgress }: { onProgress?: (percent: number) => void } = {},
 ) {
   // 1. 获取文件 Hash
   const hash = await getFileHash(file)
 
   // 2. 请求预签名 URL
   const {
-    data: { signedUrl, objectKey },
+    data: { signedUrl, objectKey, cacheControl },
   } = await axios.post<PresignedUrlResponse>('/api/s3/presigned-url', {
     filename: file.name,
     hash,
     contentType: file.type,
-    folder: 'images',
+    folder,
   } satisfies PresignedUrlRequest)
 
   // 3. 执行上传
   await axios.put(signedUrl, file, {
-    headers: { 'Content-Type': file.type },
+    headers: {
+      'Cache-Control': cacheControl,
+      'Content-Type': file.type,
+    },
     onUploadProgress: ({ loaded, total }) => {
       const percent = total ? Math.round((loaded * 100) / total) : 0
       onProgress?.(percent)
