@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { type MouseEventHandler, type ReactNode, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -32,17 +33,19 @@ function SocialButton({
 }) {
   return (
     <Button
-      className="flex items-center gap-3"
+      className="flex items-center gap-4"
       variant="outline"
       disabled={isLoading}
       onClick={onClick}
     >
-      {isLoading ? (
-        <Spinner className="size-4" />
-      ) : (
-        <Image src={image} alt="Github" width={16} height={16} />
-      )}
-      {title}
+      <div className="flex w-14 justify-end">
+        {isLoading ? (
+          <Spinner className="size-4" />
+        ) : (
+          <Image src={image} alt="Github" width={16} height={16} />
+        )}
+      </div>
+      <span className="flex-1 text-left">{title}</span>
     </Button>
   )
 }
@@ -70,14 +73,16 @@ export default function AuthScreen({
   }
   form: ReactNode
 }) {
+  const searchParams = useSearchParams()
+
   const [providing, setProviding] = useState<Provider>()
+
   const handleSocialSignIn = async (provider: Provider) => {
     setProviding(provider)
     await authClient.signIn.social(
       {
         provider,
-        // TODO 这里需要从 url 获取
-        callbackURL: '/', // 登录成功后的跳转地址
+        callbackURL: searchParams.get('callbackURL') || '/', // 登录成功后的跳转地址
       },
       {
         onError: (ctx) => void toast.error(ctx.error.message),
@@ -107,7 +112,7 @@ export default function AuthScreen({
             isLoading={providing === 'google'}
             onClick={() => handleSocialSignIn('google')}
           />
-          <SocialButton
+          {/* <SocialButton
             title="Apple"
             image="/apple.svg"
             isLoading={providing === 'apple'}
@@ -118,7 +123,7 @@ export default function AuthScreen({
             image="/wechat.svg"
             isLoading={providing === 'wechat'}
             onClick={() => handleSocialSignIn('wechat')}
-          />
+          /> */}
         </div>
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">

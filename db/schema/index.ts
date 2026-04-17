@@ -1,8 +1,7 @@
-import { relations, sql } from 'drizzle-orm'
+import { relations } from 'drizzle-orm'
 import {
   index,
   integer,
-  pgPolicy,
   pgTable,
   primaryKey,
   text,
@@ -13,36 +12,13 @@ import {
 
 import { user } from './auth'
 
-const timestamptz = (name: string) =>
-  timestamp(name, { withTimezone: true, mode: 'date' }).notNull().defaultNow()
-
-const selectPolicy = () =>
-  pgPolicy('Enable read access for all users', {
-    as: 'permissive',
-    to: 'public',
-    for: 'select',
-    using: sql`true`,
-  })
-
-const insertPolicy = (column: string) =>
-  pgPolicy(`Enable insert for users based on ${column}`, {
-    as: 'permissive',
-    to: 'public',
-    for: 'insert',
-    withCheck: sql`requesting_user_id() = ${sql.identifier(column)}`,
-  })
-
-export const tag = pgTable(
-  'tag',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    name: text('name').notNull().unique(),
-    slug: text('slug').notNull().unique(),
-    creatorId: text('creator_id').notNull(),
-    createdAt: timestamptz('created_at'),
-  },
-  () => [selectPolicy(), insertPolicy('creator_id')],
-)
+export const tag = pgTable('tag', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull().unique(),
+  slug: text('slug').notNull().unique(),
+  creatorId: text('creator_id').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
 
 export const asset = pgTable(
   'asset',
@@ -53,13 +29,9 @@ export const asset = pgTable(
     objectKey: text('object_key').notNull(),
     width: integer('width').notNull(),
     height: integer('height').notNull(),
-    createdAt: timestamptz('created_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
   },
-  (t) => [
-    unique('user_id_object_key_unique').on(t.userId, t.objectKey),
-    selectPolicy(),
-    insertPolicy('user_id'),
-  ],
+  (t) => [unique('user_id_object_key_unique').on(t.userId, t.objectKey)],
 )
 
 export const assetTag = pgTable(
@@ -75,7 +47,6 @@ export const assetTag = pgTable(
   (t) => [
     primaryKey({ columns: [t.tagId, t.assetId] }),
     index('asset_id_idx').on(t.assetId),
-    selectPolicy(),
   ],
 )
 
@@ -86,13 +57,9 @@ export const like = pgTable(
     assetId: uuid('asset_id')
       .references(() => asset.id, { onDelete: 'cascade' })
       .notNull(),
-    createdAt: timestamptz('created_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
   },
-  (t) => [
-    primaryKey({ columns: [t.assetId, t.userId] }),
-    selectPolicy(),
-    insertPolicy('user_id'),
-  ],
+  (t) => [primaryKey({ columns: [t.assetId, t.userId] })],
 )
 
 export const assetRelations = relations(asset, ({ one, many }) => ({

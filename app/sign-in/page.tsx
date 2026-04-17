@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useSearchParams } from 'next/navigation'
 import { useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -24,6 +25,8 @@ const formSchema = z.object({
 })
 
 export default function SignInPage() {
+  const searchParams = useSearchParams()
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,7 +43,7 @@ export default function SignInPage() {
         {
           email: data.email,
           password: data.password,
-          callbackURL: '/',
+          callbackURL: searchParams.get('callbackURL') || '/',
         },
         {
           onSuccess: () => void toast.success('欢迎回来！'),
