@@ -51,7 +51,7 @@ export default function AvatarUploadCard({
 
       const { objectKey } = await uploadFileToCloud('avatars', file)
 
-      await axios.patch('/api/profile/avatar', { objectKey })
+      await axios.put('/api/profile/avatar', { objectKey })
 
       toast.success('头像已更新')
       router.refresh()

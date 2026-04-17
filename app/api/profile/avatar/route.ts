@@ -9,7 +9,7 @@ interface UpdateAvatarRequest {
   objectKey: string
 }
 
-export async function PATCH(request: Request) {
+export async function PUT(request: Request) {
   const session = await getSession()
 
   if (!session) return new NextResponse('Unauthorized', { status: 401 })
