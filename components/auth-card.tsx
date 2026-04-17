@@ -52,7 +52,7 @@ function SocialButton({
 
 type Provider = 'github' | 'google' | 'wechat' | 'apple'
 
-export default function AuthScreen({
+export default function AuthCard({
   title,
   description,
   sub,
