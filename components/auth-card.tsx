@@ -38,7 +38,7 @@ function SocialButton({
       disabled={isLoading}
       onClick={onClick}
     >
-      <div className="flex w-14 justify-end">
+      <div className="flex w-10 justify-end md:w-14">
         {isLoading ? (
           <Spinner className="size-4" />
         ) : (
@@ -92,7 +92,7 @@ export default function AuthCard({
   }
 
   return (
-    <Card className="mx-auto max-w-xs gap-8 shadow-lg md:max-w-md">
+    <Card className="mx-auto max-w-sm gap-8 shadow-lg md:max-w-md">
       <CardHeader>
         <CardTitle className="text-center">{title}</CardTitle>
         <CardDescription className="text-center">{description}</CardDescription>
