@@ -1,5 +1,3 @@
-import { UserIcon } from 'lucide-react'
-
 import {
   Avatar,
   AvatarFallback,
@@ -8,19 +6,17 @@ import {
 } from './ui/avatar'
 
 export default function UserAvatar({
+  name,
   image,
-  alt,
   ...props
 }: AvatarProps & {
+  name: string
   image: string | null | undefined
-  alt: string
 }) {
   return (
     <Avatar {...props}>
-      <AvatarImage src={image ?? undefined} alt={alt} />
-      <AvatarFallback className="bg-linear-to-br from-[#406aff] to-[#a855f7] text-white">
-        <UserIcon />
-      </AvatarFallback>
+      <AvatarImage src={image ?? '/user.png'} alt={name} />
+      <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
     </Avatar>
   )
 }

@@ -128,7 +128,7 @@ export default function ImageCard({
       <div className="flex items-center border-t border-zinc-100/50 bg-white px-3.5 py-2.5">
         {user ? (
           <div className="flex items-center gap-2 overflow-hidden">
-            <UserAvatar size="sm" image={user.image} alt={user.name} />
+            <UserAvatar size="sm" name={user.name} image={user.image} />
             <span className="truncate text-[12px] font-bold text-zinc-900">
               {user.name}
             </span>

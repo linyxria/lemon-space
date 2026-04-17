@@ -59,7 +59,7 @@ export default function UserNav() {
             <span className="hidden font-medium sm:block">
               {session.user.name}
             </span>
-            <UserAvatar image={session.user.image} alt={session.user.name} />
+            <UserAvatar name={session.user.name} image={session.user.image} />
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-48" align="end">
             <DropdownMenuGroup>

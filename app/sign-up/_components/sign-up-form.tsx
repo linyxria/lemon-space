@@ -1,7 +1,7 @@
 'use client'
 
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -27,6 +27,7 @@ const formSchema = z.object({
 
 export default function SignUpForm() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const form = useForm({
     resolver: standardSchemaResolver(formSchema),
     defaultValues: {
@@ -36,6 +37,8 @@ export default function SignUpForm() {
     },
   })
   const [isPending, startTransition] = useTransition()
+
+  const callbackURL = searchParams.get('callbackURL') || '/'
 
   return (
     <AuthCard
@@ -57,10 +60,13 @@ export default function SignUpForm() {
                   name: data.username,
                   email: data.email,
                   password: data.password,
-                  callbackURL: searchParams.get('callbackURL') || '/',
+                  callbackURL,
                 },
                 {
-                  onSuccess: () => void toast.success('注册成功！正在跳转...'),
+                  onSuccess: () => {
+                    toast.success('注册成功！正在跳转...')
+                    router.push(callbackURL)
+                  },
                   onError: (ctx) => void toast.error(ctx.error.message),
                 },
               )
