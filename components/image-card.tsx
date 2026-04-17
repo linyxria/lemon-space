@@ -1,10 +1,11 @@
 'use client'
 
+import { useRouter } from '@bprogress/next/app'
 import { Heart } from 'lucide-react'
 import type { RenderComponentProps } from 'masonic'
 import { motion } from 'motion/react'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useOptimistic, useTransition } from 'react'
 
 import { toggleLike } from '@/app/actions/like'

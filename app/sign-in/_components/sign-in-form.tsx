@@ -1,7 +1,8 @@
 'use client'
 
+import { useRouter } from '@bprogress/next/app'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
