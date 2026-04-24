@@ -3,6 +3,7 @@
 import { useRouter } from '@bprogress/next/app'
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import { Camera, LoaderCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { ChangeEvent } from 'react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -14,6 +15,7 @@ import { useTRPC } from '@/trpc/client'
 
 export default function AvatarUploadCard() {
   const trpc = useTRPC()
+  const t = useTranslations('AvatarUpload')
   const { data } = useSuspenseQuery(trpc.user.info.queryOptions())
 
   const mutation = useMutation(trpc.user.avatarUpdate.mutationOptions())
@@ -29,7 +31,7 @@ export default function AvatarUploadCard() {
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      toast.error('请选择图片文件')
+      toast.error(t('invalidFile'))
       event.target.value = ''
       return
     }
@@ -43,12 +45,12 @@ export default function AvatarUploadCard() {
       const { objectKey } = await uploadFile('avatars', file)
       await mutation.mutateAsync({ objectKey })
 
-      toast.success('头像已更新')
+      toast.success(t('updated'))
       router.refresh()
     } catch (error) {
       console.error(error)
       setPreviewUrl(undefined)
-      toast.error('头像上传失败，请稍后再试')
+      toast.error(t('uploadFailed'))
     } finally {
       setUploading(false)
       event.target.value = ''
@@ -88,12 +90,12 @@ export default function AvatarUploadCard() {
               {uploading ? (
                 <>
                   <LoaderCircle className="size-3.5 animate-spin" />
-                  上传中
+                  {t('uploadingShort')}
                 </>
               ) : (
                 <>
                   <Camera className="size-3.5" />
-                  更换头像
+                  {t('changeAvatar')}
                 </>
               )}
             </Button>
@@ -101,7 +103,7 @@ export default function AvatarUploadCard() {
 
           <div className="flex min-w-0 flex-col items-center text-center sm:items-start sm:text-left">
             <span className="mb-2 rounded-full bg-white/80 px-3 py-1 text-[11px] font-medium tracking-[0.14em] text-zinc-500 uppercase shadow-sm md:hidden">
-              Profile
+              {t('badge')}
             </span>
             <p className="text-xl font-black tracking-tight text-zinc-900 sm:text-2xl">
               {data.name}
@@ -110,10 +112,10 @@ export default function AvatarUploadCard() {
               {data.email}
             </p>
             <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-600">
-              上传一张新的头像，让你的个人主页更有辨识度。
+              {t('description')}
             </p>
             <p className="mt-3 text-xs text-zinc-500 sm:hidden">
-              支持 JPG、PNG、WebP、GIF 等图片格式
+              {t('formats')}
             </p>
           </div>
         </div>
@@ -127,18 +129,16 @@ export default function AvatarUploadCard() {
             {uploading ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                上传中...
+                {t('uploadingLong')}
               </>
             ) : (
               <>
                 <Camera className="size-4" />
-                更换头像
+                {t('changeAvatar')}
               </>
             )}
           </Button>
-          <p className="text-xs text-zinc-500">
-            支持 JPG、PNG、WebP、GIF 等图片格式
-          </p>
+          <p className="text-xs text-zinc-500">{t('formats')}</p>
         </div>
       </div>
     </section>

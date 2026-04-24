@@ -1,6 +1,7 @@
 import { Citrus } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/auth'
@@ -9,10 +10,12 @@ import { HydrateClient, prefetch, trpc } from '@/trpc/server'
 import UserNav from './user-nav'
 
 export default async function Header() {
+  const t = await getTranslations('Header')
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (session) {
     prefetch(trpc.user.info.queryOptions())
+    prefetch(trpc.user.stats.queryOptions())
   }
 
   return (
@@ -39,7 +42,7 @@ export default async function Header() {
           </HydrateClient>
         ) : (
           <Button nativeButton={false} render={<Link href="/sign-in" />}>
-            登录
+            {t('signIn')}
           </Button>
         )}
       </div>

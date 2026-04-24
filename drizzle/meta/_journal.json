@@ -43,6 +43,13 @@
       "when": 1776410819278,
       "tag": "0005_pink_loners",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777051273726,
+      "tag": "0006_user_preferences_and_collections",
+      "breakpoints": true
     }
   ]
 }

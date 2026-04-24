@@ -1,7 +1,8 @@
 'use client'
 
 import { AnimatePresence } from 'motion/react'
-import { createContext, useContext, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 import ImageModal, { type ModalAssetData } from './image-modal'
 
@@ -14,8 +15,10 @@ export default function GalleryProvider({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [asset, setAsset] = useState<ModalAssetData | null>(null)
+  const previousPathnameRef = useRef(pathname)
 
   const openAsset = (item: ModalAssetData) => {
     setAsset(item)
@@ -27,6 +30,13 @@ export default function GalleryProvider({
     // 这样在 exit 动画期间，asset 始终有值，不会报错
     setAsset(null)
   }
+
+  useEffect(() => {
+    if (previousPathnameRef.current !== pathname) {
+      setIsOpen(false)
+    }
+    previousPathnameRef.current = pathname
+  }, [pathname])
 
   return (
     <GalleryContext.Provider value={{ openAsset: openAsset }}>

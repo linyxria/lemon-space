@@ -38,9 +38,7 @@ export function MasonryGrid<T extends { id: string | number }>({
       () => [],
     )
 
-    // Row-major 分发：
-    // 0,1,2,3 -> 第一行从左到右；4,5,6,7 -> 第二行从左到右。
-    // 这样“最新内容”视觉顺序是从左到右，不会变成按列向下读取。
+    // Row-major distribution keeps visual reading order left-to-right.
     items.forEach((item, index) => {
       result[index % resolvedColumnCount].push({ item, index })
     })
@@ -51,9 +49,14 @@ export function MasonryGrid<T extends { id: string | number }>({
   return (
     <div className={cn('flex items-start', gapClassName, className)}>
       {columns.map((columnItems, colIndex) => (
-        <div key={colIndex} className={cn('flex flex-1 flex-col', gapClassName)}>
+        <div
+          key={colIndex}
+          className={cn('flex flex-1 flex-col', gapClassName)}
+        >
           {columnItems.map(({ item, index }) => (
-            <Fragment key={item.id}>{renderItem(item, index)}</Fragment>
+            <Fragment key={`${item.id}:${index}`}>
+              {renderItem(item, index)}
+            </Fragment>
           ))}
         </div>
       ))}

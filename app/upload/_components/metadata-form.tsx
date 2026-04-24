@@ -1,3 +1,7 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
 import TagInput from '@/components/tag-input'
 import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -14,25 +18,27 @@ export default function MetadataForm({
   formValues: MetadataValues
   onChange: (values: MetadataValues) => void
 }) {
+  const t = useTranslations('MetadataForm')
+
   return (
     <FieldSet className="bg-muted rounded-lg p-6">
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="title">设置标题（可选）</FieldLabel>
+          <FieldLabel htmlFor="title">{t('titleLabel')}</FieldLabel>
           <Input
             type="text"
             id="title"
-            placeholder="如果不填写，将使用原文件名"
+            placeholder={t('titlePlaceholder')}
             value={formValues.title}
             onChange={(e) => onChange({ ...formValues, title: e.target.value })}
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="tags">添加标签（回车确认）</FieldLabel>
+          <FieldLabel htmlFor="tags">{t('tagsLabel')}</FieldLabel>
           <TagInput
             type="text"
             id="tags"
-            placeholder="例如：UI设计、极简 Mobile..."
+            placeholder={t('tagsPlaceholder')}
             value={formValues.tags}
             onChange={(tags) => onChange({ ...formValues, tags })}
           />

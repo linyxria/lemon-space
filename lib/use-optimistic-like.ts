@@ -7,9 +7,7 @@ export type LikeState = {
   count: number
 }
 
-type LikeAction =
-  | { type: 'toggle' }
-  | { type: 'reset'; payload: LikeState }
+type LikeAction = { type: 'toggle' } | { type: 'reset'; payload: LikeState }
 
 function getNextLikeState(state: LikeState): LikeState {
   return {
@@ -30,7 +28,7 @@ export function useOptimisticLike(initialState: LikeState) {
 
   useEffect(() => {
     setServerLike(initialState)
-  }, [initialState.count, initialState.isLiked])
+  }, [initialState])
 
   const optimisticToggle = () => {
     const previous = serverLike

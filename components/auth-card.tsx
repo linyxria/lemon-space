@@ -1,8 +1,10 @@
 'use client'
 
+import { Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { type MouseEventHandler, type ReactNode, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -42,7 +44,7 @@ function SocialButton({
         {isLoading ? (
           <Spinner className="size-4" />
         ) : (
-          <Image src={image} alt="Github" width={16} height={16} />
+          <Image src={image} alt={title} width={16} height={16} />
         )}
       </div>
       <span className="flex-1 text-left">{title}</span>
@@ -73,6 +75,7 @@ export default function AuthCard({
   }
   form: ReactNode
 }) {
+  const t = useTranslations('AuthCard')
   const searchParams = useSearchParams()
 
   const [providing, setProviding] = useState<Provider>()
@@ -82,7 +85,7 @@ export default function AuthCard({
     await authClient.signIn.social(
       {
         provider,
-        callbackURL: searchParams.get('callbackURL') || '/', // 登录成功后的跳转地址
+        callbackURL: searchParams.get('callbackURL') || '/',
       },
       {
         onError: (ctx) => void toast.error(ctx.error.message),
@@ -92,22 +95,29 @@ export default function AuthCard({
   }
 
   return (
-    <Card className="mx-auto max-w-sm gap-8 shadow-lg md:max-w-md">
+    <Card className="mx-auto w-full max-w-sm gap-8 rounded-[30px] border border-white/70 bg-white/90 shadow-[0_28px_70px_-40px_rgba(24,24,27,0.45)] backdrop-blur md:max-w-md">
       <CardHeader>
-        <CardTitle className="text-center">{title}</CardTitle>
-        <CardDescription className="text-center">{description}</CardDescription>
+        <div className="mx-auto inline-flex items-center gap-1 rounded-full border border-lime-200 bg-lime-50 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-lime-800 uppercase">
+          <Sparkles className="size-3.5" />
+          {t('brand')}
+        </div>
+        <CardTitle className="text-center text-2xl font-black tracking-tight text-zinc-900">
+          {title}
+        </CardTitle>
+        <CardDescription className="text-center text-sm text-zinc-500">
+          {description}
+        </CardDescription>
       </CardHeader>
       <CardContent className="px-10">
-        {/* 社交登录按钮 */}
         <div className="grid grid-cols-2 gap-2">
           <SocialButton
-            title="Github"
+            title={t('github')}
             image="/github.svg"
             isLoading={providing === 'github'}
             onClick={() => handleSocialSignIn('github')}
           />
           <SocialButton
-            title="Google"
+            title={t('google')}
             image="/google.svg"
             isLoading={providing === 'google'}
             onClick={() => handleSocialSignIn('google')}
@@ -131,7 +141,7 @@ export default function AuthCard({
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background text-muted-foreground px-4">
-              或者
+              {t('or')}
             </span>
           </div>
         </div>
@@ -150,8 +160,9 @@ export default function AuthCard({
       </CardContent>
       <CardFooter className="flex items-center justify-center gap-1 text-xs">
         <span className="text-muted-foreground">{sub.description}</span>
-        <Link href={sub.to}>{sub.action}</Link>
-        {/* 点击继续即表示你同意我们的服务协议和隐私政策。 */}
+        <Link href={sub.to} className="font-semibold">
+          {sub.action}
+        </Link>
       </CardFooter>
     </Card>
   )

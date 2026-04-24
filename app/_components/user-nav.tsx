@@ -2,12 +2,24 @@
 
 import { useRouter } from '@bprogress/next/app'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { LayoutGrid, LogOut, Settings, UploadCloud } from 'lucide-react'
+import {
+  BookMarked,
+  Flame,
+  Heart,
+  Languages,
+  LayoutGrid,
+  LogOut,
+  SlidersHorizontal,
+  UploadCloud,
+} from 'lucide-react'
 import Link from 'next/link'
+import { useLocale, useTranslations } from 'next-intl'
 
+import { usePreferences } from '@/components/preferences-provider'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -24,7 +36,12 @@ export default function UserNav() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const { data } = useSuspenseQuery(trpc.user.info.queryOptions())
+  const { data: stats } = useSuspenseQuery(trpc.user.stats.queryOptions())
   const router = useRouter()
+  const t = useTranslations('UserNav')
+  const tCommon = useTranslations('Common')
+  const locale = useLocale()
+  const { setLocale, showCardTags, setShowCardTags } = usePreferences()
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -53,7 +70,7 @@ export default function UserNav() {
       <Link href="/upload">
         <Button variant="secondary" className="flex items-center gap-2">
           <UploadCloud size={18} />
-          <span className="hidden sm:inline">发布灵感</span>
+          <span className="hidden sm:inline">{t('upload')}</span>
         </Button>
       </Link>
 
@@ -62,13 +79,21 @@ export default function UserNav() {
           <span className="hidden font-medium sm:block">{data.name}</span>
           <UserAvatar name={data.name} image={data.image} />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-48" align="end">
+        <DropdownMenuContent className="w-56" align="end">
           <DropdownMenuGroup>
             <DropdownMenuLabel>
               <p className="text-sm font-medium">{data.name}</p>
               <p className="text-muted-foreground text-xs font-normal">
                 {data.email}
               </p>
+              <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-zinc-500">
+                <span>
+                  {stats.myCount} {t('uploads')}
+                </span>
+                <span>
+                  {stats.likeCount} {t('likes')}
+                </span>
+              </div>
             </DropdownMenuLabel>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -76,20 +101,73 @@ export default function UserNav() {
             <DropdownMenuItem>
               <Link href="/profile" className="flex w-full items-center gap-2">
                 <LayoutGrid />
-                我的画廊
+                {t('myGallery')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/settings" className="flex w-full items-center gap-2">
-                <Settings />
-                账号设置
+              <Link
+                href="/profile?tab=likes"
+                className="flex w-full items-center gap-2"
+              >
+                <Heart />
+                {t('myLikes')}
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link
+                href="/collections"
+                className="flex w-full items-center gap-2"
+              >
+                <BookMarked />
+                {t('collections')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link
+                href="/preferences"
+                className="flex w-full items-center gap-2"
+              >
+                <SlidersHorizontal />
+                {t('preferences')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link
+                href="/?sort=popular"
+                className="flex w-full items-center gap-2"
+              >
+                <Flame />
+                {t('hotIdeas')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuCheckboxItem
+              checked={showCardTags}
+              onCheckedChange={(checked) => setShowCardTags(Boolean(checked))}
+            >
+              {t('showCardTags')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="flex items-center gap-2">
+              <Languages className="size-4" />
+              {t('language')}
+            </DropdownMenuLabel>
+            <DropdownMenuCheckboxItem
+              checked={locale === 'zh-CN'}
+              onCheckedChange={() => setLocale('zh-CN')}
+            >
+              {tCommon('localeZh')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={locale === 'en-US'}
+              onCheckedChange={() => setLocale('en-US')}
+            >
+              {tCommon('localeEn')}
+            </DropdownMenuCheckboxItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
             <LogOut />
-            <span>退出登录</span>
+            <span>{t('signOut')}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

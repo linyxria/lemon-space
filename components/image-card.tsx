@@ -6,12 +6,16 @@ import { Heart } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { usePreferences } from '@/components/preferences-provider'
+import { Badge } from '@/components/ui/badge'
 import { authClient } from '@/lib/auth-client'
 import { useOptimisticLike } from '@/lib/use-optimistic-like'
 import { useTRPC } from '@/trpc/client'
 
+import { useGallery } from './gallery-provider'
 import UserAvatar from './user-avatar'
 
 const heartVariants = {
@@ -87,6 +91,7 @@ export default function ImageCard({
   width,
   height,
   user,
+  tags,
   likeCount,
   likedByMe,
 }: {
@@ -100,28 +105,32 @@ export default function ImageCard({
     name: string
     image: string | null
   }
+  tags?: string[]
   likeCount: number
   likedByMe?: boolean
 }) {
   const { data: session } = authClient.useSession()
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const initialLikeState = useMemo(
-    () => ({
-      isLiked: likedByMe ?? false,
-      count: likeCount,
-    }),
-    [likeCount, likedByMe],
-  )
   const { optimisticLike, optimisticToggle, commit, rollback } =
-    useOptimisticLike(initialLikeState)
+    useOptimisticLike(
+      useMemo(
+        () => ({
+          isLiked: likedByMe ?? false,
+          count: likeCount,
+        }),
+        [likeCount, likedByMe],
+      ),
+    )
   const animatedLikeCount = useAnimatedCount(optimisticLike.count)
 
   const likeMutation = useMutation(
     trpc.asset.toggleLike.mutationOptions({
       onSuccess: async () => {
         await Promise.all([
-          queryClient.invalidateQueries({ queryKey: trpc.asset.list.queryKey() }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.asset.list.queryKey(),
+          }),
           queryClient.invalidateQueries({
             queryKey: trpc.asset.listByMe.queryKey(),
           }),
@@ -135,6 +144,9 @@ export default function ImageCard({
 
   const router = useRouter()
   const pathname = usePathname()
+  const gallery = useGallery()
+  const t = useTranslations('ImageCard')
+  const { showCardTags } = usePreferences()
 
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -171,7 +183,7 @@ export default function ImageCard({
     optimisticLike.isLiked ? 'text-primary' : 'text-white/80 hover:text-white'
   }`
 
-  const likeLabel = optimisticLike.isLiked ? '取消点赞' : '点赞'
+  const likeLabel = optimisticLike.isLiked ? t('unlike') : t('like')
 
   const renderHeart = (size: number, strokeWidth: number) => (
     <motion.div
@@ -192,7 +204,9 @@ export default function ImageCard({
       {/* 图片区域容器 */}
       <div
         className="relative cursor-zoom-in overflow-hidden bg-zinc-50"
-        // onClick={() => gallery.openAsset({ id, title, url })}
+        onClick={() =>
+          gallery.openAsset({ id, title, url, width, height, tags })
+        }
       >
         {/* 优雅核心：使用原生 CSS transition。
              这里的 duration 和 timing-function 调教得与 Framer Motion 一致。
@@ -223,29 +237,50 @@ export default function ImageCard({
         </div>
       </div>
       {/* 2. 底部作者栏 */}
-      <div className="flex items-center border-t border-zinc-100/50 bg-white px-3.5 py-2.5">
-        {user ? (
-          <div className="flex items-center gap-2 overflow-hidden">
-            <UserAvatar size="sm" name={user.name} image={user.image} />
-            <span className="truncate text-[12px] font-bold text-zinc-900">
-              {user.name}
-            </span>
+      <div className="border-t border-zinc-100/50 bg-white px-3.5 py-2.5">
+        {showCardTags && tags && tags.length > 0 ? (
+          <div className="mb-2 flex flex-wrap items-center gap-1.5">
+            {tags.slice(0, 2).map((tag) => (
+              <Badge
+                key={tag}
+                variant="outline"
+                className="rounded-full px-2 text-[10px]"
+              >
+                {tag}
+              </Badge>
+            ))}
+            {tags.length > 2 ? (
+              <Badge variant="ghost" className="rounded-full px-2 text-[10px]">
+                +{tags.length - 2}
+              </Badge>
+            ) : null}
           </div>
         ) : null}
 
-        {/* 交互小胶囊 */}
-        <button
-          type="button"
-          onClick={handleLikeClick}
-          disabled={likeMutation.isPending}
-          aria-label={likeLabel}
-          className={likeButtonClassName}
-        >
-          {renderHeart(13, 2.5)}
-          <span className="font-mono text-[11px] font-bold tabular-nums">
-            {animatedLikeCount}
-          </span>
-        </button>
+        <div className="flex items-center">
+          {user ? (
+            <div className="flex items-center gap-2 overflow-hidden">
+              <UserAvatar size="sm" name={user.name} image={user.image} />
+              <span className="truncate text-[12px] font-bold text-zinc-900">
+                {user.name}
+              </span>
+            </div>
+          ) : null}
+
+          {/* 交互小胶囊 */}
+          <button
+            type="button"
+            onClick={handleLikeClick}
+            disabled={likeMutation.isPending}
+            aria-label={likeLabel}
+            className={likeButtonClassName}
+          >
+            {renderHeart(13, 2.5)}
+            <span className="font-mono text-[11px] font-bold tabular-nums">
+              {animatedLikeCount}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   )

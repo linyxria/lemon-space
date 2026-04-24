@@ -1,8 +1,8 @@
 import { TRPCError } from '@trpc/server'
-import { and, desc, eq, exists, inArray, sql } from 'drizzle-orm'
+import { and, desc, eq, exists, ilike, inArray, or, sql } from 'drizzle-orm'
 import z from 'zod'
 
-import { db } from '@/db'
+import type { db } from '@/db'
 import { asset, assetTag, like, tag, user } from '@/db/schema'
 import { chineseSlugify, objectKey2Url } from '@/lib/utils'
 
@@ -65,9 +65,12 @@ async function saveAssets(
 
   if (savedAssets.length === 0) return savedAssets
 
-  await tx
-    .delete(assetTag)
-    .where(inArray(assetTag.assetId, savedAssets.map(({ id }) => id)))
+  await tx.delete(assetTag).where(
+    inArray(
+      assetTag.assetId,
+      savedAssets.map(({ id }) => id),
+    ),
+  )
 
   if (tags.length === 0) return savedAssets
 
@@ -104,8 +107,21 @@ async function saveAssets(
 
 export const assetRouter = router({
   list: procedure
-    .input(z.object({ tag: z.string().trim().min(1).optional() }))
+    .input(
+      z.object({
+        tag: z.string().trim().min(1).optional(),
+        q: z.string().trim().min(1).optional(),
+        sort: z.enum(['latest', 'popular']).default('latest'),
+        limit: z.number().int().min(1).max(48).default(24),
+        cursor: z.number().int().min(0).default(0),
+      }),
+    )
     .query(async ({ ctx, input }) => {
+      const likeCountExpr =
+        sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
+          Number,
+        )
+
       const assets = await ctx.db
         .select({
           // 基础字段
@@ -124,10 +140,7 @@ export const assetRouter = router({
           },
 
           // 2. 点赞总数
-          likeCount:
-            sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
-              Number,
-            ),
+          likeCount: likeCountExpr,
 
           // 3. 标签数组 (将关联查询结果聚合成 JSON 数组)
           tags: sql<string[]>`coalesce(
@@ -156,39 +169,185 @@ export const assetRouter = router({
         .leftJoin(tag, eq(assetTag.tagId, tag.id))
         // 过滤逻辑
         .where(
-          input.tag
-            ? exists(
-                ctx.db
-                  .select()
-                  .from(assetTag)
-                  .innerJoin(tag, eq(assetTag.tagId, tag.id))
-                  .where(
-                    and(
-                      eq(assetTag.assetId, asset.id),
-                      eq(tag.slug, input.tag),
+          and(
+            input.tag
+              ? exists(
+                  ctx.db
+                    .select()
+                    .from(assetTag)
+                    .innerJoin(tag, eq(assetTag.tagId, tag.id))
+                    .where(
+                      and(
+                        eq(assetTag.assetId, asset.id),
+                        eq(tag.slug, input.tag),
+                      ),
                     ),
+                )
+              : undefined,
+            input.q
+              ? or(
+                  ilike(asset.title, `%${input.q}%`),
+                  exists(
+                    ctx.db
+                      .select()
+                      .from(assetTag)
+                      .innerJoin(tag, eq(assetTag.tagId, tag.id))
+                      .where(
+                        and(
+                          eq(assetTag.assetId, asset.id),
+                          ilike(tag.name, `%${input.q}%`),
+                        ),
+                      ),
                   ),
-              )
-            : undefined,
+                )
+              : undefined,
+          ),
         )
         // 分组：必须包含所有非聚合字段
         .groupBy(asset.id, user.id)
-        .orderBy(desc(asset.createdAt))
+        .orderBy(
+          input.sort === 'popular'
+            ? desc(likeCountExpr)
+            : desc(asset.createdAt),
+          desc(asset.createdAt),
+          desc(asset.id),
+        )
+        .offset(input.cursor)
+        .limit(input.limit + 1)
 
-      return assets.map(({ objectKey, user, ...asset }) => ({
-        ...asset,
+      const hasMore = assets.length > input.limit
+      const slice = hasMore ? assets.slice(0, input.limit) : assets
+
+      return {
+        items: slice.map(({ objectKey, user, ...asset }) => ({
+          ...asset,
+          url: objectKey2Url(objectKey),
+          user: {
+            ...user,
+            image: user.image ? objectKey2Url(user.image) : null,
+          },
+        })),
+        nextCursor: hasMore ? input.cursor + input.limit : undefined,
+      }
+    }),
+  related: procedure
+    .input(
+      z.object({
+        assetId: z.string().trim().min(1),
+        limit: z.number().int().min(1).max(12).default(6),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const relatedTagIds = await ctx.db
+        .select({ tagId: assetTag.tagId })
+        .from(assetTag)
+        .where(eq(assetTag.assetId, input.assetId))
+
+      const tagIds = relatedTagIds.map(({ tagId }) => tagId)
+      const likeCountExpr =
+        sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
+          Number,
+        )
+
+      const relatedAssets = await ctx.db
+        .select({
+          id: asset.id,
+          title: asset.title,
+          objectKey: asset.objectKey,
+          width: asset.width,
+          height: asset.height,
+          createdAt: asset.createdAt,
+          likeCount: likeCountExpr,
+          tags: sql<string[]>`coalesce(
+            json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null),
+            '[]'
+          )`.as('tags'),
+        })
+        .from(asset)
+        .leftJoin(like, eq(asset.id, like.assetId))
+        .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
+        .leftJoin(tag, eq(assetTag.tagId, tag.id))
+        .where(
+          tagIds.length > 0
+            ? and(
+                sql`${asset.id} <> ${input.assetId}`,
+                exists(
+                  ctx.db
+                    .select()
+                    .from(assetTag)
+                    .where(
+                      and(
+                        eq(assetTag.assetId, asset.id),
+                        inArray(assetTag.tagId, tagIds),
+                      ),
+                    ),
+                ),
+              )
+            : sql`${asset.id} <> ${input.assetId}`,
+        )
+        .groupBy(asset.id)
+        .orderBy(desc(likeCountExpr), desc(asset.createdAt))
+        .limit(input.limit)
+
+      return relatedAssets.map(({ objectKey, ...item }) => ({
+        ...item,
         url: objectKey2Url(objectKey),
-        user: {
-          ...user,
-          image: user.image ? objectKey2Url(user.image) : null,
-        },
       }))
     }),
   tags: procedure.query(async ({ ctx }) => {
-    return await ctx.db.query.tag.findMany({
-      where: (t, { exists }) =>
-        exists(ctx.db.select().from(assetTag).where(eq(assetTag.tagId, t.id))),
-    })
+    return await ctx.db
+      .select({
+        id: tag.id,
+        name: tag.name,
+        slug: tag.slug,
+        assetCount: sql<number>`count(${assetTag.assetId})`.mapWith(Number),
+      })
+      .from(tag)
+      .innerJoin(assetTag, eq(assetTag.tagId, tag.id))
+      .groupBy(tag.id)
+      .orderBy(desc(sql`count(${assetTag.assetId})`), tag.name)
+  }),
+  featured: procedure.query(async ({ ctx }) => {
+    const likeCountExpr =
+      sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
+        Number,
+      )
+
+    const featuredAssets = await ctx.db
+      .select({
+        id: asset.id,
+        title: asset.title,
+        objectKey: asset.objectKey,
+        width: asset.width,
+        height: asset.height,
+        likeCount: likeCountExpr,
+      })
+      .from(asset)
+      .leftJoin(like, eq(asset.id, like.assetId))
+      .groupBy(asset.id)
+      .orderBy(desc(likeCountExpr), desc(asset.createdAt))
+      .limit(4)
+
+    const hotTags = await ctx.db
+      .select({
+        id: tag.id,
+        name: tag.name,
+        slug: tag.slug,
+        assetCount: sql<number>`count(${assetTag.assetId})`.mapWith(Number),
+      })
+      .from(tag)
+      .innerJoin(assetTag, eq(assetTag.tagId, tag.id))
+      .groupBy(tag.id)
+      .orderBy(desc(sql`count(${assetTag.assetId})`), tag.name)
+      .limit(8)
+
+    return {
+      featuredAssets: featuredAssets.map(({ objectKey, ...item }) => ({
+        ...item,
+        url: objectKey2Url(objectKey),
+      })),
+      hotTags,
+    }
   }),
   create: protectedProcedure
     .input(assetCreateSchema)
@@ -256,6 +415,10 @@ export const assetRouter = router({
         width: asset.width,
         height: asset.height,
         createdAt: asset.createdAt,
+        tags: sql<string[]>`coalesce(
+          json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null),
+          '[]'
+        )`.as('tags'),
         likeCount: sql<number>`(
         select count(*) from ${like} 
         where ${like.assetId} = ${asset.id}
@@ -267,7 +430,10 @@ export const assetRouter = router({
       )`,
       })
       .from(asset)
+      .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
+      .leftJoin(tag, eq(assetTag.tagId, tag.id))
       .where(eq(asset.userId, userId))
+      .groupBy(asset.id)
       .orderBy(desc(asset.createdAt))
 
     return assets.map(({ objectKey, ...asset }) => ({
@@ -286,6 +452,10 @@ export const assetRouter = router({
         width: asset.width,
         height: asset.height,
         createdAt: asset.createdAt,
+        tags: sql<string[]>`coalesce(
+          json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null),
+          '[]'
+        )`.as('tags'),
 
         // 发布该资产的用户信息（如果需要）
         user: {
@@ -303,10 +473,13 @@ export const assetRouter = router({
       .from(like)
       // 1. 联表获取资产详情
       .innerJoin(asset, eq(like.assetId, asset.id))
+      .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
+      .leftJoin(tag, eq(assetTag.tagId, tag.id))
       // 2. 联表获取原作者信息（可选）
       .innerJoin(user, eq(asset.userId, user.id))
       // 3. 核心过滤：谁点的赞？
       .where(eq(like.userId, userId))
+      .groupBy(asset.id, user.id, like.createdAt)
       // 4. 按点赞时间排序
       .orderBy(desc(like.createdAt))
 

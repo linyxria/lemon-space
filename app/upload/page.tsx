@@ -1,7 +1,9 @@
 'use client'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Check, Sparkles, Tags } from 'lucide-react'
 import { nanoid } from 'nanoid'
+import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -38,17 +40,22 @@ function formatBytes(bytes: number) {
 }
 
 export default function UploadPage() {
+  const t = useTranslations('UploadPage')
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const createBatchMutation = useMutation(
     trpc.asset.createBatch.mutationOptions({
       onSuccess: async () => {
         await Promise.all([
-          queryClient.invalidateQueries({ queryKey: trpc.asset.list.queryKey() }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.asset.list.queryKey(),
+          }),
           queryClient.invalidateQueries({
             queryKey: trpc.asset.listByMe.queryKey(),
           }),
-          queryClient.invalidateQueries({ queryKey: trpc.asset.tags.queryKey() }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.asset.tags.queryKey(),
+          }),
         ])
       },
     }),
@@ -74,7 +81,7 @@ export default function UploadPage() {
     try {
       setUploading(true)
       setProgress(0)
-      setStatus('开始上传...')
+      setStatus(t('started'))
 
       // 初始化所有文件的进度
       fileProgressRef.current = {}
@@ -123,14 +130,14 @@ export default function UploadPage() {
       const assets = await Promise.all(uploadTasks)
 
       setProgress(99)
-      setStatus(`正在批量入库 (${totalFiles} 件作品)`)
+      setStatus(t('syncing', { count: totalFiles }))
       await createBatchMutation.mutateAsync({
         assets,
         tags: formValues.tags,
       })
 
       setProgress(100)
-      setStatus('入库成功！')
+      setStatus(t('success'))
 
       setTimeout(() => {
         setUploading(false)
@@ -142,115 +149,182 @@ export default function UploadPage() {
       }, 2000)
     } catch (err) {
       console.error(err)
-      setStatus('上传过程中出现异常')
+      setStatus(t('error'))
       setUploading(false)
     }
   }
 
   return (
-    <Card className="relative left-1/2 max-w-3xl -translate-x-1/2 md:top-4">
-      <CardHeader>
-        <CardTitle>上传你的作品</CardTitle>
-        <CardDescription>请不要上传血腥、色情、暴力等违规内容</CardDescription>
-        <CardAction>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <Badge variant="secondary">{files.length} 件作品待上传</Badge>
+    <div className="space-y-5">
+      <section className="rounded-[30px] border border-zinc-200/80 bg-linear-to-r from-zinc-950 via-zinc-900 to-lime-950/90 px-5 py-5 text-white shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:px-6 sm:py-6">
+        <p className="text-[11px] font-semibold tracking-[0.28em] text-lime-200/80 uppercase">
+          {t('heroBadge')}
+        </p>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-black tracking-[-0.04em] sm:text-4xl">
+              {t('title')}
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm text-zinc-300">
+              {t('description')}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">
+              {t('pendingCount', { count: files.length })}
+            </Badge>
             {files.length > 0 ? (
               <Badge variant="outline">{formatBytes(totalSize)}</Badge>
             ) : null}
           </div>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <UploadArea
-          uploading={uploading}
-          onDrop={(acceptedFiles) => {
-            if (!acceptedFiles) return
-            const seen = new Set(files.map(({ origin }) => getFileFingerprint(origin)))
-            const nextFiles: PreviewFile[] = []
-            let skipped = 0
+        </div>
+      </section>
 
-            acceptedFiles.forEach((file) => {
-              const fingerprint = getFileFingerprint(file)
-              if (seen.has(fingerprint)) {
-                skipped += 1
-                return
-              }
-
-              seen.add(fingerprint)
-              nextFiles.push({
-                origin: file,
-                id: nanoid(),
-                preview: URL.createObjectURL(file),
-              })
-            })
-
-            setFiles((prev) => [...prev, ...nextFiles])
-            setSelectionMessage(skipped > 0 ? `已跳过 ${skipped} 个重复文件` : '')
-            setStatus('')
-          }}
-        />
-
-        {selectionMessage ? (
-          <p className="text-xs font-medium text-zinc-500">{selectionMessage}</p>
-        ) : null}
-
-        {files.length > 0 && (
-          <>
-            <PreviewList
-              files={files}
+      <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+        <Card className="relative w-full rounded-[28px] border-zinc-200/80 shadow-[0_24px_60px_-38px_rgba(24,24,27,0.35)]">
+          <CardHeader>
+            <CardTitle>{t('cardTitle')}</CardTitle>
+            <CardDescription>{t('cardDescription')}</CardDescription>
+            <CardAction>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <Badge variant="secondary">
+                  {t('pendingCount', { count: files.length })}
+                </Badge>
+                {files.length > 0 ? (
+                  <Badge variant="outline">{formatBytes(totalSize)}</Badge>
+                ) : null}
+              </div>
+            </CardAction>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <UploadArea
               uploading={uploading}
-              onRemove={(id) =>
-                setFiles((prev) => prev.filter((file) => file.id !== id))
-              }
-            />
-            <MetadataForm formValues={formValues} onChange={setFormValues} />
-          </>
-        )}
+              onDrop={(acceptedFiles) => {
+                if (!acceptedFiles) return
+                const seen = new Set(
+                  files.map(({ origin }) => getFileFingerprint(origin)),
+                )
+                const nextFiles: PreviewFile[] = []
+                let skipped = 0
 
-        {/* 进度条展示 */}
-        {uploading && (
-          <Field>
-            <FieldLabel htmlFor="progress-upload">
-              <span className="text-muted-foreground animate-pulse text-xs font-medium">
-                {status}
-              </span>
-              <span className="text-primary ml-auto font-mono text-xs font-bold">
-                {progress}%
-              </span>
-            </FieldLabel>
-            <Progress value={progress} id="progress-upload" />
-          </Field>
-        )}
-      </CardContent>
-      <CardFooter className="flex gap-3">
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setFiles([])
-            setSelectionMessage('')
-            setStatus('')
-          }}
-          disabled={files.length === 0 || uploading}
-          className="min-w-24"
-        >
-          清空
-        </Button>
-        <Button
-          onClick={handleUpload}
-          disabled={files.length === 0 || uploading}
-          className="flex w-full items-center gap-2"
-        >
-          {uploading ? (
-            <>
-              <Spinner />
-              正在处理...
-            </>
-          ) : (
-            '开始上传'
-          )}
-        </Button>
-      </CardFooter>
-    </Card>
+                acceptedFiles.forEach((file) => {
+                  const fingerprint = getFileFingerprint(file)
+                  if (seen.has(fingerprint)) {
+                    skipped += 1
+                    return
+                  }
+
+                  seen.add(fingerprint)
+                  nextFiles.push({
+                    origin: file,
+                    id: nanoid(),
+                    preview: URL.createObjectURL(file),
+                  })
+                })
+
+                setFiles((prev) => [...prev, ...nextFiles])
+                setSelectionMessage(
+                  skipped > 0 ? t('duplicateSkipped', { count: skipped }) : '',
+                )
+                setStatus('')
+              }}
+            />
+
+            {selectionMessage ? (
+              <p className="text-xs font-medium text-zinc-500">
+                {selectionMessage}
+              </p>
+            ) : null}
+
+            {files.length > 0 && (
+              <>
+                <PreviewList
+                  files={files}
+                  uploading={uploading}
+                  onRemove={(id) =>
+                    setFiles((prev) => prev.filter((file) => file.id !== id))
+                  }
+                />
+                <MetadataForm
+                  formValues={formValues}
+                  onChange={setFormValues}
+                />
+              </>
+            )}
+
+            {uploading && (
+              <Field>
+                <FieldLabel htmlFor="progress-upload">
+                  <span className="text-muted-foreground animate-pulse text-xs font-medium">
+                    {status}
+                  </span>
+                  <span className="text-primary ml-auto font-mono text-xs font-bold">
+                    {progress}%
+                  </span>
+                </FieldLabel>
+                <Progress value={progress} id="progress-upload" />
+              </Field>
+            )}
+          </CardContent>
+          <CardFooter className="flex gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setFiles([])
+                setSelectionMessage('')
+                setStatus('')
+              }}
+              disabled={files.length === 0 || uploading}
+              className="min-w-24"
+            >
+              {t('reset')}
+            </Button>
+            <Button
+              onClick={handleUpload}
+              disabled={files.length === 0 || uploading}
+              className="flex flex-1 items-center gap-2"
+            >
+              {uploading ? (
+                <>
+                  <Spinner />
+                  {t('processing')}
+                </>
+              ) : (
+                t('startUpload')
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="rounded-[28px] border-zinc-200/80 bg-linear-to-b from-white to-lime-50/50 shadow-[0_20px_55px_-38px_rgba(24,24,27,0.35)]">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-zinc-900">
+              <Sparkles className="size-4 text-lime-600" />
+              {t('tipsTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-zinc-600">
+            <p className="flex items-start gap-2">
+              <Check className="mt-0.5 size-4 text-lime-600" />
+              {t('tip1')}
+            </p>
+            <p className="flex items-start gap-2">
+              <Check className="mt-0.5 size-4 text-lime-600" />
+              {t('tip2')}
+            </p>
+            <p className="flex items-start gap-2">
+              <Check className="mt-0.5 size-4 text-lime-600" />
+              {t('tip3')}
+            </p>
+          </CardContent>
+          <CardFooter className="justify-start gap-2">
+            <Badge variant="outline" className="rounded-full px-2.5">
+              <Tags className="size-3.5" />
+              {t('formats')}
+            </Badge>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
   )
 }

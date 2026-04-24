@@ -1,0 +1,232 @@
+{
+  "Common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "latest": "Latest",
+    "popular": "Most liked",
+    "on": "On",
+    "off": "Off",
+    "loading": "Loading...",
+    "localeZh": "Simplified Chinese",
+    "localeEn": "English"
+  },
+  "Header": {
+    "signIn": "Sign In"
+  },
+  "UserNav": {
+    "upload": "Upload",
+    "myGallery": "My Gallery",
+    "myLikes": "My Likes",
+    "collections": "Collections",
+    "preferences": "Preferences",
+    "hotIdeas": "Trending",
+    "showCardTags": "Show card tags",
+    "language": "Language",
+    "signOut": "Sign out",
+    "uploads": "uploads",
+    "likes": "likes"
+  },
+  "TagBar": {
+    "searchPlaceholder": "Search titles or tags, e.g. minimal, poster, login",
+    "search": "Search",
+    "clear": "Clear filters",
+    "clearSearch": "Clear search",
+    "allCategories": "All categories",
+    "filtersEnabled": "Filters enabled",
+    "tag": "Tag",
+    "keyword": "Keyword"
+  },
+  "Gallery": {
+    "noResult": "No results found for current filters",
+    "backToGallery": "Back to gallery",
+    "emptyTitle": "No inspiration yet",
+    "emptyDescription": "No resources here yet. Be the first one to upload.",
+    "uploadNow": "Upload now",
+    "loadingMore": "Loading more...",
+    "loadMore": "Load more",
+    "noMore": "You reached the end"
+  },
+  "Home": {
+    "featured": "Featured Today",
+    "featuredTitle": "Trending picks for this week",
+    "featuredDesc": "Curated from recent uploads and high-engagement works to speed up your inspiration search.",
+    "featuredHint": "Keep filtering by tags and keywords with instant refresh",
+    "viewTrending": "View trending",
+    "uploadCallout": "Upload my ideas",
+    "likesSuffix": "likes",
+    "hotTags": "Hot tag ranking",
+    "pieces": "items",
+    "statFeatured": "{count} featured cards",
+    "statTags": "{count} hot tags"
+  },
+  "Profile": {
+    "badge": "Profile Space",
+    "title": "Profile",
+    "description": "Manage your avatar, uploads and saved inspirations in one creator space."
+  },
+  "ProfileOverview": {
+    "snapshotBadge": "Creator snapshot",
+    "uploadsLabel": "Uploads",
+    "likesLabel": "Total likes",
+    "recentBadge": "Recent uploads",
+    "recentTitle": "Your inspiration timeline",
+    "continueUpload": "Continue uploading",
+    "newBadge": "New",
+    "emptyRecent": "You haven't uploaded anything yet. Share your first image now."
+  },
+  "ProfileTabs": {
+    "backHome": "Back to homepage",
+    "emptyUploadsTitle": "No uploads yet",
+    "emptyUploadsDescription": "Share your first inspiration with the community.",
+    "emptyLikesTitle": "No liked resources yet",
+    "emptyLikesDescription": "Explore the homepage and save the ideas you like.",
+    "myUploads": "My uploads ({count})",
+    "myLikes": "My likes ({count})",
+    "loadingUploads": "Preparing your uploads...",
+    "loadingLikes": "Loading your liked items..."
+  },
+  "AvatarUpload": {
+    "invalidFile": "Please select an image file",
+    "updated": "Avatar updated",
+    "uploadFailed": "Avatar upload failed, please try again later",
+    "uploadingShort": "Uploading",
+    "uploadingLong": "Uploading...",
+    "changeAvatar": "Change avatar",
+    "badge": "Profile",
+    "description": "Upload a new avatar to make your creator profile more recognizable.",
+    "formats": "Supports JPG, PNG, WebP and GIF"
+  },
+  "ImageCard": {
+    "like": "Like",
+    "unlike": "Unlike"
+  },
+  "ImageModal": {
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "copyFailed": "Copy failed, please try again later",
+    "download": "Download",
+    "viewOriginal": "View original",
+    "saveToCollection": "Save to collection",
+    "sameTagRelated": "Same-tag picks",
+    "continueExploring": "Continue Exploring",
+    "noCollectionYet": "No collection yet",
+    "createCollection": "Create collection"
+  },
+  "Preferences": {
+    "title": "Preferences",
+    "description": "Manage your core settings in one place and sync across devices.",
+    "languageTitle": "Interface language",
+    "languageDesc": "Apply to navigation, filters and key feature pages.",
+    "showTagsTitle": "Show tags on cards",
+    "showTagsDesc": "Display or hide tags in masonry cards.",
+    "sortTitle": "Default sort",
+    "sortDesc": "Used when homepage has no explicit sort query.",
+    "saved": "Saved automatically"
+  },
+  "Collections": {
+    "title": "Collections",
+    "description": "Group favorite images into themed sets for review and reuse.",
+    "createTitle": "Create collection",
+    "namePlaceholder": "e.g. Login ideas, Illustration references",
+    "descriptionPlaceholder": "Add a short note to remember why you saved this",
+    "createButton": "Create collection",
+    "empty": "No collections yet. Create your first one.",
+    "open": "Open",
+    "delete": "Delete",
+    "assetsCount": "images",
+    "back": "Back to collections",
+    "update": "Update details",
+    "updated": "Updated",
+    "remove": "Remove"
+  },
+  "AuthCard": {
+    "brand": "Lemon ID",
+    "github": "Github",
+    "google": "Google",
+    "or": "or"
+  },
+  "SignIn": {
+    "title": "Sign in to Lemon Gallery",
+    "description": "Welcome back. Continue organizing your inspiration.",
+    "noAccount": "No account yet?",
+    "register": "Sign up",
+    "submit": "Sign in",
+    "welcome": "Welcome back!",
+    "emailNotVerified": "Your email is not verified yet. Please verify it first.",
+    "verificationHint": "Didn't receive the email? Resend to {email}",
+    "resendVerification": "Resend verification",
+    "resending": "Sending...",
+    "verificationResent": "Verification email sent again",
+    "verificationResendFailed": "Failed to resend verification email",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password"
+  },
+  "SignUp": {
+    "title": "Create your account",
+    "description": "Join Lemon Gallery and build your visual inspiration system.",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "submit": "Create account",
+    "success": "Account created.",
+    "checkInbox": "Account created. Verification email sent to {email}",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password"
+  },
+  "SignInPage": {
+    "badge": "Welcome Back",
+    "title": "Continue your inspiration workflow",
+    "description": "Sign in to sync collections, preferences and upload history.",
+    "highlight1": "Collections synced",
+    "highlight2": "Cross-device preferences",
+    "highlight3": "Upload history at a glance"
+  },
+  "SignUpPage": {
+    "badge": "New Creator",
+    "title": "Create account, build your inspiration system",
+    "description": "Start from your first image and keep a structured visual library.",
+    "highlight1": "Upload and tag management",
+    "highlight2": "Theme-based collections",
+    "highlight3": "Personalized browsing preferences"
+  },
+  "UploadPage": {
+    "heroBadge": "Upload Studio",
+    "title": "Upload your work",
+    "description": "Batch upload with unified titles and tags to keep your assets searchable.",
+    "pendingCount": "{count} files pending",
+    "cardTitle": "Upload your work",
+    "cardDescription": "Do not upload prohibited content such as gore, sexual or violent material.",
+    "reset": "Clear",
+    "startUpload": "Start upload",
+    "processing": "Processing...",
+    "started": "Upload started...",
+    "syncing": "Syncing to database ({count} items)",
+    "success": "Saved successfully!",
+    "error": "Upload failed unexpectedly",
+    "duplicateSkipped": "{count} duplicate files skipped",
+    "tipsTitle": "Upload tips",
+    "tip1": "Use consistent tags in one batch for better filtering later.",
+    "tip2": "Set a base title for batch uploads and let auto-numbering handle the rest.",
+    "tip3": "Prefer clearer high-resolution images for better modal presentation.",
+    "formats": "Supports JPG / PNG / WebP / AVIF / GIF"
+  },
+  "UploadArea": {
+    "dragging": "Drop files to add them to the upload queue",
+    "idle": "Drag images here or click to select",
+    "formats": "Supports JPG / PNG / WebP / AVIF / GIF"
+  },
+  "MetadataForm": {
+    "titleLabel": "Title (optional)",
+    "titlePlaceholder": "If empty, original filename will be used",
+    "tagsLabel": "Tags (press Enter to confirm)",
+    "tagsPlaceholder": "e.g. UI design, minimalist mobile"
+  },
+  "PreviewList": {
+    "remove": "Remove image"
+  }
+}

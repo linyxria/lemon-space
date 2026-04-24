@@ -3,6 +3,7 @@
 import { useRouter } from '@bprogress/next/app'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -27,6 +28,7 @@ const formSchema = z.object({
 })
 
 export default function SignUpForm() {
+  const t = useTranslations('SignUp')
   const searchParams = useSearchParams()
   const router = useRouter()
   const form = useForm({
@@ -43,11 +45,15 @@ export default function SignUpForm() {
 
   return (
     <AuthCard
-      title="创建您的账户"
-      description="继续使用 Lemon Gallery"
-      sub={{ description: '已经有账户了？', to: '/sign-in', action: '登录' }}
+      title={t('title')}
+      description={t('description')}
+      sub={{
+        description: t('hasAccount'),
+        to: '/sign-in',
+        action: t('signIn'),
+      }}
       button={{
-        text: '创建账号',
+        text: t('submit'),
         form: 'sign-up',
         loading: isPending,
       }}
@@ -65,8 +71,12 @@ export default function SignUpForm() {
                 },
                 {
                   onSuccess: () => {
-                    toast.success('注册成功！正在跳转...')
-                    router.push(callbackURL)
+                    toast.success(t('checkInbox', { email: data.email }))
+                    const next = new URLSearchParams({
+                      email: data.email,
+                      callbackURL,
+                    })
+                    router.push(`/sign-in?${next.toString()}`)
                   },
                   onError: (ctx) => void toast.error(ctx.error.message),
                 },
@@ -80,11 +90,13 @@ export default function SignUpForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="username">用户名</FieldLabel>
+                  <FieldLabel htmlFor="username">
+                    {t('usernameLabel')}
+                  </FieldLabel>
                   <Input
                     {...field}
                     id="username"
-                    placeholder="请输入您的用户名"
+                    placeholder={t('usernamePlaceholder')}
                     aria-invalid={fieldState.invalid}
                   />
                   {fieldState.invalid && (
@@ -98,11 +110,11 @@ export default function SignUpForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email">电子邮件地址</FieldLabel>
+                  <FieldLabel htmlFor="email">{t('emailLabel')}</FieldLabel>
                   <Input
                     {...field}
                     id="email"
-                    placeholder="请输入您的电子邮件地址"
+                    placeholder={t('emailPlaceholder')}
                     aria-invalid={fieldState.invalid}
                   />
                   {fieldState.invalid && (
@@ -116,11 +128,13 @@ export default function SignUpForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="password">密码</FieldLabel>
+                  <FieldLabel htmlFor="password">
+                    {t('passwordLabel')}
+                  </FieldLabel>
                   <PasswordInput
                     {...field}
                     id="password"
-                    placeholder="请输入您的密码"
+                    placeholder={t('passwordPlaceholder')}
                     aria-invalid={fieldState.invalid}
                   />
                   {fieldState.invalid && (

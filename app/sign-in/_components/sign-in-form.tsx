@@ -3,13 +3,15 @@
 import { useRouter } from '@bprogress/next/app'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import { useSearchParams } from 'next/navigation'
-import { useTransition } from 'react'
+import { useTranslations } from 'next-intl'
+import { useEffect, useState, useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import z from 'zod'
 
 import AuthCard from '@/components/auth-card'
 import PasswordInput from '@/components/password-input'
+import { Button } from '@/components/ui/button'
 import {
   Field,
   FieldError,
@@ -26,8 +28,13 @@ const formSchema = z.object({
 })
 
 export default function SignInForm() {
+  const t = useTranslations('SignIn')
   const searchParams = useSearchParams()
   const router = useRouter()
+  const [resending, setResending] = useState(false)
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
+    string | null
+  >(null)
   const form = useForm({
     resolver: standardSchemaResolver(formSchema),
     defaultValues: {
@@ -38,14 +45,24 @@ export default function SignInForm() {
   const [isPending, startTransition] = useTransition()
 
   const callbackURL = searchParams.get('callbackURL') || '/'
+  const emailFromQuery = searchParams.get('email')
+
+  useEffect(() => {
+    if (!emailFromQuery) return
+    form.setValue('email', emailFromQuery)
+  }, [emailFromQuery, form])
 
   return (
     <AuthCard
-      title="登录 Lemon Gallery"
-      description="欢迎回来！请登录您的账户以继续。"
-      sub={{ description: '还没有账户？', to: '/sign-up', action: '注册' }}
+      title={t('title')}
+      description={t('description')}
+      sub={{
+        description: t('noAccount'),
+        to: '/sign-up',
+        action: t('register'),
+      }}
       button={{
-        text: '登录',
+        text: t('submit'),
         form: 'sign-in',
         loading: isPending,
       }}
@@ -62,10 +79,18 @@ export default function SignInForm() {
                 },
                 {
                   onSuccess: () => {
-                    toast.success('欢迎回来！')
+                    setPendingVerificationEmail(null)
+                    toast.success(t('welcome'))
                     router.push(callbackURL)
                   },
-                  onError: (ctx) => void toast.error(ctx.error.message),
+                  onError: (ctx) => {
+                    if (ctx.error.code === 'EMAIL_NOT_VERIFIED') {
+                      setPendingVerificationEmail(data.email)
+                      toast.error(t('emailNotVerified'))
+                      return
+                    }
+                    toast.error(ctx.error.message)
+                  },
                 },
               )
             })
@@ -77,11 +102,11 @@ export default function SignInForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email">电子邮件地址</FieldLabel>
+                  <FieldLabel htmlFor="email">{t('emailLabel')}</FieldLabel>
                   <Input
                     {...field}
                     id="email"
-                    placeholder="请输入您的电子邮件地址"
+                    placeholder={t('emailPlaceholder')}
                     aria-invalid={fieldState.invalid}
                   />
                   {fieldState.invalid && (
@@ -95,11 +120,13 @@ export default function SignInForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="password">密码</FieldLabel>
+                  <FieldLabel htmlFor="password">
+                    {t('passwordLabel')}
+                  </FieldLabel>
                   <PasswordInput
                     {...field}
                     id="password"
-                    placeholder="请输入您的密码"
+                    placeholder={t('passwordPlaceholder')}
                     aria-invalid={fieldState.invalid}
                   />
                   {fieldState.invalid && (
@@ -109,6 +136,36 @@ export default function SignInForm() {
               )}
             />
           </FieldGroup>
+          {pendingVerificationEmail ? (
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <p className="text-xs text-zinc-500">
+                {t('verificationHint', { email: pendingVerificationEmail })}
+              </p>
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                disabled={resending}
+                onClick={async () => {
+                  try {
+                    setResending(true)
+                    await authClient.sendVerificationEmail({
+                      email: pendingVerificationEmail,
+                      callbackURL,
+                    })
+                    toast.success(t('verificationResent'))
+                  } catch (error) {
+                    console.error(error)
+                    toast.error(t('verificationResendFailed'))
+                  } finally {
+                    setResending(false)
+                  }
+                }}
+              >
+                {resending ? t('resending') : t('resendVerification')}
+              </Button>
+            </div>
+          ) : null}
         </form>
       }
     />
