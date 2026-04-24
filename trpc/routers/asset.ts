@@ -1,11 +1,106 @@
 import { TRPCError } from '@trpc/server'
-import { and, desc, eq, exists, sql } from 'drizzle-orm'
+import { and, desc, eq, exists, inArray, sql } from 'drizzle-orm'
 import z from 'zod'
 
+import { db } from '@/db'
 import { asset, assetTag, like, tag, user } from '@/db/schema'
 import { chineseSlugify, objectKey2Url } from '@/lib/utils'
 
 import { procedure, protectedProcedure, router } from '../init'
+
+const tagListSchema = z.array(z.string().trim().min(1))
+
+const assetCreateSchema = z.object({
+  title: z.string().trim().min(1),
+  objectKey: z.string().trim().min(1),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  tags: tagListSchema,
+})
+
+const assetBatchItemSchema = assetCreateSchema.omit({ tags: true })
+
+function normalizeTags(tags: string[]) {
+  return Array.from(new Set(tags))
+}
+
+function normalizeAssetsByObjectKey(
+  items: Array<z.infer<typeof assetBatchItemSchema>>,
+) {
+  const byObjectKey = new Map<string, z.infer<typeof assetBatchItemSchema>>()
+
+  for (const item of items) {
+    byObjectKey.set(item.objectKey, item)
+  }
+
+  return Array.from(byObjectKey.values())
+}
+
+async function saveAssets(
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  userId: string,
+  items: Array<z.infer<typeof assetBatchItemSchema>>,
+  rawTags: string[],
+) {
+  const tags = normalizeTags(rawTags)
+  const assets = normalizeAssetsByObjectKey(items)
+
+  const savedAssets = await tx
+    .insert(asset)
+    .values(
+      assets.map((item) => ({
+        ...item,
+        userId,
+      })),
+    )
+    .onConflictDoUpdate({
+      target: [asset.userId, asset.objectKey],
+      set: {
+        title: sql`excluded.title`,
+        width: sql`excluded.width`,
+        height: sql`excluded.height`,
+      },
+    })
+    .returning()
+
+  if (savedAssets.length === 0) return savedAssets
+
+  await tx
+    .delete(assetTag)
+    .where(inArray(assetTag.assetId, savedAssets.map(({ id }) => id)))
+
+  if (tags.length === 0) return savedAssets
+
+  const insertedTags = await tx
+    .insert(tag)
+    .values(
+      tags.map((name) => ({
+        name,
+        slug: chineseSlugify(name),
+        creatorId: userId,
+      })),
+    )
+    .onConflictDoUpdate({
+      target: tag.slug,
+      set: { slug: tag.slug },
+    })
+    .returning()
+
+  const tagIds = insertedTags.map(({ id }) => id)
+
+  if (tagIds.length > 0) {
+    await tx.insert(assetTag).values(
+      savedAssets.flatMap(({ id: assetId }) =>
+        tagIds.map((tagId) => ({
+          assetId,
+          tagId,
+        })),
+      ),
+    )
+  }
+
+  return savedAssets
+}
 
 export const assetRouter = router({
   list: procedure
@@ -95,79 +190,26 @@ export const assetRouter = router({
         exists(ctx.db.select().from(assetTag).where(eq(assetTag.tagId, t.id))),
     })
   }),
-  // TODO 后续优化为批量创建
   create: protectedProcedure
-    .input(
-      z.object({
-        title: z.string().trim().min(1),
-        objectKey: z.string().trim().min(1),
-        width: z.number().int().positive(),
-        height: z.number().int().positive(),
-        tags: z.array(z.string()),
-      }),
-    )
+    .input(assetCreateSchema)
     .mutation(async ({ ctx, input }) => {
-      // const { objectKey, width, height, title, tags } = input
-
       try {
-        // 使用数据库事务 (Transaction)，保证要么全成功，要么全失败
         const result = await ctx.db.transaction(async (tx) => {
-          // 插入资产并获取 ID
-          const [newAsset] = await tx
-            .insert(asset)
-            .values({
-              title: input.title,
-              objectKey: input.objectKey,
-              width: input.width,
-              height: input.height,
-              userId: ctx.user.id,
-            })
-            .onConflictDoUpdate({
-              target: [asset.userId, asset.objectKey],
-              set: {
+          const [savedAsset] = await saveAssets(
+            tx,
+            ctx.user.id,
+            [
+              {
                 title: input.title,
+                objectKey: input.objectKey,
                 width: input.width,
                 height: input.height,
               },
-            })
-            .returning()
+            ],
+            input.tags,
+          )
 
-          // 如果是更新旧资产，建议先清理掉旧的标签关联，再重新插入
-          // 这样可以保证标签始终以最后一次上传为准
-          await tx.delete(assetTag).where(eq(assetTag.assetId, newAsset.id))
-
-          // 处理标签
-          if (input.tags.length > 0) {
-            // 准备所有待插入的数据
-            const tagsToInsert = input.tags.map((name) => ({
-              name,
-              slug: chineseSlugify(name),
-              creatorId: ctx.user.id,
-            }))
-
-            const insertedTags = await tx
-              .insert(tag)
-              .values(tagsToInsert)
-              .onConflictDoUpdate({
-                target: tag.slug,
-                set: { slug: tag.slug }, // 关键：保持 slug 不变，触发 upsert 行为但不修改数据
-              })
-              .returning()
-
-            const insertedTagIds = insertedTags.map((t) => t.id)
-
-            // 批量插入中间表关联关系
-            if (insertedTagIds.length > 0) {
-              await tx.insert(assetTag).values(
-                insertedTagIds.map((tagId) => ({
-                  assetId: newAsset.id,
-                  tagId,
-                })),
-              )
-            }
-          }
-
-          return newAsset
+          return savedAsset
         })
 
         return result
@@ -177,6 +219,29 @@ export const assetRouter = router({
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to save asset',
+        })
+      }
+    }),
+  createBatch: protectedProcedure
+    .input(
+      z.object({
+        assets: z.array(assetBatchItemSchema).min(1),
+        tags: tagListSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await ctx.db.transaction(async (tx) =>
+          saveAssets(tx, ctx.user.id, input.assets, input.tags),
+        )
+      } catch (error) {
+        console.error('asset.createBatch failed', error)
+
+        if (error instanceof TRPCError) throw error
+
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to save assets',
         })
       }
     }),

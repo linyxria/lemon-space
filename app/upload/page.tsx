@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { nanoid } from 'nanoid'
 import { useRef, useState } from 'react'
 
@@ -27,14 +27,38 @@ import type { PreviewFile } from './_components/preview-list'
 import PreviewList from './_components/preview-list'
 import UploadArea from './_components/upload-area'
 
+function getFileFingerprint(file: File) {
+  return `${file.name}:${file.size}:${file.lastModified}`
+}
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export default function UploadPage() {
   const trpc = useTRPC()
-  const createMutation = useMutation(trpc.asset.create.mutationOptions())
+  const queryClient = useQueryClient()
+  const createBatchMutation = useMutation(
+    trpc.asset.createBatch.mutationOptions({
+      onSuccess: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: trpc.asset.list.queryKey() }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.asset.listByMe.queryKey(),
+          }),
+          queryClient.invalidateQueries({ queryKey: trpc.asset.tags.queryKey() }),
+        ])
+      },
+    }),
+  )
 
   const [files, setFiles] = useState<PreviewFile[]>([])
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState('')
+  const [selectionMessage, setSelectionMessage] = useState('')
   const [formValues, setFormValues] = useState<MetadataValues>({
     title: '',
     tags: [],
@@ -42,6 +66,7 @@ export default function UploadPage() {
 
   // 使用 useRef 存储每个文件的实时进度，避免频繁触发渲染时的闭包问题
   const fileProgressRef = useRef<Record<number, number>>({})
+  const totalSize = files.reduce((sum, file) => sum + file.origin.size, 0)
 
   const handleUpload = async () => {
     if (files.length === 0) return
@@ -85,27 +110,24 @@ export default function UploadPage() {
             : formValues.title
           : file.name.split('.')[0]
 
-        // 3. 同步到数据库
-        await createMutation.mutateAsync({
+        fileProgressRef.current[index] = 100
+
+        return {
           title: finalTitle,
           objectKey,
           width: dimensions.width,
           height: dimensions.height,
-          tags: formValues.tags,
-        })
-
-        // 标记单个任务彻底完成
-        fileProgressRef.current[index] = 100
-
-        // 更新已完成数量的状态显示
-        const completedCount = Object.values(fileProgressRef.current).filter(
-          (v) => v === 100,
-        ).length
-        setStatus(`正在同步数据 (${completedCount}/${totalFiles})`)
+        }
       })
 
-      // 等待所有并行任务完成
-      await Promise.all(uploadTasks)
+      const assets = await Promise.all(uploadTasks)
+
+      setProgress(99)
+      setStatus(`正在批量入库 (${totalFiles} 件作品)`)
+      await createBatchMutation.mutateAsync({
+        assets,
+        tags: formValues.tags,
+      })
 
       setProgress(100)
       setStatus('入库成功！')
@@ -115,6 +137,7 @@ export default function UploadPage() {
         setFiles([])
         setProgress(0)
         setStatus('')
+        setSelectionMessage('')
         setFormValues({ title: '', tags: [] })
       }, 2000)
     } catch (err) {
@@ -130,7 +153,12 @@ export default function UploadPage() {
         <CardTitle>上传你的作品</CardTitle>
         <CardDescription>请不要上传血腥、色情、暴力等违规内容</CardDescription>
         <CardAction>
-          <Badge variant="secondary">{files.length} 件作品待上传</Badge>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Badge variant="secondary">{files.length} 件作品待上传</Badge>
+            {files.length > 0 ? (
+              <Badge variant="outline">{formatBytes(totalSize)}</Badge>
+            ) : null}
+          </div>
         </CardAction>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -138,15 +166,34 @@ export default function UploadPage() {
           uploading={uploading}
           onDrop={(acceptedFiles) => {
             if (!acceptedFiles) return
-            const newFiles = acceptedFiles.map((file) => ({
-              origin: file,
-              id: nanoid(),
-              preview: URL.createObjectURL(file),
-            }))
-            setFiles((prev) => [...prev, ...newFiles])
+            const seen = new Set(files.map(({ origin }) => getFileFingerprint(origin)))
+            const nextFiles: PreviewFile[] = []
+            let skipped = 0
+
+            acceptedFiles.forEach((file) => {
+              const fingerprint = getFileFingerprint(file)
+              if (seen.has(fingerprint)) {
+                skipped += 1
+                return
+              }
+
+              seen.add(fingerprint)
+              nextFiles.push({
+                origin: file,
+                id: nanoid(),
+                preview: URL.createObjectURL(file),
+              })
+            })
+
+            setFiles((prev) => [...prev, ...nextFiles])
+            setSelectionMessage(skipped > 0 ? `已跳过 ${skipped} 个重复文件` : '')
             setStatus('')
           }}
         />
+
+        {selectionMessage ? (
+          <p className="text-xs font-medium text-zinc-500">{selectionMessage}</p>
+        ) : null}
 
         {files.length > 0 && (
           <>
@@ -176,7 +223,19 @@ export default function UploadPage() {
           </Field>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex gap-3">
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setFiles([])
+            setSelectionMessage('')
+            setStatus('')
+          }}
+          disabled={files.length === 0 || uploading}
+          className="min-w-24"
+        >
+          清空
+        </Button>
         <Button
           onClick={handleUpload}
           disabled={files.length === 0 || uploading}

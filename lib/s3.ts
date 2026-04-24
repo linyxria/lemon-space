@@ -49,7 +49,7 @@ export async function uploadFile(
   const objectKey = `${folder}/${hash}.${getSafeExtension(file.name) || 'bin'}`
   const cacheControl = CACHE_CONTROL_BY_FOLDER[folder]
 
-  const signedUrl = await api.upload.signedUrl.query({
+  const signedUrl = await api.upload.signedUrl.mutate({
     Key: objectKey,
     ContentType: file.type,
     CacheControl: cacheControl,

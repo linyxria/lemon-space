@@ -15,7 +15,7 @@ export const uploadRouter = router({
         CacheControl: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       // 1. 生成 R2 预签名 URL
       const command = new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,
