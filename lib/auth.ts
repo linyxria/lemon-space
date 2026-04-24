@@ -1,6 +1,5 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { headers } from 'next/headers'
 
 import { db } from '@/db'
 
@@ -24,7 +23,3 @@ export const auth = betterAuth({
     // wechat: {},
   },
 })
-
-export async function getSession() {
-  return auth.api.getSession({ headers: await headers() })
-}

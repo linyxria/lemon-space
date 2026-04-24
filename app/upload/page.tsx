@@ -1,6 +1,6 @@
 'use client'
 
-import axios from 'axios'
+import { useMutation } from '@tanstack/react-query'
 import { nanoid } from 'nanoid'
 import { useRef, useState } from 'react'
 
@@ -18,8 +18,9 @@ import {
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
-import { uploadFileToCloud } from '@/lib/upload-service'
+import { uploadFile } from '@/lib/s3'
 import { getImageDimensions } from '@/lib/utils'
+import { useTRPC } from '@/trpc/client'
 
 import MetadataForm, { type MetadataValues } from './_components/metadata-form'
 import type { PreviewFile } from './_components/preview-list'
@@ -27,6 +28,9 @@ import PreviewList from './_components/preview-list'
 import UploadArea from './_components/upload-area'
 
 export default function UploadPage() {
+  const trpc = useTRPC()
+  const createMutation = useMutation(trpc.asset.create.mutationOptions())
+
   const [files, setFiles] = useState<PreviewFile[]>([])
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -55,7 +59,7 @@ export default function UploadPage() {
 
       const uploadTasks = files.map(async ({ origin: file }, index) => {
         // 1. 上传文件到云端 (R2)
-        const { objectKey } = await uploadFileToCloud('assets', file, {
+        const { objectKey } = await uploadFile('assets', file, {
           onProgress: (percent) => {
             // 更新当前文件的进度
             fileProgressRef.current[index] = percent
@@ -82,7 +86,7 @@ export default function UploadPage() {
           : file.name.split('.')[0]
 
         // 3. 同步到数据库
-        await axios.post('/api/assets', {
+        await createMutation.mutateAsync({
           title: finalTitle,
           objectKey,
           width: dimensions.width,

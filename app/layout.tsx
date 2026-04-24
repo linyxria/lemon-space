@@ -6,6 +6,8 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
 
+import { TRPCReactProvider } from '@/trpc/client'
+
 import Header from './_components/header'
 import ProgressProvider from './_components/progress-provider'
 
@@ -35,13 +37,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <ProgressProvider>
-          <Header />
-          <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 md:px-5 md:py-8">
-            {children}
-          </main>
-          <Toaster />
-        </ProgressProvider>
+        <TRPCReactProvider>
+          <ProgressProvider>
+            <Header />
+            <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 md:px-5 md:py-8">
+              {children}
+            </main>
+            <Toaster />
+          </ProgressProvider>
+        </TRPCReactProvider>
         <Analytics />
         <SpeedInsights />
       </body>

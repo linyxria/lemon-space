@@ -3,11 +3,10 @@
 import { AnimatePresence } from 'motion/react'
 import { createContext, useContext, useState } from 'react'
 
-import type { AssetData } from './image-card'
-import ImageModal from './image-modal'
+import ImageModal, { type ModalAssetData } from './image-modal'
 
 const GalleryContext = createContext<{
-  openAsset: (asset: AssetData) => void
+  openAsset: (asset: ModalAssetData) => void
 } | null>(null)
 
 export default function GalleryProvider({
@@ -16,9 +15,9 @@ export default function GalleryProvider({
   children: React.ReactNode
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [asset, setAsset] = useState<AssetData | null>(null)
+  const [asset, setAsset] = useState<ModalAssetData | null>(null)
 
-  const openAsset = (item: AssetData) => {
+  const openAsset = (item: ModalAssetData) => {
     setAsset(item)
     setIsOpen(true)
   }

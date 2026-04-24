@@ -1,23 +1,21 @@
+'use client'
+
+import { useSuspenseQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { useTRPC } from '@/trpc/client'
 
-interface Tag {
-  id: string | number
-  name: string
-  slug: string
-}
+export function TagBar({ selected }: { selected: string | undefined }) {
+  const trpc = useTRPC()
+  const { data } = useSuspenseQuery(trpc.asset.tags.queryOptions())
 
-interface TagBarProps {
-  tags: Tag[]
-  selected?: string
-}
+  if (data.length === 0) return null
 
-export default function TagBar({ tags, selected }: TagBarProps) {
   return (
     <ScrollArea>
       <div className="flex w-max items-center gap-1 pb-4 md:gap-2">
-        {tags.map((tag) => {
+        {data.map((tag) => {
           const isActive = selected === tag.slug
           return (
             <Link

@@ -4,11 +4,16 @@ import { ExternalLink, X } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 
-import type { AssetData } from './image-card'
 import { Button } from './ui/button'
 
+export interface ModalAssetData {
+  id: string
+  title: string
+  url: string
+}
+
 interface ImageModalProps {
-  asset: AssetData | null
+  asset: ModalAssetData | null
   onClose: () => void
 }
 

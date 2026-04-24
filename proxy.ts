@@ -1,9 +1,10 @@
+import { headers } from 'next/headers'
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { getSession } from './lib/auth'
+import { auth } from './lib/auth'
 
 export async function proxy(request: NextRequest) {
-  const session = await getSession()
+  const session = await auth.api.getSession({ headers: await headers() })
   if (!session) {
     const url = new URL('/sign-in', request.url)
     url.searchParams.set('callbackURL', request.nextUrl.pathname)

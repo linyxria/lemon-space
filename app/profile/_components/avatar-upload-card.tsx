@@ -1,36 +1,27 @@
 'use client'
 
 import { useRouter } from '@bprogress/next/app'
-import axios from 'axios'
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import { Camera, LoaderCircle } from 'lucide-react'
 import type { ChangeEvent } from 'react'
 import { useRef, useState } from 'react'
-import ReactDOM from 'react-dom'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import UserAvatar from '@/components/user-avatar'
-import { uploadFileToCloud } from '@/lib/upload-service'
+import { uploadFile } from '@/lib/s3'
+import { useTRPC } from '@/trpc/client'
 
-export default function AvatarUploadCard({
-  name,
-  email,
-  image,
-}: {
-  name: string
-  email: string
-  image: string | null
-}) {
+export default function AvatarUploadCard() {
+  const trpc = useTRPC()
+  const { data } = useSuspenseQuery(trpc.user.info.queryOptions())
+
+  const mutation = useMutation(trpc.user.avatarUpdate.mutationOptions())
+
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const avatarSrc = previewUrl ?? image
-
-  if (avatarSrc) {
-    ReactDOM.preload(avatarSrc, { as: 'image' })
-    ReactDOM.preconnect(new URL(avatarSrc).origin)
-  }
+  const [previewUrl, setPreviewUrl] = useState<string>()
 
   const handleSelectFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -49,15 +40,14 @@ export default function AvatarUploadCard({
       setUploading(true)
       setPreviewUrl(localPreviewUrl)
 
-      const { objectKey } = await uploadFileToCloud('avatars', file)
-
-      await axios.put('/api/profile/avatar', { objectKey })
+      const { objectKey } = await uploadFile('avatars', file)
+      await mutation.mutateAsync({ objectKey })
 
       toast.success('头像已更新')
       router.refresh()
     } catch (error) {
       console.error(error)
-      setPreviewUrl(null)
+      setPreviewUrl(undefined)
       toast.error('头像上传失败，请稍后再试')
     } finally {
       setUploading(false)
@@ -69,7 +59,6 @@ export default function AvatarUploadCard({
     <section className="relative mb-6 overflow-hidden rounded-[28px] border border-zinc-200/80 bg-linear-to-br from-white via-white to-amber-50/60 shadow-sm md:mb-8">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-linear-to-b from-amber-100/70 via-lime-50/35 to-transparent md:hidden" />
       <div className="pointer-events-none absolute top-5 left-1/2 size-36 -translate-x-1/2 rounded-full bg-white/70 blur-2xl md:hidden" />
-
       <input
         ref={inputRef}
         type="file"
@@ -85,12 +74,8 @@ export default function AvatarUploadCard({
             <div className="absolute inset-4 rounded-full bg-amber-100/45 blur-2xl md:hidden" />
             <div className="relative flex items-center justify-center">
               <UserAvatar
-                name={name}
-                image={avatarSrc}
-                imageProps={{
-                  loading: 'eager',
-                  fetchPriority: 'high',
-                }}
+                name={data.name}
+                image={previewUrl || data.image}
                 className="relative size-24 shadow-[0_14px_30px_-20px_rgba(24,24,27,0.35)] sm:size-28 md:size-32 md:shadow-none"
               />
             </div>
@@ -119,10 +104,10 @@ export default function AvatarUploadCard({
               Profile
             </span>
             <p className="text-xl font-black tracking-tight text-zinc-900 sm:text-2xl">
-              {name}
+              {data.name}
             </p>
             <p className="mt-1 max-w-60 truncate text-sm text-zinc-500 sm:max-w-70 md:max-w-none">
-              {email}
+              {data.email}
             </p>
             <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-600">
               上传一张新的头像，让你的个人主页更有辨识度。
