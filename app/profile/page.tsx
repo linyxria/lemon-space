@@ -23,14 +23,14 @@ export default async function ProfilePage({
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col">
-      <div className="mb-8 rounded-[28px] bg-linear-to-r from-zinc-950 via-zinc-900 to-lime-950/90 px-5 py-5 text-white shadow-[0_20px_50px_-28px_rgba(24,24,27,0.6)] sm:px-6 sm:py-6">
-        <p className="text-[11px] font-semibold tracking-[0.28em] text-lime-200/80 uppercase">
+      <div className="from-hero via-hero to-primary/35 text-hero-foreground mb-8 rounded-[28px] bg-linear-to-r px-5 py-5 shadow-[0_20px_50px_-28px_rgba(24,24,27,0.6)] sm:px-6 sm:py-6">
+        <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
           {t('badge')}
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl">
+        <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
           {t('title')}
         </h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-300 sm:text-[15px]">
+        <p className="text-hero-muted mt-2 max-w-3xl text-sm leading-6 sm:text-[15px]">
           {t('description')}
         </p>
       </div>

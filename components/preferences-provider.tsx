@@ -9,17 +9,24 @@ import { authClient } from '@/lib/auth-client'
 import { type AppLocale, LOCALE_COOKIE_KEY } from '@/lib/i18n'
 import { useTRPC } from '@/trpc/client'
 
+import {
+  type ThemePreference,
+  useTheme,
+} from './theme-provider'
+
 type SortPreference = 'latest' | 'popular'
 
 type PreferencesState = {
   showCardTags: boolean
   defaultSort: SortPreference
+  theme: ThemePreference
 }
 
 type PreferencesContextValue = PreferencesState & {
   locale: AppLocale
   setShowCardTags: (value: boolean) => void
   setDefaultSort: (value: SortPreference) => void
+  setTheme: (value: ThemePreference) => void
   setLocale: (value: AppLocale) => void
 }
 
@@ -30,6 +37,13 @@ const STORAGE_KEY = 'lemon-gallery-preferences'
 const DEFAULT_PREFERENCES: PreferencesState = {
   showCardTags: true,
   defaultSort: 'latest',
+  theme: 'system',
+}
+
+function normalizeTheme(value: unknown): ThemePreference {
+  return value === 'light' || value === 'dark' || value === 'system'
+    ? value
+    : DEFAULT_PREFERENCES.theme
 }
 
 function readStoredPreferences(): PreferencesState {
@@ -52,6 +66,7 @@ function readStoredPreferences(): PreferencesState {
         parsed.defaultSort === 'popular'
           ? 'popular'
           : DEFAULT_PREFERENCES.defaultSort,
+      theme: normalizeTheme(parsed.theme),
     }
   } catch {
     window.localStorage.removeItem(STORAGE_KEY)
@@ -68,6 +83,7 @@ export default function PreferencesProvider({
   const router = useRouter()
   const locale = useLocale() as AppLocale
   const queryClient = useQueryClient()
+  const { setTheme: setNextTheme } = useTheme()
   const { data: session } = authClient.useSession()
   const hasUserSwitchedLocaleRef = useRef(false)
   const hasAppliedRemoteLocaleRef = useRef(false)
@@ -79,15 +95,6 @@ export default function PreferencesProvider({
     trpc.user.preferences.queryOptions(undefined, {
       enabled: Boolean(session?.user),
       staleTime: 60_000,
-      onSuccess: (data) => {
-        const nextSort: SortPreference =
-          data.defaultSort === 'popular' ? 'popular' : 'latest'
-
-        setPreferences({
-          showCardTags: data.showCardTags,
-          defaultSort: nextSort,
-        })
-      },
     }),
   )
 
@@ -101,6 +108,18 @@ export default function PreferencesProvider({
       },
     }),
   )
+
+  const remotePreferences = preferencesQuery.data
+    ? {
+        showCardTags: preferencesQuery.data.showCardTags,
+        defaultSort:
+          preferencesQuery.data.defaultSort === 'popular'
+            ? 'popular'
+            : DEFAULT_PREFERENCES.defaultSort,
+        theme: normalizeTheme(preferencesQuery.data.theme),
+      }
+    : null
+  const resolvedPreferences = remotePreferences ?? preferences
 
   useEffect(() => {
     const nextLocale = preferencesQuery.data?.locale
@@ -119,34 +138,49 @@ export default function PreferencesProvider({
   }, [locale, preferencesQuery.data?.locale, router])
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
-  }, [preferences])
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(resolvedPreferences),
+    )
+  }, [resolvedPreferences])
+
+  useEffect(() => {
+    setNextTheme(resolvedPreferences.theme)
+  }, [resolvedPreferences.theme, setNextTheme])
 
   const updatePreferences = (patch: Partial<PreferencesState>) => {
-    setPreferences((current) => {
-      const next = {
-        ...current,
-        ...patch,
+    const next = {
+      ...resolvedPreferences,
+      ...patch,
+    }
+
+    setPreferences(next)
+
+    if (patch.theme !== undefined) {
+      setNextTheme(patch.theme)
+    }
+
+    if (session?.user) {
+      const payload: {
+        showCardTags?: boolean
+        defaultSort?: SortPreference
+        theme?: ThemePreference
+      } = {}
+
+      if (patch.showCardTags !== undefined)
+        payload.showCardTags = patch.showCardTags
+      if (patch.defaultSort !== undefined)
+        payload.defaultSort = patch.defaultSort
+      if (patch.theme !== undefined) payload.theme = patch.theme
+
+      if (Object.keys(payload).length > 0) {
+        queryClient.setQueryData(trpc.user.preferences.queryKey(), {
+          locale,
+          ...next,
+        })
+        savePreferencesMutation.mutate(payload)
       }
-
-      if (session?.user) {
-        const payload: {
-          showCardTags?: boolean
-          defaultSort?: SortPreference
-        } = {}
-
-        if (patch.showCardTags !== undefined)
-          payload.showCardTags = patch.showCardTags
-        if (patch.defaultSort !== undefined)
-          payload.defaultSort = patch.defaultSort
-
-        if (Object.keys(payload).length > 0) {
-          savePreferencesMutation.mutate(payload)
-        }
-      }
-
-      return next
-    })
+    }
   }
 
   const setLocale = (value: AppLocale) => {
@@ -167,10 +201,11 @@ export default function PreferencesProvider({
   return (
     <PreferencesContext.Provider
       value={{
-        ...preferences,
+        ...resolvedPreferences,
         locale,
         setShowCardTags: (value) => updatePreferences({ showCardTags: value }),
         setDefaultSort: (value) => updatePreferences({ defaultSort: value }),
+        setTheme: (value) => updatePreferences({ theme: value }),
         setLocale,
       }}
     >

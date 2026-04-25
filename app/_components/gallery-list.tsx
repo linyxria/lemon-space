@@ -74,7 +74,7 @@ export function GalleryList({
     if (tag || q)
       return (
         <div className="py-20 text-center">
-          <p className="font-medium text-zinc-400">{t('noResult')}</p>
+          <p className="text-muted-foreground font-medium">{t('noResult')}</p>
           <Link
             href="/"
             className="text-primary mt-2 inline-block text-sm font-bold hover:underline"
@@ -114,7 +114,7 @@ export function GalleryList({
 
       <div ref={loadMoreRef} className="flex justify-center py-4">
         {isFetchingNextPage ? (
-          <div className="flex items-center gap-2 text-sm font-medium text-zinc-500">
+          <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
             <LoaderCircle className="size-4 animate-spin" />
             {t('loadingMore')}
           </div>
@@ -123,7 +123,9 @@ export function GalleryList({
             {t('loadMore')}
           </Button>
         ) : (
-          <p className="text-sm font-medium text-zinc-400">{t('noMore')}</p>
+          <p className="text-muted-foreground text-sm font-medium">
+            {t('noMore')}
+          </p>
         )}
       </div>
     </div>

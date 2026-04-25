@@ -33,7 +33,7 @@ function TabEmptyWithLink({
       <EmptyHeader>
         <EmptyMedia
           variant="icon"
-          className="text-primary border-border flex h-14 w-14 items-center justify-center rounded-2xl border bg-white shadow-sm"
+          className="text-primary border-border bg-card flex h-14 w-14 items-center justify-center rounded-2xl border shadow-sm"
         >
           <Sparkles size={28} strokeWidth={1.5} />
         </EmptyMedia>
@@ -56,7 +56,7 @@ function TabEmptyWithLink({
 }
 
 function Fallback({ text }: { text: string }) {
-  return <div className="py-20 text-center text-zinc-400">{text}</div>
+  return <div className="text-muted-foreground py-20 text-center">{text}</div>
 }
 
 function Upload() {
@@ -120,7 +120,7 @@ export function ProfileTabs({
 
   return (
     <Tabs defaultValue={defaultTab} className="w-full">
-      <TabsList className="mb-4 rounded-xl bg-zinc-100 p-1">
+      <TabsList className="mb-4 rounded-xl">
         <TabsTrigger
           value="my"
           className="flex items-center gap-2 rounded-lg px-6"

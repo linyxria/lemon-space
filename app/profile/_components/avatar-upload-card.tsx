@@ -58,9 +58,9 @@ export default function AvatarUploadCard() {
   }
 
   return (
-    <section className="relative mb-6 overflow-hidden rounded-[28px] border border-zinc-200/80 bg-linear-to-br from-white via-white to-amber-50/60 shadow-sm md:mb-8">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-linear-to-b from-amber-100/70 via-lime-50/35 to-transparent md:hidden" />
-      <div className="pointer-events-none absolute top-5 left-1/2 size-36 -translate-x-1/2 rounded-full bg-white/70 blur-2xl md:hidden" />
+    <section className="from-card via-card to-primary/10 relative mb-6 overflow-hidden rounded-[28px] border bg-linear-to-br shadow-sm md:mb-8">
+      <div className="from-primary/20 via-primary/10 pointer-events-none absolute inset-x-0 top-0 h-36 bg-linear-to-b to-transparent md:hidden" />
+      <div className="bg-primary/10 pointer-events-none absolute top-5 left-1/2 size-36 -translate-x-1/2 rounded-full blur-2xl md:hidden" />
       <input
         ref={inputRef}
         type="file"
@@ -73,7 +73,7 @@ export default function AvatarUploadCard() {
       <div className="relative flex flex-col gap-6 p-5 sm:p-6 md:flex-row md:items-center md:justify-between md:gap-8 md:p-8">
         <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left md:gap-6">
           <div className="relative flex flex-col items-center md:items-start">
-            <div className="absolute inset-4 rounded-full bg-amber-100/45 blur-2xl md:hidden" />
+            <div className="bg-primary/15 absolute inset-4 rounded-full blur-2xl md:hidden" />
             <div className="relative flex items-center justify-center">
               <UserAvatar
                 name={data.name}
@@ -85,7 +85,7 @@ export default function AvatarUploadCard() {
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
               size="sm"
-              className="mt-3 inline-flex rounded-full border border-white/80 bg-white/92 px-4 text-zinc-900 shadow-lg shadow-zinc-900/10 backdrop-blur sm:hidden"
+              className="bg-background text-foreground mt-3 inline-flex rounded-full border px-4 shadow-lg shadow-foreground/10 backdrop-blur sm:hidden"
             >
               {uploading ? (
                 <>
@@ -102,25 +102,25 @@ export default function AvatarUploadCard() {
           </div>
 
           <div className="flex min-w-0 flex-col items-center text-center sm:items-start sm:text-left">
-            <span className="mb-2 rounded-full bg-white/80 px-3 py-1 text-[11px] font-medium tracking-[0.14em] text-zinc-500 uppercase shadow-sm md:hidden">
+            <span className="bg-background/80 text-muted-foreground mb-2 rounded-full px-3 py-1 text-[11px] font-medium tracking-[0.14em] uppercase shadow-sm md:hidden">
               {t('badge')}
             </span>
-            <p className="text-xl font-black tracking-tight text-zinc-900 sm:text-2xl">
+            <p className="text-foreground text-xl font-black tracking-tight sm:text-2xl">
               {data.name}
             </p>
-            <p className="mt-1 max-w-60 truncate text-sm text-zinc-500 sm:max-w-70 md:max-w-none">
+            <p className="text-muted-foreground mt-1 max-w-60 truncate text-sm sm:max-w-70 md:max-w-none">
               {data.email}
             </p>
-            <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-600">
+            <p className="text-muted-foreground mt-2 max-w-sm text-sm leading-6">
               {t('description')}
             </p>
-            <p className="mt-3 text-xs text-zinc-500 sm:hidden">
+            <p className="text-muted-foreground mt-3 text-xs sm:hidden">
               {t('formats')}
             </p>
           </div>
         </div>
 
-        <div className="hidden w-full flex-col gap-3 border-t border-zinc-200/70 pt-4 sm:pt-5 md:flex md:w-auto md:items-end md:border-t-0 md:pt-0">
+        <div className="hidden w-full flex-col gap-3 border-t pt-4 sm:pt-5 md:flex md:w-auto md:items-end md:border-t-0 md:pt-0">
           <Button
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
@@ -138,7 +138,7 @@ export default function AvatarUploadCard() {
               </>
             )}
           </Button>
-          <p className="text-xs text-zinc-500">{t('formats')}</p>
+          <p className="text-muted-foreground text-xs">{t('formats')}</p>
         </div>
       </div>
     </section>

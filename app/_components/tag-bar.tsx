@@ -70,22 +70,22 @@ export function TagBar({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 rounded-[28px] border border-zinc-200/70 bg-linear-to-br from-white via-zinc-50 to-lime-50/60 p-4 shadow-[0_18px_40px_-26px_rgba(24,24,27,0.2)] sm:p-5">
+      <div className="from-card via-card to-primary/10 flex flex-col gap-3 rounded-[28px] border bg-linear-to-br p-4 shadow-[0_18px_40px_-26px_rgba(24,24,27,0.2)] sm:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <form onSubmit={handleSearchSubmit} className="flex flex-1 gap-2">
             <div className="relative flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
+              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
               <Input
                 value={inputValue}
                 onChange={(event) => setInputValue(event.target.value)}
                 placeholder={t('searchPlaceholder')}
-                className="h-10 rounded-2xl border-zinc-200 bg-white pr-9 pl-9"
+                className="bg-background h-10 rounded-2xl pr-9 pl-9"
               />
               {inputValue ? (
                 <button
                   type="button"
                   onClick={() => setInputValue('')}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-zinc-400 transition hover:text-zinc-700"
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition"
                   aria-label={t('clearSearch')}
                 >
                   <X className="size-4" />
@@ -98,7 +98,7 @@ export function TagBar({
           </form>
 
           <div className="flex items-center gap-2">
-            <ArrowUpWideNarrow className="size-4 text-zinc-400" />
+            <ArrowUpWideNarrow className="text-muted-foreground size-4" />
             <div className="flex flex-wrap items-center gap-2">
               {sortOptions.map((option) => (
                 <Badge
@@ -159,7 +159,7 @@ export function TagBar({
                 'rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm',
                 !selected
                   ? 'bg-primary/10 text-primary'
-                  : 'bg-transparent text-zinc-400 hover:bg-zinc-100/50 hover:text-zinc-600',
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent',
               )}
             >
               {t('allCategories')}
@@ -174,7 +174,7 @@ export function TagBar({
                     'rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm',
                     isActive
                       ? 'bg-primary/10 text-primary'
-                      : 'bg-transparent text-zinc-400 hover:bg-zinc-100/50 hover:text-zinc-600',
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent',
                   )}
                 >
                   {tag.name}

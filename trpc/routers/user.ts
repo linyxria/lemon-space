@@ -11,12 +11,14 @@ const preferenceInputSchema = z.object({
   locale: z.enum(['zh-CN', 'en-US']).optional(),
   showCardTags: z.boolean().optional(),
   defaultSort: z.enum(['latest', 'popular']).optional(),
+  theme: z.enum(['light', 'dark', 'system']).optional(),
 })
 
 const defaultPreferences = {
   locale: 'zh-CN' as const,
   showCardTags: true,
   defaultSort: 'latest' as const,
+  theme: 'system' as const,
 }
 
 export const userRouter = router({
@@ -118,6 +120,7 @@ export const userRouter = router({
         locale: userPreference.locale,
         showCardTags: userPreference.showCardTags,
         defaultSort: userPreference.defaultSort,
+        theme: userPreference.theme,
       })
       .from(userPreference)
       .where(eq(userPreference.userId, ctx.user.id))
@@ -135,6 +138,12 @@ export const userRouter = router({
         preferences.defaultSort === 'popular'
           ? 'popular'
           : defaultPreferences.defaultSort,
+      theme:
+        preferences.theme === 'light' ||
+        preferences.theme === 'dark' ||
+        preferences.theme === 'system'
+          ? preferences.theme
+          : defaultPreferences.theme,
     }
   }),
   updatePreferences: protectedProcedure
@@ -149,6 +158,7 @@ export const userRouter = router({
           locale: userPreference.locale,
           showCardTags: userPreference.showCardTags,
           defaultSort: userPreference.defaultSort,
+          theme: userPreference.theme,
         })
         .from(userPreference)
         .where(eq(userPreference.userId, ctx.user.id))
@@ -168,6 +178,13 @@ export const userRouter = router({
           (existingPreferences?.defaultSort === 'popular'
             ? 'popular'
             : defaultPreferences.defaultSort),
+        theme:
+          input.theme ??
+          (existingPreferences?.theme === 'light' ||
+          existingPreferences?.theme === 'dark' ||
+          existingPreferences?.theme === 'system'
+            ? existingPreferences.theme
+            : defaultPreferences.theme),
       } as const
 
       const [upsertedPreferences] = await ctx.db
@@ -187,6 +204,7 @@ export const userRouter = router({
           locale: userPreference.locale,
           showCardTags: userPreference.showCardTags,
           defaultSort: userPreference.defaultSort,
+          theme: userPreference.theme,
         })
 
       return {
@@ -200,6 +218,12 @@ export const userRouter = router({
           upsertedPreferences.defaultSort === 'popular'
             ? 'popular'
             : defaultPreferences.defaultSort,
+        theme:
+          upsertedPreferences.theme === 'light' ||
+          upsertedPreferences.theme === 'dark' ||
+          upsertedPreferences.theme === 'system'
+            ? upsertedPreferences.theme
+            : defaultPreferences.theme,
       }
     }),
 })

@@ -95,16 +95,16 @@ export default function AuthCard({
   }
 
   return (
-    <Card className="mx-auto w-full max-w-sm gap-8 rounded-[30px] border border-white/70 bg-white/90 shadow-[0_28px_70px_-40px_rgba(24,24,27,0.45)] backdrop-blur md:max-w-md">
+    <Card className="bg-card/90 mx-auto w-full max-w-sm gap-8 rounded-[30px] shadow-[0_28px_70px_-40px_rgba(24,24,27,0.45)] backdrop-blur md:max-w-md">
       <CardHeader>
-        <div className="mx-auto inline-flex items-center gap-1 rounded-full border border-lime-200 bg-lime-50 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-lime-800 uppercase">
+        <div className="border-primary/25 bg-primary/10 text-primary mx-auto inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.16em] uppercase">
           <Sparkles className="size-3.5" />
           {t('brand')}
         </div>
-        <CardTitle className="text-center text-2xl font-black tracking-tight text-zinc-900">
+        <CardTitle className="text-center text-2xl font-black tracking-tight">
           {title}
         </CardTitle>
-        <CardDescription className="text-center text-sm text-zinc-500">
+        <CardDescription className="text-center text-sm">
           {description}
         </CardDescription>
       </CardHeader>

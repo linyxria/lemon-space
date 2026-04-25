@@ -9,7 +9,9 @@ import {
   Languages,
   LayoutGrid,
   LogOut,
+  Moon,
   SlidersHorizontal,
+  Sun,
   UploadCloud,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -57,7 +59,8 @@ export default function UserNavClient() {
   const t = useTranslations('UserNav')
   const tCommon = useTranslations('Common')
   const locale = useLocale()
-  const { setLocale, showCardTags, setShowCardTags } = usePreferences()
+  const { setLocale, setShowCardTags, setTheme, showCardTags, theme } =
+    usePreferences()
 
   const handleSignOut = async () => {
     setIsSigningOut(true)
@@ -98,7 +101,7 @@ export default function UserNavClient() {
               <p className="text-muted-foreground text-xs font-normal">
                 {data.email}
               </p>
-              <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-zinc-500">
+              <div className="text-muted-foreground mt-2 flex items-center gap-2 text-[11px] font-semibold">
                 <span>
                   {stats?.myCount ?? 0} {t('uploads')}
                 </span>
@@ -157,6 +160,33 @@ export default function UserNavClient() {
               onCheckedChange={(checked) => setShowCardTags(Boolean(checked))}
             >
               {t('showCardTags')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="flex items-center gap-2">
+              {theme === 'dark' ? (
+                <Moon className="size-4" />
+              ) : (
+                <Sun className="size-4" />
+              )}
+              {t('appearance')}
+            </DropdownMenuLabel>
+            <DropdownMenuCheckboxItem
+              checked={theme === 'system'}
+              onCheckedChange={() => setTheme('system')}
+            >
+              {tCommon('themeSystem')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={theme === 'light'}
+              onCheckedChange={() => setTheme('light')}
+            >
+              {tCommon('themeLight')}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={theme === 'dark'}
+              onCheckedChange={() => setTheme('dark')}
+            >
+              {tCommon('themeDark')}
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">

@@ -10,6 +10,7 @@ import { Toaster } from 'sonner'
 
 import GalleryProvider from '@/components/gallery-provider'
 import PreferencesProvider from '@/components/preferences-provider'
+import { ThemeProvider } from '@/components/theme-provider'
 import { TRPCReactProvider } from '@/trpc/client'
 
 import Header from './_components/header'
@@ -41,23 +42,31 @@ export default async function RootLayout({
     <html
       lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        <TRPCReactProvider>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <ProgressProvider>
-              <PreferencesProvider>
-                <GalleryProvider>
-                  <Header />
-                  <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 md:px-5 md:py-8">
-                    {children}
-                  </main>
-                  <Toaster />
-                </GalleryProvider>
-              </PreferencesProvider>
-            </ProgressProvider>
-          </NextIntlClientProvider>
-        </TRPCReactProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TRPCReactProvider>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <ProgressProvider>
+                <PreferencesProvider>
+                  <GalleryProvider>
+                    <Header />
+                    <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 md:px-5 md:py-8">
+                      {children}
+                    </main>
+                    <Toaster />
+                  </GalleryProvider>
+                </PreferencesProvider>
+              </ProgressProvider>
+            </NextIntlClientProvider>
+          </TRPCReactProvider>
+        </ThemeProvider>
         <Analytics />
         <SpeedInsights />
       </body>

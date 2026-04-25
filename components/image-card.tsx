@@ -176,7 +176,7 @@ export default function ImageCard({
   const likeButtonClassName = `ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
     optimisticLike.isLiked
       ? 'bg-primary/10 text-primary'
-      : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'
+      : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
   } `
 
   const iconButtonClassName = `rounded-full bg-black/20 p-2 backdrop-blur-md transition-all active:scale-90 ${
@@ -200,10 +200,10 @@ export default function ImageCard({
   )
 
   return (
-    <div className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-zinc-200 transition-all hover:shadow-lg hover:ring-zinc-300">
+    <div className="bg-card group relative overflow-hidden rounded-lg shadow-sm ring-1 ring-border transition-all hover:shadow-lg hover:ring-ring/40">
       {/* 图片区域容器 */}
       <div
-        className="relative cursor-zoom-in overflow-hidden bg-zinc-50"
+        className="bg-muted relative cursor-zoom-in overflow-hidden"
         onClick={() =>
           gallery.openAsset({ id, title, url, width, height, tags })
         }
@@ -238,7 +238,7 @@ export default function ImageCard({
         </div>
       </div>
       {/* 2. 底部作者栏 */}
-      <div className="border-t border-zinc-100/50 bg-white px-3.5 py-2.5">
+      <div className="bg-card border-t px-3.5 py-2.5">
         {showCardTags && tags && tags.length > 0 ? (
           <div className="mb-2 flex flex-wrap items-center gap-1.5">
             {tags.slice(0, 2).map((tag) => (
@@ -262,7 +262,7 @@ export default function ImageCard({
           {user ? (
             <div className="flex items-center gap-2 overflow-hidden">
               <UserAvatar size="sm" name={user.name} image={user.image} />
-              <span className="truncate text-[12px] font-bold text-zinc-900">
+              <span className="text-card-foreground truncate text-[12px] font-bold">
                 {user.name}
               </span>
             </div>

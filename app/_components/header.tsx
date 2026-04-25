@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
+import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/auth'
 import { HydrateClient, prefetch, trpc } from '@/trpc/server'
@@ -19,14 +20,14 @@ export default async function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-20 w-full border-b border-zinc-100 bg-white/80 backdrop-blur-md">
+    <header className="bg-background/80 sticky top-0 z-20 w-full border-b backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* 左侧：Logo - 确保不缩水 */}
         <Link
           href="/"
-          className="group flex shrink-0 items-center gap-1.5 text-lg font-black tracking-tighter text-zinc-900 sm:gap-2 sm:text-xl"
+          className="text-foreground group flex shrink-0 items-center gap-1.5 text-lg font-black tracking-tighter sm:gap-2 sm:text-xl"
         >
-          <div className="group-hover:bg-primary rounded-xl bg-zinc-900 p-1.5 text-white shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:text-zinc-900">
+          <div className="bg-foreground text-background group-hover:bg-primary group-hover:text-primary-foreground rounded-xl p-1.5 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
             <Citrus size={18} className="sm:h-5 sm:w-5" strokeWidth={2.5} />
           </div>
           <span className="flex items-baseline gap-0.5 select-none sm:gap-1">
@@ -36,15 +37,18 @@ export default async function Header() {
             </span>
           </span>
         </Link>
-        {session ? (
-          <HydrateClient>
-            <UserNav />
-          </HydrateClient>
-        ) : (
-          <Button nativeButton={false} render={<Link href="/sign-in" />}>
-            {t('signIn')}
-          </Button>
-        )}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <ThemeToggle label={t('themeToggle')} />
+          {session ? (
+            <HydrateClient>
+              <UserNav />
+            </HydrateClient>
+          ) : (
+            <Button nativeButton={false} render={<Link href="/sign-in" />}>
+              {t('signIn')}
+            </Button>
+          )}
+        </div>
       </div>
     </header>
   )

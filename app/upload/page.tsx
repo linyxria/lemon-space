@@ -156,8 +156,8 @@ export default function UploadPage() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-[30px] border border-zinc-200/80 bg-linear-to-r from-zinc-950 via-zinc-900 to-lime-950/90 px-5 py-5 text-white shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:px-6 sm:py-6">
-        <p className="text-[11px] font-semibold tracking-[0.28em] text-lime-200/80 uppercase">
+      <section className="from-hero via-hero to-primary/35 text-hero-foreground rounded-[30px] border bg-linear-to-r px-5 py-5 shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:px-6 sm:py-6">
+        <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
           {t('heroBadge')}
         </p>
         <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
@@ -165,7 +165,7 @@ export default function UploadPage() {
             <h1 className="text-3xl font-black tracking-[-0.04em] sm:text-4xl">
               {t('title')}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm text-zinc-300">
+            <p className="text-hero-muted mt-2 max-w-3xl text-sm">
               {t('description')}
             </p>
           </div>
@@ -181,7 +181,7 @@ export default function UploadPage() {
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-        <Card className="relative w-full rounded-[28px] border-zinc-200/80 shadow-[0_24px_60px_-38px_rgba(24,24,27,0.35)]">
+        <Card className="relative w-full rounded-[28px] shadow-[0_24px_60px_-38px_rgba(24,24,27,0.35)]">
           <CardHeader>
             <CardTitle>{t('cardTitle')}</CardTitle>
             <CardDescription>{t('cardDescription')}</CardDescription>
@@ -231,7 +231,7 @@ export default function UploadPage() {
             />
 
             {selectionMessage ? (
-              <p className="text-xs font-medium text-zinc-500">
+              <p className="text-muted-foreground text-xs font-medium">
                 {selectionMessage}
               </p>
             ) : null}
@@ -296,24 +296,24 @@ export default function UploadPage() {
           </CardFooter>
         </Card>
 
-        <Card className="rounded-[28px] border-zinc-200/80 bg-linear-to-b from-white to-lime-50/50 shadow-[0_20px_55px_-38px_rgba(24,24,27,0.35)]">
+        <Card className="from-card to-primary/10 rounded-[28px] bg-linear-to-b shadow-[0_20px_55px_-38px_rgba(24,24,27,0.35)]">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-zinc-900">
-              <Sparkles className="size-4 text-lime-600" />
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="text-primary size-4" />
               {t('tipsTitle')}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-zinc-600">
+          <CardContent className="text-muted-foreground space-y-3 text-sm">
             <p className="flex items-start gap-2">
-              <Check className="mt-0.5 size-4 text-lime-600" />
+              <Check className="text-primary mt-0.5 size-4" />
               {t('tip1')}
             </p>
             <p className="flex items-start gap-2">
-              <Check className="mt-0.5 size-4 text-lime-600" />
+              <Check className="text-primary mt-0.5 size-4" />
               {t('tip2')}
             </p>
             <p className="flex items-start gap-2">
-              <Check className="mt-0.5 size-4 text-lime-600" />
+              <Check className="text-primary mt-0.5 size-4" />
               {t('tip3')}
             </p>
           </CardContent>

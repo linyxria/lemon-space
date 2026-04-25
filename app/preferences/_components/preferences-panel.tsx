@@ -1,6 +1,14 @@
 'use client'
 
-import { CheckCheck, Languages, Tags, TrendingUp } from 'lucide-react'
+import {
+  CheckCheck,
+  Languages,
+  Monitor,
+  Moon,
+  Sun,
+  Tags,
+  TrendingUp,
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { usePreferences } from '@/components/preferences-provider'
@@ -17,31 +25,33 @@ export function PreferencesPanel() {
     setDefaultSort,
     setLocale,
     setShowCardTags,
+    setTheme,
     showCardTags,
+    theme,
   } = usePreferences()
 
   return (
     <div className="space-y-5">
-      <section className="rounded-[28px] border border-zinc-200/70 bg-linear-to-r from-zinc-950 via-zinc-900 to-lime-950/90 px-6 py-6 text-white">
-        <p className="text-[11px] font-semibold tracking-[0.28em] text-lime-200/80 uppercase">
+      <section className="bg-linear-to-r from-hero via-hero to-primary/35 text-hero-foreground rounded-[28px] border px-6 py-6">
+        <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
           {t('title')}
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
           {t('title')}
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-zinc-300">
+        <p className="text-hero-muted mt-2 max-w-2xl text-sm">
           {t('description')}
         </p>
       </section>
 
       <div className="grid gap-4">
-        <Card className="rounded-3xl border-zinc-200/80 bg-white">
+        <Card className="rounded-3xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-zinc-900">
+            <CardTitle className="flex items-center gap-2">
               <Languages className="size-4" />
               {t('languageTitle')}
             </CardTitle>
-            <p className="text-sm text-zinc-500">{t('languageDesc')}</p>
+            <p className="text-muted-foreground text-sm">{t('languageDesc')}</p>
           </CardHeader>
           <CardContent className="flex flex-wrap items-center gap-2">
             <Button
@@ -59,13 +69,48 @@ export function PreferencesPanel() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl border-zinc-200/80 bg-white">
+        <Card className="rounded-3xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-zinc-900">
+            <CardTitle className="flex items-center gap-2">
+              <Moon className="size-4" />
+              {t('themeTitle')}
+            </CardTitle>
+            <p className="text-muted-foreground text-sm">{t('themeDesc')}</p>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-2">
+            <Button
+              variant={theme === 'system' ? 'default' : 'outline'}
+              onClick={() => setTheme('system')}
+            >
+              <Monitor className="size-4" />
+              {tCommon('themeSystem')}
+            </Button>
+            <Button
+              variant={theme === 'light' ? 'default' : 'outline'}
+              onClick={() => setTheme('light')}
+            >
+              <Sun className="size-4" />
+              {tCommon('themeLight')}
+            </Button>
+            <Button
+              variant={theme === 'dark' ? 'default' : 'outline'}
+              onClick={() => setTheme('dark')}
+            >
+              <Moon className="size-4" />
+              {tCommon('themeDark')}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-3xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               <Tags className="size-4" />
               {t('showTagsTitle')}
             </CardTitle>
-            <p className="text-sm text-zinc-500">{t('showTagsDesc')}</p>
+            <p className="text-muted-foreground text-sm">
+              {t('showTagsDesc')}
+            </p>
           </CardHeader>
           <CardContent className="flex items-center gap-2">
             <Button
@@ -83,13 +128,13 @@ export function PreferencesPanel() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl border-zinc-200/80 bg-white">
+        <Card className="rounded-3xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-zinc-900">
+            <CardTitle className="flex items-center gap-2">
               <TrendingUp className="size-4" />
               {t('sortTitle')}
             </CardTitle>
-            <p className="text-sm text-zinc-500">{t('sortDesc')}</p>
+            <p className="text-muted-foreground text-sm">{t('sortDesc')}</p>
           </CardHeader>
           <CardContent className="flex flex-wrap items-center gap-2">
             <Button

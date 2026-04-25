@@ -84,6 +84,7 @@ export const userPreference = pgTable(
     locale: text('locale').notNull().default('zh-CN'),
     showCardTags: boolean('show_card_tags').notNull().default(true),
     defaultSort: text('default_sort').notNull().default('latest'),
+    theme: text('theme').notNull().default('system'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()

@@ -112,12 +112,14 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
         </Button>
       </div>
 
-      <section className="rounded-[28px] border border-zinc-200/80 bg-white p-5 shadow-sm">
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900">
+      <section className="bg-card rounded-[28px] border p-5 shadow-sm">
+        <h1 className="text-foreground text-3xl font-black tracking-tight">
           {data.name}
         </h1>
         {data.description ? (
-          <p className="mt-2 text-sm text-zinc-500">{data.description}</p>
+          <p className="text-muted-foreground mt-2 text-sm">
+            {data.description}
+          </p>
         ) : null}
 
         <CollectionEditor
@@ -163,7 +165,7 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
           )}
         />
       ) : (
-        <p className="rounded-3xl border border-dashed border-zinc-300 bg-zinc-50 p-6 text-sm text-zinc-500">
+        <p className="bg-muted/50 text-muted-foreground rounded-3xl border border-dashed p-6 text-sm">
           {t('empty')}
         </p>
       )}

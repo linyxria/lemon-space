@@ -105,11 +105,11 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
       {/* 1. 背景 */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-white/70 antialiased backdrop-blur-3xl"
+        className="bg-background/75 absolute inset-0 antialiased backdrop-blur-3xl"
       />
 
       {/* 2. 弹窗主体 */}
-      <div className="relative z-10 h-[calc(100dvh-1.5rem)] w-full max-w-[1380px] overflow-hidden rounded-3xl bg-white shadow-[0_32px_64px_-24px_rgba(0,0,0,0.3)] sm:h-[calc(100dvh-3rem)] md:max-h-[92vh]">
+      <div className="bg-card relative z-10 h-[calc(100dvh-1.5rem)] w-full max-w-[1380px] overflow-hidden rounded-3xl shadow-[0_32px_64px_-24px_rgba(0,0,0,0.3)] sm:h-[calc(100dvh-3rem)] md:max-h-[92vh]">
         {/* 3. 关闭按钮 */}
         <button
           onClick={onClose}
@@ -120,7 +120,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
 
         <div className="grid h-full grid-rows-[auto_1fr] md:grid-cols-[minmax(0,1.25fr)_minmax(22rem,0.75fr)] md:grid-rows-1">
           {/* 4. 图片展示区：桌面双栏左侧主视觉 */}
-          <div className="relative h-[40dvh] min-h-[15rem] overflow-hidden bg-zinc-950 md:h-full md:min-h-0">
+          <div className="bg-hero relative h-[40dvh] min-h-[15rem] overflow-hidden md:h-full md:min-h-0">
             {/* 底层氛围模糊图 */}
             <Image
               src={asset.url}
@@ -146,10 +146,10 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
           </div>
 
           {/* 5. 右侧信息栏 */}
-          <div className="relative min-h-0 overflow-y-auto border-t border-zinc-100 bg-white p-4 pb-20 md:border-t-0 md:border-l md:border-zinc-100 md:p-6 md:pb-8">
+          <div className="bg-card relative min-h-0 overflow-y-auto border-t p-4 pb-20 md:border-t-0 md:border-l md:p-6 md:pb-8">
             <div className="flex flex-col gap-6">
               <div className="space-y-1.5">
-                <h3 className="max-w-70 truncate text-xl leading-tight font-black tracking-tight text-zinc-900 sm:max-w-md md:text-2xl">
+                <h3 className="text-card-foreground max-w-70 truncate text-xl leading-tight font-black tracking-tight sm:max-w-md md:text-2xl">
                   {asset.title}
                 </h3>
                 {asset.tags && asset.tags.length > 0 ? (
@@ -165,7 +165,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                     ))}
                   </div>
                 ) : null}
-                <div className="flex items-center gap-2 font-mono text-[9px] font-bold tracking-widest text-zinc-400 uppercase">
+                <div className="text-muted-foreground flex items-center gap-2 font-mono text-[9px] font-bold tracking-widest uppercase">
                   <span>ID: {asset.id.slice(-8)}</span>
                 </div>
               </div>
@@ -205,8 +205,8 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
               </div>
 
               {session?.user ? (
-                <div className="rounded-2xl border border-zinc-200/70 bg-zinc-50/60 p-3">
-                  <p className="mb-2 text-xs font-bold tracking-[0.12em] text-zinc-500 uppercase">
+                <div className="bg-muted/60 rounded-2xl border p-3">
+                  <p className="text-muted-foreground mb-2 text-xs font-bold tracking-[0.12em] uppercase">
                     {t('saveToCollection')}
                   </p>
                   {collectionsForAsset && collectionsForAsset.length > 0 ? (
@@ -228,7 +228,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <p className="text-sm text-zinc-500">
+                      <p className="text-muted-foreground text-sm">
                         {t('noCollectionYet')}
                       </p>
                       <Button
@@ -247,10 +247,10 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
               {relatedAssets && relatedAssets.length > 0 ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-black tracking-[0.12em] text-zinc-500 uppercase">
+                    <h4 className="text-muted-foreground text-sm font-black tracking-[0.12em] uppercase">
                       {t('continueExploring')}
                     </h4>
-                    <span className="text-xs font-medium text-zinc-400">
+                    <span className="text-muted-foreground text-xs font-medium">
                       {t('sameTagRelated')}
                     </span>
                   </div>
@@ -271,7 +271,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                         }
                         className="group text-left"
                       >
-                        <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-zinc-100">
+                        <div className="bg-muted relative aspect-[4/5] overflow-hidden rounded-2xl">
                           <Image
                             src={item.url}
                             alt={item.title}
@@ -280,7 +280,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                             sizes="(max-width: 768px) 42vw, (max-width: 1024px) 24vw, 16vw"
                           />
                         </div>
-                        <p className="mt-2 truncate text-xs font-semibold text-zinc-700">
+                        <p className="text-card-foreground mt-2 truncate text-xs font-semibold">
                           {item.title}
                         </p>
                       </button>

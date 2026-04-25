@@ -58,7 +58,7 @@ export default function PreviewList({
               {!uploading && (
                 <Button
                   size="icon-xs"
-                  className="hover:bg-destructive absolute top-1 right-1 z-10 rounded-full bg-zinc-800/80 text-white opacity-0 transition group-hover:opacity-100"
+                  className="hover:bg-destructive bg-foreground/80 text-background absolute top-1 right-1 z-10 rounded-full opacity-0 transition group-hover:opacity-100"
                   onClick={() => onRemove(file.id)}
                   aria-label={t('remove')}
                   title={t('remove')}

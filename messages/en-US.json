@@ -8,10 +8,14 @@
     "off": "Off",
     "loading": "Loading...",
     "localeZh": "Simplified Chinese",
-    "localeEn": "English"
+    "localeEn": "English",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   },
   "Header": {
-    "signIn": "Sign In"
+    "signIn": "Sign In",
+    "themeToggle": "Toggle appearance"
   },
   "UserNav": {
     "upload": "Upload",
@@ -21,6 +25,7 @@
     "preferences": "Preferences",
     "hotIdeas": "Trending",
     "showCardTags": "Show card tags",
+    "appearance": "Appearance",
     "language": "Language",
     "signOut": "Sign out",
     "uploads": "uploads",
@@ -117,6 +122,8 @@
     "description": "Manage your core settings in one place and sync across devices.",
     "languageTitle": "Interface language",
     "languageDesc": "Apply to navigation, filters and key feature pages.",
+    "themeTitle": "Dark mode",
+    "themeDesc": "Choose light, dark, or follow your system setting.",
     "showTagsTitle": "Show tags on cards",
     "showTagsDesc": "Display or hide tags in masonry cards.",
     "sortTitle": "Default sort",

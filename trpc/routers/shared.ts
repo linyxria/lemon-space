@@ -22,7 +22,9 @@ export function mapObjectKeyToUrl<T extends { objectKey: string }>(value: T) {
   }
 }
 
-export function mapUserImageToUrl<T extends { image: string | null }>(value: T) {
+export function mapUserImageToUrl<T extends { image?: string | null }>(
+  value: T,
+) {
   const { image, ...rest } = value
   return {
     ...rest,
