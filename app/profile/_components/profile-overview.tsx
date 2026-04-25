@@ -57,7 +57,7 @@ export function ProfileOverview() {
             <p className="mt-2 text-3xl font-black">{dashboard.myCount}</p>
           </div>
           <div className="bg-primary/15 text-primary rounded-2xl px-4 py-4">
-            <p className="text-[11px] tracking-[0.2em] opacity-70 uppercase">
+            <p className="text-[11px] tracking-[0.2em] uppercase opacity-70">
               {t('likesLabel')}
             </p>
             <p className="mt-2 text-3xl font-black">

@@ -85,7 +85,7 @@ export default function AvatarUploadCard() {
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
               size="sm"
-              className="bg-background text-foreground mt-3 inline-flex rounded-full border px-4 shadow-lg shadow-foreground/10 backdrop-blur sm:hidden"
+              className="bg-background text-foreground shadow-foreground/10 mt-3 inline-flex rounded-full border px-4 shadow-lg backdrop-blur sm:hidden"
             >
               {uploading ? (
                 <>

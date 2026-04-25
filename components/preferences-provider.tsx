@@ -9,10 +9,7 @@ import { authClient } from '@/lib/auth-client'
 import { type AppLocale, LOCALE_COOKIE_KEY } from '@/lib/i18n'
 import { useTRPC } from '@/trpc/client'
 
-import {
-  type ThemePreference,
-  useTheme,
-} from './theme-provider'
+import { type ThemePreference, useTheme } from './theme-provider'
 
 type SortPreference = 'latest' | 'popular'
 

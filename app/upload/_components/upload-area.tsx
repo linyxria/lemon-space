@@ -24,7 +24,7 @@ export default function UploadArea({
   return (
     <div
       {...getRootProps()}
-      className={`group rounded-3xl border border-dashed px-6 py-12 transition sm:px-8 ${isDragActive ? 'border-primary bg-primary/10 shadow-inner shadow-primary/20' : 'border-border bg-muted/50 hover:bg-muted'}`}
+      className={`group rounded-3xl border border-dashed px-6 py-12 transition sm:px-8 ${isDragActive ? 'border-primary bg-primary/10 shadow-primary/20 shadow-inner' : 'border-border bg-muted/50 hover:bg-muted'}`}
     >
       <input {...getInputProps()} />
       <div className="mx-auto flex max-w-xl flex-col items-center gap-4 text-center">

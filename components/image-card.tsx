@@ -200,7 +200,7 @@ export default function ImageCard({
   )
 
   return (
-    <div className="bg-card group relative overflow-hidden rounded-lg shadow-sm ring-1 ring-border transition-all hover:shadow-lg hover:ring-ring/40">
+    <div className="bg-card group ring-border hover:ring-ring/40 relative overflow-hidden rounded-lg shadow-sm ring-1 transition-all hover:shadow-lg">
       {/* 图片区域容器 */}
       <div
         className="bg-muted relative cursor-zoom-in overflow-hidden"

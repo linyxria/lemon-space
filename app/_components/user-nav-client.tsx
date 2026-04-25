@@ -78,7 +78,8 @@ export default function UserNavClient() {
     })
   }
 
-  if (sessionPending || !shouldFetchProtected || !data) return <UserNavSkeleton />
+  if (sessionPending || !shouldFetchProtected || !data)
+    return <UserNavSkeleton />
 
   return (
     <div className="flex items-center gap-2 sm:gap-4">

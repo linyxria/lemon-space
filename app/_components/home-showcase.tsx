@@ -19,7 +19,7 @@ export function HomeShowcase() {
 
   return (
     <section className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-      <div className="bg-linear-to-br from-hero via-hero to-primary/35 text-hero-foreground overflow-hidden rounded-[28px] border p-5 shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:p-6">
+      <div className="from-hero via-hero to-primary/35 text-hero-foreground overflow-hidden rounded-[28px] border bg-linear-to-br p-5 shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:p-6">
         <div className="text-primary flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] uppercase">
           <Sparkles size={16} />
           {t('featured')}

@@ -32,7 +32,7 @@ export function PreferencesPanel() {
 
   return (
     <div className="space-y-5">
-      <section className="bg-linear-to-r from-hero via-hero to-primary/35 text-hero-foreground rounded-[28px] border px-6 py-6">
+      <section className="from-hero via-hero to-primary/35 text-hero-foreground rounded-[28px] border bg-linear-to-r px-6 py-6">
         <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
           {t('title')}
         </p>
@@ -108,9 +108,7 @@ export function PreferencesPanel() {
               <Tags className="size-4" />
               {t('showTagsTitle')}
             </CardTitle>
-            <p className="text-muted-foreground text-sm">
-              {t('showTagsDesc')}
-            </p>
+            <p className="text-muted-foreground text-sm">{t('showTagsDesc')}</p>
           </CardHeader>
           <CardContent className="flex items-center gap-2">
             <Button

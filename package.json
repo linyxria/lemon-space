@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier . --write",
     "db:generate": "drizzle-kit generate",
     "db:push:dev": "NODE_ENV=development drizzle-kit push",
     "db:push:prod": "NODE_ENV=production drizzle-kit push",

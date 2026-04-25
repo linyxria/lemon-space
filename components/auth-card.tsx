@@ -95,7 +95,7 @@ export default function AuthCard({
   }
 
   return (
-    <Card className="bg-card/90 mx-auto w-full max-w-sm gap-8 rounded-[30px] shadow-[0_28px_70px_-40px_rgba(24,24,27,0.45)] backdrop-blur dark:border-white/10 dark:bg-card/95 dark:shadow-[0_28px_70px_-40px_rgba(0,0,0,0.9)] md:max-w-md">
+    <Card className="bg-card/90 dark:bg-card/95 mx-auto w-full max-w-sm gap-8 rounded-[30px] shadow-[0_28px_70px_-40px_rgba(24,24,27,0.45)] backdrop-blur md:max-w-md dark:border-white/10 dark:shadow-[0_28px_70px_-40px_rgba(0,0,0,0.9)]">
       <CardHeader>
         <div className="border-primary/25 bg-primary/10 text-primary mx-auto inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.16em] uppercase">
           <Sparkles className="size-3.5" />
