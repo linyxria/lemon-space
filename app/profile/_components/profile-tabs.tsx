@@ -77,7 +77,9 @@ function Upload() {
   return (
     <MasonryGrid
       items={data}
-      renderItem={(item, index) => <ImageCard {...item} priority={index < 6} />}
+      renderItem={(item, index) => (
+        <ImageCard {...item} loading={index < 2 ? 'eager' : 'lazy'} />
+      )}
     />
   )
 }
@@ -100,7 +102,9 @@ function Liked() {
   return (
     <MasonryGrid
       items={data}
-      renderItem={(item, index) => <ImageCard {...item} priority={index < 6} />}
+      renderItem={(item, index) => (
+        <ImageCard {...item} loading={index < 2 ? 'eager' : 'lazy'} />
+      )}
     />
   )
 }

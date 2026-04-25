@@ -84,7 +84,7 @@ function useAnimatedCount(value: number, duration = 180) {
 }
 
 export default function ImageCard({
-  priority,
+  loading = 'lazy',
   id,
   title,
   url,
@@ -95,7 +95,7 @@ export default function ImageCard({
   likeCount,
   likedByMe,
 }: {
-  priority: boolean
+  loading?: 'eager' | 'lazy'
   id: string
   title: string
   url: string
@@ -218,7 +218,8 @@ export default function ImageCard({
             alt={title}
             width={width}
             height={height}
-            priority={priority}
+            loading={loading}
+            fetchPriority={loading === 'eager' ? 'high' : undefined}
             className="block h-auto w-full object-cover"
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />

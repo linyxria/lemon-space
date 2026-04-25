@@ -4,9 +4,15 @@ import z from 'zod'
 
 import type { db } from '@/db'
 import { asset, assetTag, like, tag, user } from '@/db/schema'
-import { chineseSlugify, objectKey2Url } from '@/lib/utils'
+import { chineseSlugify } from '@/lib/utils'
 
 import { procedure, protectedProcedure, router } from '../init'
+import {
+  createDistinctLikeUserCountExpr,
+  createTagNamesAggExpr,
+  mapObjectKeyToUrl,
+  mapUserImageToUrl,
+} from './shared'
 
 const tagListSchema = z.array(z.string().trim().min(1))
 
@@ -117,10 +123,7 @@ export const assetRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const likeCountExpr =
-        sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
-          Number,
-        )
+      const likeCountExpr = createDistinctLikeUserCountExpr()
 
       const assets = await ctx.db
         .select({
@@ -143,10 +146,7 @@ export const assetRouter = router({
           likeCount: likeCountExpr,
 
           // 3. 标签数组 (将关联查询结果聚合成 JSON 数组)
-          tags: sql<string[]>`coalesce(
-        json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null), 
-        '[]'
-      )`.as('tags'),
+          tags: createTagNamesAggExpr(),
 
           // 4. 当前用户是否点赞
           ...(ctx.session
@@ -219,13 +219,9 @@ export const assetRouter = router({
       const slice = hasMore ? assets.slice(0, input.limit) : assets
 
       return {
-        items: slice.map(({ objectKey, user, ...asset }) => ({
-          ...asset,
-          url: objectKey2Url(objectKey),
-          user: {
-            ...user,
-            image: user.image ? objectKey2Url(user.image) : null,
-          },
+        items: slice.map((item) => ({
+          ...mapObjectKeyToUrl(item),
+          user: mapUserImageToUrl(item.user),
         })),
         nextCursor: hasMore ? input.cursor + input.limit : undefined,
       }
@@ -244,10 +240,7 @@ export const assetRouter = router({
         .where(eq(assetTag.assetId, input.assetId))
 
       const tagIds = relatedTagIds.map(({ tagId }) => tagId)
-      const likeCountExpr =
-        sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
-          Number,
-        )
+      const likeCountExpr = createDistinctLikeUserCountExpr()
 
       const relatedAssets = await ctx.db
         .select({
@@ -258,10 +251,7 @@ export const assetRouter = router({
           height: asset.height,
           createdAt: asset.createdAt,
           likeCount: likeCountExpr,
-          tags: sql<string[]>`coalesce(
-            json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null),
-            '[]'
-          )`.as('tags'),
+          tags: createTagNamesAggExpr(),
         })
         .from(asset)
         .leftJoin(like, eq(asset.id, like.assetId))
@@ -289,10 +279,7 @@ export const assetRouter = router({
         .orderBy(desc(likeCountExpr), desc(asset.createdAt))
         .limit(input.limit)
 
-      return relatedAssets.map(({ objectKey, ...item }) => ({
-        ...item,
-        url: objectKey2Url(objectKey),
-      }))
+      return relatedAssets.map((item) => mapObjectKeyToUrl(item))
     }),
   tags: procedure.query(async ({ ctx }) => {
     return await ctx.db
@@ -308,10 +295,7 @@ export const assetRouter = router({
       .orderBy(desc(sql`count(${assetTag.assetId})`), tag.name)
   }),
   featured: procedure.query(async ({ ctx }) => {
-    const likeCountExpr =
-      sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
-        Number,
-      )
+    const likeCountExpr = createDistinctLikeUserCountExpr()
 
     const featuredAssets = await ctx.db
       .select({
@@ -342,10 +326,7 @@ export const assetRouter = router({
       .limit(8)
 
     return {
-      featuredAssets: featuredAssets.map(({ objectKey, ...item }) => ({
-        ...item,
-        url: objectKey2Url(objectKey),
-      })),
+      featuredAssets: featuredAssets.map((item) => mapObjectKeyToUrl(item)),
       hotTags,
     }
   }),
@@ -415,10 +396,7 @@ export const assetRouter = router({
         width: asset.width,
         height: asset.height,
         createdAt: asset.createdAt,
-        tags: sql<string[]>`coalesce(
-          json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null),
-          '[]'
-        )`.as('tags'),
+        tags: createTagNamesAggExpr(),
         likeCount: sql<number>`(
         select count(*) from ${like} 
         where ${like.assetId} = ${asset.id}
@@ -436,10 +414,7 @@ export const assetRouter = router({
       .groupBy(asset.id)
       .orderBy(desc(asset.createdAt))
 
-    return assets.map(({ objectKey, ...asset }) => ({
-      ...asset,
-      url: objectKey2Url(objectKey),
-    }))
+    return assets.map((item) => mapObjectKeyToUrl(item))
   }),
   listByMeLike: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.user.id
@@ -452,10 +427,7 @@ export const assetRouter = router({
         width: asset.width,
         height: asset.height,
         createdAt: asset.createdAt,
-        tags: sql<string[]>`coalesce(
-          json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null),
-          '[]'
-        )`.as('tags'),
+        tags: createTagNamesAggExpr(),
 
         // 发布该资产的用户信息（如果需要）
         user: {
@@ -483,9 +455,8 @@ export const assetRouter = router({
       // 4. 按点赞时间排序
       .orderBy(desc(like.createdAt))
 
-    return assets.map(({ objectKey, ...asset }) => ({
-      ...asset,
-      url: objectKey2Url(objectKey),
+    return assets.map((item) => ({
+      ...mapObjectKeyToUrl(item),
       likedByMe: true,
     }))
   }),
@@ -512,6 +483,7 @@ export const assetRouter = router({
         await db
           .insert(like)
           .values({ userId: user.id, assetId: input.assetId })
+          .onConflictDoNothing()
       }
     }),
 })

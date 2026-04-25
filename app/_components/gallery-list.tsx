@@ -108,7 +108,7 @@ export function GalleryList({
       <MasonryGrid
         items={items}
         renderItem={(item, index) => (
-          <ImageCard {...item} priority={index < 6} />
+          <ImageCard {...item} loading={index < 12 ? 'eager' : 'lazy'} />
         )}
       />
 

@@ -169,6 +169,7 @@
     "hasAccount": "已经有账户了？",
     "signIn": "登录",
     "submit": "创建账号",
+    "welcome": "欢迎加入！",
     "success": "注册成功！",
     "checkInbox": "注册成功，验证邮件已发送到 {email}",
     "usernameLabel": "用户名",

@@ -1,7 +1,7 @@
 'use client'
 
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Flame, Sparkles, TrendingUp } from 'lucide-react'
+import { Flame, Sparkles, TrendingUp, UploadCloud } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -21,7 +21,7 @@ export function HomeShowcase() {
     <section className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
       <div className="overflow-hidden rounded-[28px] border border-zinc-200/80 bg-linear-to-br from-zinc-950 via-zinc-900 to-lime-950/90 p-5 text-white shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:p-6">
         <div className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] text-lime-200/80 uppercase">
-          <Sparkles className="size-3.5" />
+          <Sparkles size={16} />
           {t('featured')}
         </div>
         <div className="mt-3 flex flex-col gap-4 lg:flex-row">
@@ -41,7 +41,7 @@ export function HomeShowcase() {
               </Badge>
             </div>
             <Badge variant="secondary" className="rounded-full px-3">
-              <TrendingUp className="size-3.5" />
+              <TrendingUp />
               {t('featuredHint')}
             </Badge>
             <div className="flex flex-wrap items-center gap-2">
@@ -51,14 +51,16 @@ export function HomeShowcase() {
                 nativeButton={false}
                 render={<Link href="/?sort=popular" />}
               >
+                <TrendingUp />
                 {t('viewTrending')}
               </Button>
               <Button
                 size="sm"
-                variant="outline"
+                variant="secondary"
                 nativeButton={false}
                 render={<Link href="/upload" />}
               >
+                <UploadCloud />
                 {t('uploadCallout')}
               </Button>
             </div>

@@ -1,13 +1,11 @@
 'use client'
 
-import { startTransition, useEffect, useOptimistic, useState } from 'react'
+import { useState } from 'react'
 
 export type LikeState = {
   isLiked: boolean
   count: number
 }
-
-type LikeAction = { type: 'toggle' } | { type: 'reset'; payload: LikeState }
 
 function getNextLikeState(state: LikeState): LikeState {
   return {
@@ -17,36 +15,38 @@ function getNextLikeState(state: LikeState): LikeState {
 }
 
 export function useOptimisticLike(initialState: LikeState) {
-  const [serverLike, setServerLike] = useState<LikeState>(initialState)
-  const [optimisticLike, setOptimisticLike] = useOptimistic(
-    serverLike,
-    (state: LikeState, action: LikeAction) => {
-      if (action.type === 'reset') return action.payload
-      return getNextLikeState(state)
-    },
-  )
+  const [state, setState] = useState<{
+    key: string
+    like: LikeState
+  }>({
+    key: `${initialState.isLiked ? 1 : 0}:${initialState.count}`,
+    like: initialState,
+  })
 
-  useEffect(() => {
-    setServerLike(initialState)
-  }, [initialState])
+  const initialKey = `${initialState.isLiked ? 1 : 0}:${initialState.count}`
+  const optimisticLike = state.key === initialKey ? initialState : state.like
 
   const optimisticToggle = () => {
-    const previous = serverLike
+    const previous = optimisticLike
     const next = getNextLikeState(previous)
-    startTransition(() => {
-      setOptimisticLike({ type: 'toggle' })
+    setState({
+      key: `${next.isLiked ? 1 : 0}:${next.count}`,
+      like: next,
     })
     return { previous, next }
   }
 
   const commit = (nextState: LikeState) => {
-    setServerLike(nextState)
+    setState({
+      key: `${nextState.isLiked ? 1 : 0}:${nextState.count}`,
+      like: nextState,
+    })
   }
 
   const rollback = (previousState: LikeState) => {
-    setServerLike(previousState)
-    startTransition(() => {
-      setOptimisticLike({ type: 'reset', payload: previousState })
+    setState({
+      key: `${previousState.isLiked ? 1 : 0}:${previousState.count}`,
+      like: previousState,
     })
   }
 

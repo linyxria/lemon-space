@@ -71,12 +71,19 @@ export default function SignUpForm() {
                 },
                 {
                   onSuccess: () => {
-                    toast.success(t('checkInbox', { email: data.email }))
-                    const next = new URLSearchParams({
-                      email: data.email,
-                      callbackURL,
-                    })
-                    router.push(`/sign-in?${next.toString()}`)
+                    // if (requireEmailVerification) {
+                    //   toast.success(t('checkInbox', { email: data.email }))
+                    //   const next = new URLSearchParams({
+                    //     email: data.email,
+                    //     callbackURL,
+                    //   })
+                    //   router.push(`/sign-in?${next.toString()}`)
+                    //   return
+                    // }
+
+                    toast.success(t('welcome'))
+                    router.replace(callbackURL)
+                    router.refresh()
                   },
                   onError: (ctx) => void toast.error(ctx.error.message),
                 },

@@ -3,7 +3,7 @@
 import { useRouter } from '@bprogress/next/app'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLocale } from 'next-intl'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 import { authClient } from '@/lib/auth-client'
 import { type AppLocale, LOCALE_COOKIE_KEY } from '@/lib/i18n'
@@ -32,6 +32,33 @@ const DEFAULT_PREFERENCES: PreferencesState = {
   defaultSort: 'latest',
 }
 
+function readStoredPreferences(): PreferencesState {
+  if (typeof window === 'undefined') {
+    return DEFAULT_PREFERENCES
+  }
+
+  const raw = window.localStorage.getItem(STORAGE_KEY)
+  if (!raw) return DEFAULT_PREFERENCES
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<PreferencesState>
+
+    return {
+      showCardTags:
+        typeof parsed.showCardTags === 'boolean'
+          ? parsed.showCardTags
+          : DEFAULT_PREFERENCES.showCardTags,
+      defaultSort:
+        parsed.defaultSort === 'popular'
+          ? 'popular'
+          : DEFAULT_PREFERENCES.defaultSort,
+    }
+  } catch {
+    window.localStorage.removeItem(STORAGE_KEY)
+    return DEFAULT_PREFERENCES
+  }
+}
+
 export default function PreferencesProvider({
   children,
 }: {
@@ -42,13 +69,25 @@ export default function PreferencesProvider({
   const locale = useLocale() as AppLocale
   const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
-  const [preferences, setPreferences] =
-    useState<PreferencesState>(DEFAULT_PREFERENCES)
+  const hasUserSwitchedLocaleRef = useRef(false)
+  const hasAppliedRemoteLocaleRef = useRef(false)
+  const [preferences, setPreferences] = useState<PreferencesState>(
+    readStoredPreferences,
+  )
 
   const preferencesQuery = useQuery(
     trpc.user.preferences.queryOptions(undefined, {
       enabled: Boolean(session?.user),
       staleTime: 60_000,
+      onSuccess: (data) => {
+        const nextSort: SortPreference =
+          data.defaultSort === 'popular' ? 'popular' : 'latest'
+
+        setPreferences({
+          showCardTags: data.showCardTags,
+          defaultSort: nextSort,
+        })
+      },
     }),
   )
 
@@ -64,40 +103,17 @@ export default function PreferencesProvider({
   )
 
   useEffect(() => {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return
-
-    try {
-      const parsed = JSON.parse(raw) as Partial<PreferencesState>
-      setPreferences((current) => ({
-        showCardTags:
-          typeof parsed.showCardTags === 'boolean'
-            ? parsed.showCardTags
-            : current.showCardTags,
-        defaultSort:
-          parsed.defaultSort === 'popular' ? 'popular' : current.defaultSort,
-      }))
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!preferencesQuery.data) return
-
-    const nextSort: SortPreference =
-      preferencesQuery.data.defaultSort === 'popular' ? 'popular' : 'latest'
-
-    setPreferences({
-      showCardTags: preferencesQuery.data.showCardTags,
-      defaultSort: nextSort,
-    })
-  }, [preferencesQuery.data])
-
-  useEffect(() => {
     const nextLocale = preferencesQuery.data?.locale
-    if (!nextLocale || nextLocale === locale) return
+    if (!nextLocale) return
+    if (hasUserSwitchedLocaleRef.current) return
 
+    if (nextLocale === locale) {
+      hasAppliedRemoteLocaleRef.current = true
+      return
+    }
+    if (hasAppliedRemoteLocaleRef.current) return
+
+    hasAppliedRemoteLocaleRef.current = true
     document.cookie = `${LOCALE_COOKIE_KEY}=${nextLocale}; path=/; max-age=31536000; samesite=lax`
     router.refresh()
   }, [locale, preferencesQuery.data?.locale, router])
@@ -136,6 +152,7 @@ export default function PreferencesProvider({
   const setLocale = (value: AppLocale) => {
     if (value === locale) return
 
+    hasUserSwitchedLocaleRef.current = true
     document.cookie = `${LOCALE_COOKIE_KEY}=${value}; path=/; max-age=31536000; samesite=lax`
 
     if (session?.user) {

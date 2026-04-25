@@ -3,9 +3,9 @@ import { eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { asset, like, user, userPreference } from '@/db/schema'
-import { objectKey2Url } from '@/lib/utils'
 
 import { protectedProcedure, router } from '../init'
+import { mapObjectKeyToUrl, mapUserImageToUrl } from './shared'
 
 const preferenceInputSchema = z.object({
   locale: z.enum(['zh-CN', 'en-US']).optional(),
@@ -21,11 +21,7 @@ const defaultPreferences = {
 
 export const userRouter = router({
   info: protectedProcedure.query(({ ctx }) => {
-    const { image, ...user } = ctx.user
-    return {
-      ...user,
-      image: image ? objectKey2Url(image) : null,
-    }
+    return mapUserImageToUrl(ctx.user)
   }),
   avatarUpdate: protectedProcedure
     .input(
@@ -113,10 +109,7 @@ export const userRouter = router({
 
     return {
       ...stats,
-      recentUploads: recentUploads.map(({ objectKey, ...item }) => ({
-        ...item,
-        url: objectKey2Url(objectKey),
-      })),
+      recentUploads: recentUploads.map((item) => mapObjectKeyToUrl(item)),
     }
   }),
   preferences: protectedProcedure.query(async ({ ctx }) => {

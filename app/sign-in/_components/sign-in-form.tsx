@@ -4,7 +4,7 @@ import { useRouter } from '@bprogress/next/app'
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import z from 'zod'
@@ -35,22 +35,18 @@ export default function SignInForm() {
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
     string | null
   >(null)
+
+  const callbackURL = searchParams.get('callbackURL') || '/'
+  const emailFromQuery = searchParams.get('email') ?? ''
+
   const form = useForm({
     resolver: standardSchemaResolver(formSchema),
     defaultValues: {
-      email: '',
+      email: emailFromQuery,
       password: '',
     },
   })
   const [isPending, startTransition] = useTransition()
-
-  const callbackURL = searchParams.get('callbackURL') || '/'
-  const emailFromQuery = searchParams.get('email')
-
-  useEffect(() => {
-    if (!emailFromQuery) return
-    form.setValue('email', emailFromQuery)
-  }, [emailFromQuery, form])
 
   return (
     <AuthCard
@@ -81,7 +77,8 @@ export default function SignInForm() {
                   onSuccess: () => {
                     setPendingVerificationEmail(null)
                     toast.success(t('welcome'))
-                    router.push(callbackURL)
+                    router.replace(callbackURL)
+                    router.refresh()
                   },
                   onError: (ctx) => {
                     if (ctx.error.code === 'EMAIL_NOT_VERIFIED') {

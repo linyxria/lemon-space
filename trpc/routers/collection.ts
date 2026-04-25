@@ -13,9 +13,14 @@ import {
   tag,
   user,
 } from '@/db/schema'
-import { objectKey2Url } from '@/lib/utils'
 
 import { protectedProcedure, router } from '../init'
+import {
+  createDistinctLikeUserCountExpr,
+  createTagNamesAggExpr,
+  mapObjectKeyToUrl,
+  mapUserImageToUrl,
+} from './shared'
 
 const collectionIdSchema = z.object({
   collectionId: z.string().trim().min(1),
@@ -92,10 +97,7 @@ export const collectionRouter = router({
         })
       }
 
-      const likeCountExpr =
-        sql<number>`count(distinct ${like.userId} || ${like.assetId})`.mapWith(
-          Number,
-        )
+      const likeCountExpr = createDistinctLikeUserCountExpr()
 
       const assets = await ctx.db
         .select({
@@ -112,10 +114,7 @@ export const collectionRouter = router({
             image: user.image,
           },
           likeCount: likeCountExpr,
-          tags: sql<string[]>`coalesce(
-            json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null),
-            '[]'
-          )`.as('tags'),
+          tags: createTagNamesAggExpr(),
           likedByMe: sql<boolean>`exists(
             select 1 from ${like}
             where ${like.assetId} = ${asset.id}
@@ -134,13 +133,9 @@ export const collectionRouter = router({
 
       return {
         ...collectionInfo,
-        assets: assets.map(({ objectKey, user, ...item }) => ({
-          ...item,
-          url: objectKey2Url(objectKey),
-          user: {
-            ...user,
-            image: user.image ? objectKey2Url(user.image) : null,
-          },
+        assets: assets.map((item) => ({
+          ...mapObjectKeyToUrl(item),
+          user: mapUserImageToUrl(item.user),
         })),
       }
     }),

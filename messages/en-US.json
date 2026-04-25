@@ -169,6 +169,7 @@
     "hasAccount": "Already have an account?",
     "signIn": "Sign in",
     "submit": "Create account",
+    "welcome": "Welcome aboard!",
     "success": "Account created.",
     "checkInbox": "Account created. Verification email sent to {email}",
     "usernameLabel": "Username",

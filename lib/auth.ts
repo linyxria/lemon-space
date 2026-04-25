@@ -2,6 +2,13 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 
 import { db } from '@/db'
+import { sendVerificationEmail } from '@/lib/auth-email'
+
+function isEmailVerificationEnabled() {
+  return process.env.AUTH_REQUIRE_EMAIL_VERIFICATION === 'true'
+}
+
+const requireEmailVerification = isEmailVerificationEnabled()
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -9,21 +16,25 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    // requireEmailVerification: true,
+    requireEmailVerification,
   },
-  // emailVerification: {
-  //   sendOnSignUp: true,
-  //   sendOnSignIn: true,
-  //   autoSignInAfterVerification: true,
-  //   expiresIn: 60 * 60 * 24,
-  //   sendVerificationEmail: async ({ user, url }) => {
-  //     await sendVerificationEmail({
-  //       email: user.email,
-  //       name: user.name,
-  //       verifyUrl: url,
-  //     })
-  //   },
-  // },
+  ...(requireEmailVerification
+    ? {
+        emailVerification: {
+          sendOnSignUp: true,
+          sendOnSignIn: true,
+          autoSignInAfterVerification: true,
+          expiresIn: 60 * 60 * 24,
+          sendVerificationEmail: async ({ user, url }) => {
+            await sendVerificationEmail({
+              email: user.email,
+              name: user.name,
+              verifyUrl: url,
+            })
+          },
+        },
+      }
+    : {}),
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,

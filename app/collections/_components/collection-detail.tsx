@@ -8,7 +8,7 @@ import {
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import ImageCard from '@/components/image-card'
@@ -18,6 +18,51 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useTRPC } from '@/trpc/client'
 
+function CollectionEditor({
+  initialName,
+  initialDescription,
+  disabled,
+  onSubmit,
+  updateLabel,
+  descriptionPlaceholder,
+}: {
+  initialName: string
+  initialDescription: string
+  disabled: boolean
+  onSubmit: (payload: { name: string; description: string }) => void
+  updateLabel: string
+  descriptionPlaceholder: string
+}) {
+  const [name, setName] = useState(initialName)
+  const [description, setDescription] = useState(initialDescription)
+
+  const handleUpdate = () => {
+    const trimmedName = name.trim()
+    if (!trimmedName) return
+
+    onSubmit({
+      name: trimmedName,
+      description,
+    })
+  }
+
+  return (
+    <div className="mt-4 grid gap-3">
+      <Input value={name} onChange={(event) => setName(event.target.value)} />
+      <Textarea
+        value={description}
+        onChange={(event) => setDescription(event.target.value)}
+        placeholder={descriptionPlaceholder}
+      />
+      <div className="flex justify-end">
+        <Button onClick={handleUpdate} disabled={disabled}>
+          {updateLabel}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 export function CollectionDetail({ collectionId }: { collectionId: string }) {
   const trpc = useTRPC()
   const t = useTranslations('Collections')
@@ -26,13 +71,6 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
   const { data } = useSuspenseQuery(
     trpc.collection.detail.queryOptions({ collectionId }),
   )
-  const [name, setName] = useState(data.name)
-  const [description, setDescription] = useState(data.description ?? '')
-
-  useEffect(() => {
-    setName(data.name)
-    setDescription(data.description ?? '')
-  }, [data.description, data.name])
 
   const updateMutation = useMutation(
     trpc.collection.update.mutationOptions({
@@ -60,17 +98,6 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
     }),
   )
 
-  const handleUpdate = () => {
-    const trimmedName = name.trim()
-    if (!trimmedName) return
-
-    updateMutation.mutate({
-      collectionId,
-      name: trimmedName,
-      description,
-    })
-  }
-
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2">
@@ -93,22 +120,21 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
           <p className="mt-2 text-sm text-zinc-500">{data.description}</p>
         ) : null}
 
-        <div className="mt-4 grid gap-3">
-          <Input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-          <Textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder={t('descriptionPlaceholder')}
-          />
-          <div className="flex justify-end">
-            <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
-              {t('update')}
-            </Button>
-          </div>
-        </div>
+        <CollectionEditor
+          key={`${data.name}\u0000${data.description ?? ''}`}
+          initialName={data.name}
+          initialDescription={data.description ?? ''}
+          disabled={updateMutation.isPending}
+          updateLabel={t('update')}
+          descriptionPlaceholder={t('descriptionPlaceholder')}
+          onSubmit={({ name, description }) => {
+            updateMutation.mutate({
+              collectionId,
+              name,
+              description,
+            })
+          }}
+        />
       </section>
 
       {data.assets.length > 0 ? (
@@ -132,7 +158,7 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
                   {t('remove')}
                 </Button>
               </div>
-              <ImageCard {...item} priority={index < 6} />
+              <ImageCard {...item} loading={index < 2 ? 'eager' : 'lazy'} />
             </div>
           )}
         />
