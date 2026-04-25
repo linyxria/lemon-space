@@ -65,6 +65,7 @@ export function TagBar({
         q: nextKeyword || undefined,
         sort,
       }),
+      { scroll: false },
     )
   }
 
@@ -111,6 +112,7 @@ export function TagBar({
                         q: keyword,
                         sort: option.value,
                       })}
+                      scroll={false}
                     />
                   }
                   className="h-8 rounded-full px-3 text-xs font-semibold"
@@ -142,7 +144,7 @@ export function TagBar({
               variant="ghost"
               size="sm"
               nativeButton={false}
-              render={<Link href="/" />}
+              render={<Link href="/" scroll={false} />}
             >
               {t('clear')}
             </Button>
@@ -161,6 +163,7 @@ export function TagBar({
                   ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent',
               )}
+              scroll={false}
             >
               {t('allCategories')}
             </Link>
@@ -176,6 +179,7 @@ export function TagBar({
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent',
                   )}
+                  scroll={false}
                 >
                   {tag.name}
                 </Link>
