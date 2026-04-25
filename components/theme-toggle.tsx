@@ -1,14 +1,20 @@
 'use client'
 
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 
 import { usePreferences } from '@/components/preferences-provider'
 import { type ThemePreference } from '@/components/theme-provider'
 import { Button } from '@/components/ui/button'
 
-const THEME_SEQUENCE: ThemePreference[] = ['system', 'light', 'dark']
+type VisibleThemePreference = Exclude<ThemePreference, 'system'>
+
+const THEME_SEQUENCE: VisibleThemePreference[] = ['light', 'dark']
 const subscribe = () => () => {}
+
+function getVisibleTheme(theme: ThemePreference): VisibleThemePreference {
+  return theme === 'dark' ? 'dark' : 'light'
+}
 
 export function ThemeToggle({ label }: { label: string }) {
   const { setTheme, theme } = usePreferences()
@@ -17,9 +23,8 @@ export function ThemeToggle({ label }: { label: string }) {
     () => true,
     () => false,
   )
-  const currentTheme = isHydrated ? theme : 'system'
-  const Icon =
-    currentTheme === 'dark' ? Moon : currentTheme === 'light' ? Sun : Monitor
+  const currentTheme = getVisibleTheme(isHydrated ? theme : 'light')
+  const Icon = currentTheme === 'dark' ? Moon : Sun
   const nextTheme =
     THEME_SEQUENCE[
       (THEME_SEQUENCE.indexOf(currentTheme) + 1) % THEME_SEQUENCE.length
