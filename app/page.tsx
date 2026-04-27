@@ -55,10 +55,11 @@ export default async function HomePage({
       <HydrateClient>
         <Suspense
           fallback={
-            <div className="flex w-full max-w-xs flex-col gap-2">
+            <div className="flex w-full max-w-3xl flex-col gap-4">
+              <Skeleton className="h-4 w-2/5" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-3/5" />
             </div>
           }
         >

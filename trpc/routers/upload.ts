@@ -16,9 +16,9 @@ export const uploadRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
-      // 1. 生成 R2 预签名 URL
+      // 1. 生成预签名 URL
       const command = new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET_NAME,
+        Bucket: process.env.S3_BUCKET_NAME,
         Key: input.Key,
         ContentType: input.ContentType,
         CacheControl: input.CacheControl,

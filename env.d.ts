@@ -2,11 +2,11 @@ declare namespace NodeJS {
   interface ProcessEnv {
     DATABASE_URL: string
 
-    R2_ENDPOINT: string
-    R2_ACCESS_KEY_ID: string
-    R2_SECRET_ACCESS_KEY: string
-    R2_BUCKET_NAME: string
-    R2_PUBLIC_DOMAIN: string
+    S3_ENDPOINT: string
+    S3_ACCESS_KEY_ID: string
+    S3_SECRET_ACCESS_KEY: string
+    S3_BUCKET_NAME: string
+    S3_PUBLIC_DOMAIN: string
 
     BETTER_AUTH_SECRET: string
     BETTER_AUTH_URL: string

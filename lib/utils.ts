@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function objectKey2Url(objectKey: string) {
-  return `${process.env.R2_PUBLIC_DOMAIN}/${objectKey}`
+  return `${process.env.S3_PUBLIC_DOMAIN}/${objectKey}`
 }
 
 export function chineseSlugify(text: string): string {

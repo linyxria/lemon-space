@@ -90,7 +90,7 @@ export default function UploadPage() {
       const totalFiles = files.length
 
       const uploadTasks = files.map(async ({ origin: file }, index) => {
-        // 1. 上传文件到云端 (R2)
+        // 1. 上传文件到云端
         const { objectKey } = await uploadFile('assets', file, {
           onProgress: (percent) => {
             // 更新当前文件的进度
