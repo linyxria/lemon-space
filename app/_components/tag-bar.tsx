@@ -154,7 +154,7 @@ export function TagBar({
 
       {data.length > 0 ? (
         <ScrollArea>
-          <div className="flex w-max items-center gap-1 pb-2 md:gap-2">
+          <div className="mb-2 flex w-max items-center gap-1 pb-2 md:gap-2">
             <Link
               href={buildGalleryHref({ q: keyword, sort })}
               className={cn(

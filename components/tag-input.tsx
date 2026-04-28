@@ -58,8 +58,8 @@ export default function TagInput({
   return (
     <div className="border-input focus-within:ring-ring/50 focus-within:border-ring flex min-h-8 flex-wrap items-center gap-1 rounded-lg border border-solid px-2.5 py-1 focus-within:ring-3">
       {value?.map((tag) => (
-        <Badge key={tag}>
-          {tag}
+        <Badge key={tag} className="flex max-w-full">
+          <span className="flex-1 truncate">{tag}</span>
           <button onClick={() => handmeRemove(tag)}>
             <X size={12} />
           </button>

@@ -18,7 +18,7 @@ export function HomeShowcase() {
   if (data.featuredAssets.length === 0) return null
 
   return (
-    <section className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
+    <section className="grid gap-4 overflow-hidden lg:grid-cols-[1.3fr_0.7fr]">
       <div className="from-hero via-hero to-primary/35 text-hero-foreground overflow-hidden rounded-[28px] border bg-linear-to-br p-5 shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:p-6">
         <div className="text-primary flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] uppercase">
           <Sparkles size={16} />
@@ -96,7 +96,7 @@ export function HomeShowcase() {
         </div>
       </div>
 
-      <div className="bg-card rounded-[28px] border p-5 shadow-sm sm:p-6">
+      <div className="bg-card min-w-0 rounded-[28px] border p-5 shadow-sm sm:p-6">
         <div className="text-muted-foreground flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] uppercase">
           <Flame className="text-primary size-3.5" />
           {t('hotTags')}
@@ -106,14 +106,14 @@ export function HomeShowcase() {
             <Link
               key={tag.id}
               href={`/?tag=${tag.slug}`}
-              className="hover:border-primary/30 hover:bg-primary/10 flex items-center justify-between rounded-2xl border px-4 py-3 transition"
+              className="hover:border-primary/30 hover:bg-primary/10 flex items-center justify-between gap-4 overflow-hidden rounded-2xl border px-4 py-3 transition"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex flex-1 items-center gap-3 overflow-hidden">
                 <span className="text-muted-foreground font-mono text-xs font-bold">
                   {(index + 1).toString().padStart(2, '0')}
                 </span>
-                <div>
-                  <p className="text-card-foreground text-sm font-bold">
+                <div className="flex-1 overflow-hidden">
+                  <p className="text-card-foreground truncate text-sm font-bold">
                     {tag.name}
                   </p>
                   <p className="text-muted-foreground text-xs">
@@ -121,8 +121,8 @@ export function HomeShowcase() {
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" className="rounded-full px-2.5">
-                #{tag.slug}
+              <Badge variant="outline" className="max-w-24 rounded-full px-2.5">
+                <span className="truncate">#{tag.slug}</span>
               </Badge>
             </Link>
           ))}
