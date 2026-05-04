@@ -36,6 +36,55 @@ function getNextLikeState(state: LikeState): LikeState {
   }
 }
 
+function ImageTags({ tags }: { tags: string[] }) {
+  const visibleMobileTags = tags.slice(0, 2)
+  const visibleDesktopTags = tags.slice(0, 4)
+
+  return (
+    <>
+      <div className="mb-2 flex min-w-0 items-center gap-1.5 overflow-hidden sm:hidden">
+        {visibleMobileTags.map((tag) => (
+          <Badge
+            key={tag}
+            variant="outline"
+            className="max-w-18 min-w-0 truncate rounded-full px-2 text-[10px]"
+          >
+            {tag}
+          </Badge>
+        ))}
+        {tags.length > visibleMobileTags.length ? (
+          <Badge
+            variant="ghost"
+            className="shrink-0 rounded-full px-2 text-[10px]"
+          >
+            +{tags.length - visibleMobileTags.length}
+          </Badge>
+        ) : null}
+      </div>
+
+      <div className="mb-2 hidden min-w-0 items-center gap-1.5 overflow-hidden sm:flex">
+        {visibleDesktopTags.map((tag) => (
+          <Badge
+            key={tag}
+            variant="outline"
+            className="max-w-28 min-w-0 truncate rounded-full px-2 text-[10px]"
+          >
+            {tag}
+          </Badge>
+        ))}
+        {tags.length > visibleDesktopTags.length ? (
+          <Badge
+            variant="ghost"
+            className="shrink-0 rounded-full px-2 text-[10px]"
+          >
+            +{tags.length - visibleDesktopTags.length}
+          </Badge>
+        ) : null}
+      </div>
+    </>
+  )
+}
+
 export default function ImageCard({
   loading = "lazy",
   id,
@@ -160,7 +209,7 @@ export default function ImageCard({
   )
 
   return (
-    <div className="bg-card group ring-border hover:ring-ring/40 relative overflow-hidden rounded-lg shadow-sm ring-1 transition-all hover:shadow-lg">
+    <div className="bg-card group ring-border hover:ring-ring/40 relative w-full max-w-full min-w-0 overflow-hidden rounded-lg shadow-sm ring-1 transition-all hover:shadow-lg">
       {/* 图片区域容器 */}
       <div
         className="bg-muted relative cursor-zoom-in overflow-hidden"
@@ -199,31 +248,11 @@ export default function ImageCard({
       </div>
       {/* 2. 底部作者栏 */}
       <div className="bg-card border-t px-3.5 py-2.5">
-        {tags && tags.length > 0 ? (
-          <div className="mb-2 flex min-w-0 items-center gap-1.5 overflow-hidden">
-            {tags.slice(0, 4).map((tag) => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="min-w-0 shrink truncate rounded-full px-2 text-[10px]"
-              >
-                {tag}
-              </Badge>
-            ))}
-            {tags.length > 4 ? (
-              <Badge
-                variant="ghost"
-                className="shrink-0 rounded-full px-2 text-[10px]"
-              >
-                +{tags.length - 4}
-              </Badge>
-            ) : null}
-          </div>
-        ) : null}
+        {tags && tags.length > 0 ? <ImageTags tags={tags} /> : null}
 
-        <div className="flex items-center">
+        <div className="flex min-w-0 items-center">
           {user ? (
-            <div className="flex items-center gap-2 overflow-hidden">
+            <div className="flex min-w-0 items-center gap-2 overflow-hidden">
               <UserAvatar size="sm" name={user.name} image={user.image} />
               <span className="text-card-foreground truncate text-[12px] font-bold">
                 {user.name}

@@ -2,4 +2,3 @@ ignoredBuiltDependencies:
   - '@swc/core'
   - sharp
   - unrs-resolver
-  - supabase

@@ -38,6 +38,23 @@ import { useTRPC } from "@/trpc/client"
 
 import UserNavSkeleton from "./user-nav-skeleton"
 
+function UserNavLinkItem({
+  children,
+  href,
+}: {
+  children: React.ReactNode
+  href: string
+}) {
+  return (
+    <DropdownMenuItem
+      render={<Link href={href} />}
+      className="focus:bg-transparent"
+    >
+      {children}
+    </DropdownMenuItem>
+  )
+}
+
 export default function UserNavClient() {
   const [isSigningOut, setIsSigningOut] = useState(false)
   const { data: session, isPending: sessionPending } = authClient.useSession()
@@ -118,70 +135,44 @@ export default function UserNavClient() {
               <PenLine className="size-4" />
               {t("createGroup")}
             </DropdownMenuLabel>
-            <DropdownMenuItem>
-              <Link
-                href="/posts/new"
-                className="flex w-full items-center gap-2"
-              >
-                <BookOpenText />
-                {t("newPost")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link
-                href="/gallery/upload"
-                className="flex w-full items-center gap-2"
-              >
-                <UploadCloud />
-                {t("upload")}
-              </Link>
-            </DropdownMenuItem>
+            <UserNavLinkItem href="/posts/new">
+              <BookOpenText />
+              {t("newPost")}
+            </UserNavLinkItem>
+            <UserNavLinkItem href="/gallery/upload">
+              <UploadCloud />
+              {t("upload")}
+            </UserNavLinkItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">
               <Library className="size-4" />
               {t("libraryGroup")}
             </DropdownMenuLabel>
-            <DropdownMenuItem>
-              <Link href="/posts/me" className="flex w-full items-center gap-2">
-                <BookOpenText />
-                {t("myPosts")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link
-                href="/gallery/me"
-                className="flex w-full items-center gap-2"
-              >
-                <LayoutGrid />
-                {t("myGallery")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href="/likes" className="flex w-full items-center gap-2">
-                <Heart />
-                {t("myLikes")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link
-                href="/collections"
-                className="flex w-full items-center gap-2"
-              >
-                <BookMarked />
-                {t("collections")}
-              </Link>
-            </DropdownMenuItem>
+            <UserNavLinkItem href="/posts/me">
+              <BookOpenText />
+              {t("myPosts")}
+            </UserNavLinkItem>
+            <UserNavLinkItem href="/gallery/me">
+              <LayoutGrid />
+              {t("myGallery")}
+            </UserNavLinkItem>
+            <UserNavLinkItem href="/likes">
+              <Heart />
+              {t("myLikes")}
+            </UserNavLinkItem>
+            <UserNavLinkItem href="/collections">
+              <BookMarked />
+              {t("collections")}
+            </UserNavLinkItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">
               <SlidersHorizontal className="size-4" />
               {t("settingsGroup")}
             </DropdownMenuLabel>
-            <DropdownMenuItem>
-              <Link href="/profile" className="flex w-full items-center gap-2">
-                <UserRound />
-                {t("profile")}
-              </Link>
-            </DropdownMenuItem>
+            <UserNavLinkItem href="/profile">
+              <UserRound />
+              {t("profile")}
+            </UserNavLinkItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">
               {theme === "dark" ? (

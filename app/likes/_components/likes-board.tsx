@@ -62,7 +62,7 @@ export function LikesBoard() {
   )
 
   return (
-    <Tabs defaultValue="posts" className="space-y-4">
+    <Tabs defaultValue="posts" className="min-w-0 space-y-4">
       <TabsList>
         <TabsTrigger value="posts">
           <BookOpenText className="size-4" />
@@ -74,9 +74,9 @@ export function LikesBoard() {
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="posts">
+      <TabsContent value="posts" className="min-w-0">
         {posts.length > 0 ? (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid min-w-0 gap-4 lg:grid-cols-2">
             {posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
@@ -92,7 +92,7 @@ export function LikesBoard() {
         )}
       </TabsContent>
 
-      <TabsContent value="assets">
+      <TabsContent value="assets" className="min-w-0">
         {assets.length > 0 ? (
           <MasonryGrid
             items={assets}

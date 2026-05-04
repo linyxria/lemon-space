@@ -47,11 +47,17 @@ export function MasonryGrid<T extends { id: string | number }>({
   }, [items, resolvedColumnCount])
 
   return (
-    <div className={cn("flex items-start", gapClassName, className)}>
+    <div
+      className={cn(
+        "flex w-full max-w-full min-w-0 items-start overflow-x-clip",
+        gapClassName,
+        className,
+      )}
+    >
       {columns.map((columnItems, colIndex) => (
         <div
           key={colIndex}
-          className={cn("flex flex-1 flex-col", gapClassName)}
+          className={cn("flex min-w-0 flex-1 basis-0 flex-col", gapClassName)}
         >
           {columnItems.map(({ item, index }) => (
             <Fragment key={`${item.id}:${index}`}>
