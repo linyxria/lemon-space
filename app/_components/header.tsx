@@ -40,7 +40,8 @@ export default async function Header() {
           </Link>
           <DesktopMainNav />
         </div>
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-4">
+          <MobileMainNav />
           <ThemeToggle label={t("themeToggle")} />
           {session ? (
             <HydrateClient>
@@ -53,7 +54,6 @@ export default async function Header() {
           )}
         </div>
       </div>
-      <MobileMainNav />
     </header>
   )
 }
