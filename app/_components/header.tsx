@@ -5,17 +5,10 @@ import { getTranslations } from 'next-intl/server'
 
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu'
 import { auth } from '@/lib/auth'
-import { cn } from '@/lib/utils'
 import { HydrateClient, prefetch, trpc } from '@/trpc/server'
 
+import { DesktopMainNav, MobileMainNav } from './main-nav'
 import UserNav from './user-nav'
 
 export default async function Header() {
@@ -45,44 +38,7 @@ export default async function Header() {
               </span>
             </span>
           </Link>
-          <NavigationMenu className="hidden flex-none justify-start md:flex">
-            <NavigationMenuList className="justify-start">
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  render={<Link href="/posts" />}
-                  className={cn(navigationMenuTriggerStyle(), 'px-3')}
-                >
-                  文章
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  render={<Link href="/gallery" />}
-                  className={cn(navigationMenuTriggerStyle(), 'px-3')}
-                >
-                  画廊
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  render={<Link href="/resources" />}
-                  className={cn(navigationMenuTriggerStyle(), 'px-3')}
-                >
-                  技术导航
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              {session ? (
-                <NavigationMenuItem>
-                  <NavigationMenuLink
-                    render={<Link href="/collections" />}
-                    className={cn(navigationMenuTriggerStyle(), 'px-3')}
-                  >
-                    收藏夹
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ) : null}
-            </NavigationMenuList>
-          </NavigationMenu>
+          <DesktopMainNav />
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
           <ThemeToggle label={t('themeToggle')} />
@@ -97,34 +53,7 @@ export default async function Header() {
           )}
         </div>
       </div>
-      <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 pb-2 md:hidden">
-        <Link
-          href="/posts"
-          className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-3 py-1.5 text-sm font-semibold whitespace-nowrap"
-        >
-          文章
-        </Link>
-        <Link
-          href="/gallery"
-          className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-3 py-1.5 text-sm font-semibold whitespace-nowrap"
-        >
-          画廊
-        </Link>
-        <Link
-          href="/resources"
-          className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-3 py-1.5 text-sm font-semibold whitespace-nowrap"
-        >
-          技术导航
-        </Link>
-        {session ? (
-          <Link
-            href="/collections"
-            className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-3 py-1.5 text-sm font-semibold whitespace-nowrap"
-          >
-            收藏夹
-          </Link>
-        ) : null}
-      </nav>
+      <MobileMainNav />
     </header>
   )
 }

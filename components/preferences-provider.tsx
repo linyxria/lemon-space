@@ -3,13 +3,14 @@
 import { useRouter } from '@bprogress/next/app'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLocale } from 'next-intl'
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useTheme } from 'next-themes'
+import { createContext, useContext, useEffect, useRef } from 'react'
 
 import { authClient } from '@/lib/auth-client'
 import { type AppLocale, LOCALE_COOKIE_KEY } from '@/lib/i18n'
 import { useTRPC } from '@/trpc/client'
 
-import { type ThemePreference, useTheme } from './theme-provider'
+export type ThemePreference = 'light' | 'dark' | 'system'
 
 type PreferencesState = {
   theme: ThemePreference
@@ -23,8 +24,6 @@ type PreferencesContextValue = PreferencesState & {
 
 const PreferencesContext = createContext<PreferencesContextValue | null>(null)
 
-const STORAGE_KEY = 'lemon-space-preferences'
-
 const DEFAULT_PREFERENCES: PreferencesState = {
   theme: 'system',
 }
@@ -33,26 +32,6 @@ function normalizeTheme(value: unknown): ThemePreference {
   return value === 'light' || value === 'dark' || value === 'system'
     ? value
     : DEFAULT_PREFERENCES.theme
-}
-
-function readStoredPreferences(): PreferencesState {
-  if (typeof window === 'undefined') {
-    return DEFAULT_PREFERENCES
-  }
-
-  const raw = window.localStorage.getItem(STORAGE_KEY)
-  if (!raw) return DEFAULT_PREFERENCES
-
-  try {
-    const parsed = JSON.parse(raw) as Partial<PreferencesState>
-
-    return {
-      theme: normalizeTheme(parsed.theme),
-    }
-  } catch {
-    window.localStorage.removeItem(STORAGE_KEY)
-    return DEFAULT_PREFERENCES
-  }
 }
 
 export default function PreferencesProvider({
@@ -64,13 +43,10 @@ export default function PreferencesProvider({
   const router = useRouter()
   const locale = useLocale() as AppLocale
   const queryClient = useQueryClient()
-  const { setTheme: setNextTheme } = useTheme()
+  const { setTheme: setNextTheme, theme: nextTheme } = useTheme()
   const { data: session } = authClient.useSession()
   const hasUserSwitchedLocaleRef = useRef(false)
   const hasAppliedRemoteLocaleRef = useRef(false)
-  const [preferences, setPreferences] = useState<PreferencesState>(
-    readStoredPreferences,
-  )
 
   const preferencesQuery = useQuery(
     trpc.user.preferences.queryOptions(undefined, {
@@ -90,12 +66,12 @@ export default function PreferencesProvider({
     }),
   )
 
-  const remotePreferences = preferencesQuery.data
-    ? {
-        theme: normalizeTheme(preferencesQuery.data.theme),
-      }
+  const remoteTheme = preferencesQuery.data
+    ? normalizeTheme(preferencesQuery.data.theme)
     : null
-  const resolvedPreferences = remotePreferences ?? preferences
+  const resolvedPreferences = {
+    theme: normalizeTheme(nextTheme ?? remoteTheme),
+  }
 
   useEffect(() => {
     const nextLocale = preferencesQuery.data?.locale
@@ -114,23 +90,17 @@ export default function PreferencesProvider({
   }, [locale, preferencesQuery.data?.locale, router])
 
   useEffect(() => {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(resolvedPreferences),
-    )
-  }, [resolvedPreferences])
+    if (!remoteTheme) return
+    if (remoteTheme === nextTheme) return
 
-  useEffect(() => {
-    setNextTheme(resolvedPreferences.theme)
-  }, [resolvedPreferences.theme, setNextTheme])
+    setNextTheme(remoteTheme)
+  }, [nextTheme, remoteTheme, setNextTheme])
 
   const updatePreferences = (patch: Partial<PreferencesState>) => {
     const next = {
       ...resolvedPreferences,
       ...patch,
     }
-
-    setPreferences(next)
 
     if (patch.theme !== undefined) {
       setNextTheme(patch.theme)

@@ -7,14 +7,7 @@ import { motion } from 'motion/react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import {
-  useEffect,
-  useMemo,
-  useOptimistic,
-  useRef,
-  useState,
-  useTransition,
-} from 'react'
+import { useOptimistic, useState, useTransition } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { authClient } from '@/lib/auth-client'
@@ -29,63 +22,6 @@ const heartVariants = {
     transition: { duration: 0.45 },
   },
   unliked: { scale: 1 },
-}
-
-function easeOutCubic(progress: number) {
-  return 1 - (1 - progress) ** 3
-}
-
-function useAnimatedCount(value: number, duration = 180) {
-  const [displayValue, setDisplayValue] = useState(value)
-  const previousValueRef = useRef(value)
-  const frameRef = useRef<number | null>(null)
-  const mountedRef = useRef(false)
-
-  useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true
-      previousValueRef.current = value
-      setDisplayValue(value)
-      return
-    }
-
-    const from = previousValueRef.current
-    const to = value
-
-    if (from === to) return
-
-    const startedAt = performance.now()
-
-    if (frameRef.current !== null) {
-      cancelAnimationFrame(frameRef.current)
-    }
-
-    const tick = (now: number) => {
-      const progress = Math.min((now - startedAt) / duration, 1)
-      const eased = easeOutCubic(progress)
-      const nextValue = Math.round(from + (to - from) * eased)
-
-      setDisplayValue(nextValue)
-
-      if (progress < 1) {
-        frameRef.current = requestAnimationFrame(tick)
-      } else {
-        previousValueRef.current = to
-        frameRef.current = null
-      }
-    }
-
-    frameRef.current = requestAnimationFrame(tick)
-
-    return () => {
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current)
-        frameRef.current = null
-      }
-    }
-  }, [duration, value])
-
-  return displayValue
 }
 
 type LikeState = {
@@ -129,23 +65,19 @@ export default function ImageCard({
   const { data: session } = authClient.useSession()
   const trpc = useTRPC()
   const queryClient = useQueryClient()
+  const [confirmedLike, setConfirmedLike] = useState<LikeState>(() => ({
+    isLiked: likedByMe ?? false,
+    count: likeCount,
+  }))
   const [isLikeTransitionPending, startLikeTransition] = useTransition()
-  const likeState = useMemo(
-    () => ({
-      isLiked: likedByMe ?? false,
-      count: likeCount,
-    }),
-    [likeCount, likedByMe],
-  )
-  const [optimisticLike, toggleOptimisticLike] = useOptimistic<LikeState, void>(
-    likeState,
-    (current) => getNextLikeState(current),
-  )
-  const animatedLikeCount = useAnimatedCount(optimisticLike.count)
+  const [optimisticLike, setOptimisticLike] = useOptimistic<
+    LikeState,
+    LikeState
+  >(confirmedLike, (_current, nextLike) => nextLike)
 
   const likeMutation = useMutation(
     trpc.asset.toggleLike.mutationOptions({
-      onSuccess: async () => {
+      onSettled: async () => {
         await Promise.all([
           queryClient.invalidateQueries({
             queryKey: trpc.asset.list.queryKey(),
@@ -155,6 +87,9 @@ export default function ImageCard({
           }),
           queryClient.invalidateQueries({
             queryKey: trpc.asset.listByMeLike.queryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.collection.detail.queryKey(),
           }),
         ])
       },
@@ -176,13 +111,24 @@ export default function ImageCard({
 
     if (likeMutation.isPending || isLikeTransitionPending) return
 
+    const optimisticNextLike = getNextLikeState(optimisticLike)
+
     startLikeTransition(async () => {
-      toggleOptimisticLike(undefined)
+      setOptimisticLike(optimisticNextLike)
 
       try {
-        await likeMutation.mutateAsync({ assetId: id })
+        const nextLike = await likeMutation.mutateAsync({ assetId: id })
+
+        startLikeTransition(() => {
+          setConfirmedLike({
+            isLiked: nextLike.likedByMe,
+            count: nextLike.likeCount,
+          })
+        })
       } catch {
-        // useOptimistic falls back to the confirmed props when the action settles.
+        startLikeTransition(() => {
+          setConfirmedLike(confirmedLike)
+        })
       }
     })
   }
@@ -295,7 +241,7 @@ export default function ImageCard({
           >
             {renderHeart(13, 2.5)}
             <span className="font-mono text-[11px] font-bold tabular-nums">
-              {animatedLikeCount}
+              {optimisticLike.count}
             </span>
           </button>
         </div>

@@ -43,7 +43,6 @@ if (!targetEntry) {
   process.exit(1)
 }
 
-const migrationSqlPath = path.join(migrationsDir, `${targetEntry.tag}.sql`)
 const baselineEntries = entries.filter((entry) => entry.idx <= targetEntry.idx)
 const client = postgres(databaseUrl, { prepare: false, max: 1 })
 

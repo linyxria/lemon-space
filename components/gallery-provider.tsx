@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from 'motion/react'
 import { usePathname } from 'next/navigation'
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 import ImageModal, { type ModalAssetData } from './image-modal'
 
@@ -16,35 +16,29 @@ export default function GalleryProvider({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
-  const [asset, setAsset] = useState<ModalAssetData | null>(null)
-  const previousPathnameRef = useRef(pathname)
+  const [modal, setModal] = useState<{
+    asset: ModalAssetData
+    pathname: string
+  } | null>(null)
 
   const openAsset = (item: ModalAssetData) => {
-    setAsset(item)
-    setIsOpen(true)
+    setModal({
+      asset: item,
+      pathname,
+    })
   }
 
   const handleExitComplete = () => {
-    // 只有当动画彻底结束时，才把数据源断掉
-    // 这样在 exit 动画期间，asset 始终有值，不会报错
-    setAsset(null)
+    setModal(null)
   }
-
-  useEffect(() => {
-    if (previousPathnameRef.current !== pathname) {
-      setIsOpen(false)
-    }
-    previousPathnameRef.current = pathname
-  }, [pathname])
+  const isModalOpen = modal?.pathname === pathname
 
   return (
     <GalleryContext.Provider value={{ openAsset: openAsset }}>
       {children}
-      {/* 这里的单例 Modal 只在 Provider 挂载时渲染一次 */}
       <AnimatePresence onExitComplete={handleExitComplete}>
-        {isOpen && (
-          <ImageModal asset={asset} onClose={() => setIsOpen(false)} />
+        {isModalOpen && (
+          <ImageModal asset={modal.asset} onClose={() => setModal(null)} />
         )}
       </AnimatePresence>
     </GalleryContext.Provider>

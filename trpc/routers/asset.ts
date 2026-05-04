@@ -492,5 +492,17 @@ export const assetRouter = router({
           .values({ userId: user.id, assetId: input.assetId })
           .onConflictDoNothing()
       }
+
+      const [countRow] = await db
+        .select({
+          likeCount: sql<number>`count(*)`.mapWith(Number),
+        })
+        .from(assetLike)
+        .where(eq(assetLike.assetId, input.assetId))
+
+      return {
+        likedByMe: existing.length === 0,
+        likeCount: countRow?.likeCount ?? 0,
+      }
     }),
 })

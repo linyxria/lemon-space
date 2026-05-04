@@ -3,8 +3,10 @@
 import { Moon, Sun } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 
-import { usePreferences } from '@/components/preferences-provider'
-import { type ThemePreference } from '@/components/theme-provider'
+import {
+  type ThemePreference,
+  usePreferences,
+} from '@/components/preferences-provider'
 import { Button } from '@/components/ui/button'
 
 type VisibleThemePreference = Exclude<ThemePreference, 'system'>

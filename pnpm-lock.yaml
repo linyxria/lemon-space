@@ -184,8 +184,8 @@ importers:
         specifier: ^0.8.0
         version: 0.8.0(prettier@3.8.3)
       supabase:
-        specifier: ^2.98.0
-        version: 2.98.0
+        specifier: ^2.98.1
+        version: 2.98.1
       tailwindcss:
         specifier: ^4.2.4
         version: 4.2.4
@@ -4903,8 +4903,8 @@ packages:
   stylis@4.4.0:
     resolution: {integrity: sha512-5Z9ZpRzfuH6l/UAvCPAPUo3665Nk2wLaZU3x+TLHKVzIz33+sbJqbtrYoC3KD4/uVOr2Zp+L0LySezP9OHV9yA==}
 
-  supabase@2.98.0:
-    resolution: {integrity: sha512-1r56wzoi6SFj+i0XHqF9rSLrjaBSrs+t6xUWn3I+UVnO9nb5ITkmaLEeGgjf7naiBUDf9rtqyRoI+5hTrezZNg==}
+  supabase@2.98.1:
+    resolution: {integrity: sha512-hnPNVjqi8BClWd73YzSzdokap2o+JtCcx6oOOB2qV34CIwXip6IToeQMhdkblFJFGDwixRdqYEj590qB4D5+Vw==}
     engines: {npm: '>=8'}
     hasBin: true
 
@@ -10087,7 +10087,7 @@ snapshots:
 
   stylis@4.4.0: {}
 
-  supabase@2.98.0:
+  supabase@2.98.1:
     dependencies:
       bin-links: 6.0.0
       https-proxy-agent: 9.0.0
