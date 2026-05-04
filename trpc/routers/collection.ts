@@ -1,9 +1,9 @@
-import { TRPCError } from '@trpc/server'
-import { and, desc, eq, inArray, sql } from 'drizzle-orm'
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { z } from 'zod'
+import { TRPCError } from "@trpc/server"
+import { and, desc, eq, inArray, sql } from "drizzle-orm"
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js"
+import { z } from "zod"
 
-import type * as schema from '@/db/schema'
+import type * as schema from "@/db/schema"
 import {
   asset,
   assetLike,
@@ -18,15 +18,15 @@ import {
   postTag,
   postTagLink,
   user,
-} from '@/db/schema'
+} from "@/db/schema"
 
-import { protectedProcedure, router } from '../init'
+import { protectedProcedure, router } from "../init"
 import {
   createDistinctLikeUserCountExpr,
   createTagNamesAggExpr,
   mapObjectKeyToUrl,
   mapUserImageToUrl,
-} from './shared'
+} from "./shared"
 
 const collectionIdSchema = z.object({
   collectionId: z.string().trim().min(1),
@@ -49,8 +49,8 @@ async function assertCollectionOwner({
 
   if (ownedCollection.length === 0) {
     throw new TRPCError({
-      code: 'NOT_FOUND',
-      message: 'Collection not found',
+      code: "NOT_FOUND",
+      message: "Collection not found",
     })
   }
 }
@@ -64,12 +64,12 @@ export const collectionRouter = router({
         description: collection.description,
         createdAt: collection.createdAt,
         updatedAt: collection.updatedAt,
-        assetCount: sql<number>`count(distinct ${collectionAsset.assetId})`.mapWith(
-          Number,
-        ),
-        postCount: sql<number>`count(distinct ${collectionPost.postId})`.mapWith(
-          Number,
-        ),
+        assetCount:
+          sql<number>`count(distinct ${collectionAsset.assetId})`.mapWith(
+            Number,
+          ),
+        postCount:
+          sql<number>`count(distinct ${collectionPost.postId})`.mapWith(Number),
       })
       .from(collection)
       .leftJoin(
@@ -105,8 +105,8 @@ export const collectionRouter = router({
 
       if (!collectionInfo) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Collection not found',
+          code: "NOT_FOUND",
+          message: "Collection not found",
         })
       }
 
@@ -246,7 +246,7 @@ export const collectionRouter = router({
         .refine(
           (value) => Boolean(value.name || value.description !== undefined),
           {
-            message: 'At least one field must be updated',
+            message: "At least one field must be updated",
           },
         ),
     )
@@ -276,8 +276,8 @@ export const collectionRouter = router({
 
       if (!updatedCollection) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Collection not found',
+          code: "NOT_FOUND",
+          message: "Collection not found",
         })
       }
 
@@ -298,8 +298,8 @@ export const collectionRouter = router({
 
       if (!deletedCollection) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Collection not found',
+          code: "NOT_FOUND",
+          message: "Collection not found",
         })
       }
 

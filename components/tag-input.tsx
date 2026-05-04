@@ -1,12 +1,12 @@
-import { X } from 'lucide-react'
+import { X } from "lucide-react"
 import {
   type HTMLInputTypeAttribute,
   type KeyboardEventHandler,
   useState,
-} from 'react'
+} from "react"
 
-import { Badge } from './ui/badge'
-import { Input } from './ui/input'
+import { Badge } from "./ui/badge"
+import { Input } from "./ui/input"
 
 export default function TagInput({
   value,
@@ -21,10 +21,10 @@ export default function TagInput({
   id?: string
   placeholder?: string
 }) {
-  const [inputValue, setInputValue] = useState('')
+  const [inputValue, setInputValue] = useState("")
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault()
 
       const tag = inputValue.trim()
@@ -37,9 +37,9 @@ export default function TagInput({
         onChange([tag])
       }
 
-      setInputValue('')
+      setInputValue("")
     } else if (
-      e.key === 'Backspace' &&
+      e.key === "Backspace" &&
       !inputValue &&
       value &&
       value.length &&

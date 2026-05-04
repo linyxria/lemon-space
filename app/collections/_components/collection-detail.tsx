@@ -1,25 +1,25 @@
-'use client'
+"use client"
 
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
-} from '@tanstack/react-query'
-import { ArrowLeft, Trash2 } from 'lucide-react'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-import { toast } from 'sonner'
+} from "@tanstack/react-query"
+import { ArrowLeft, Trash2 } from "lucide-react"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { useState } from "react"
+import { toast } from "sonner"
 
-import ImageCard from '@/components/image-card'
-import { MasonryGrid } from '@/components/masonry-grid'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
-import { useTRPC } from '@/trpc/client'
+import ImageCard from "@/components/image-card"
+import { MasonryGrid } from "@/components/masonry-grid"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { useTRPC } from "@/trpc/client"
 
-import { PostCard } from '../../posts/_components/post-card'
+import { PostCard } from "../../posts/_components/post-card"
 
 function CollectionEditor({
   initialName,
@@ -68,8 +68,8 @@ function CollectionEditor({
 
 export function CollectionDetail({ collectionId }: { collectionId: string }) {
   const trpc = useTRPC()
-  const t = useTranslations('Collections')
-  const tPreferences = useTranslations('Preferences')
+  const t = useTranslations("Collections")
+  const tPreferences = useTranslations("Preferences")
   const queryClient = useQueryClient()
   const { data } = useSuspenseQuery(
     trpc.collection.detail.queryOptions({ collectionId }),
@@ -86,7 +86,7 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
             queryKey: trpc.collection.list.queryKey(),
           }),
         ])
-        toast.success(tPreferences('saved'))
+        toast.success(tPreferences("saved"))
       },
     }),
   )
@@ -121,7 +121,7 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
           render={<Link href="/collections" />}
         >
           <ArrowLeft className="size-4" />
-          {t('back')}
+          {t("back")}
         </Button>
       </div>
 
@@ -136,12 +136,12 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
         ) : null}
 
         <CollectionEditor
-          key={`${data.name}\u0000${data.description ?? ''}`}
+          key={`${data.name}\u0000${data.description ?? ""}`}
           initialName={data.name}
-          initialDescription={data.description ?? ''}
+          initialDescription={data.description ?? ""}
           disabled={updateMutation.isPending}
-          updateLabel={t('update')}
-          descriptionPlaceholder={t('descriptionPlaceholder')}
+          updateLabel={t("update")}
+          descriptionPlaceholder={t("descriptionPlaceholder")}
           onSubmit={({ name, description }) => {
             updateMutation.mutate({
               collectionId,
@@ -155,10 +155,10 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
       <Tabs defaultValue="posts">
         <TabsList>
           <TabsTrigger value="posts">
-            {t('posts')} ({data.posts.length})
+            {t("posts")} ({data.posts.length})
           </TabsTrigger>
           <TabsTrigger value="assets">
-            {t('assets')} ({data.assets.length})
+            {t("assets")} ({data.assets.length})
           </TabsTrigger>
         </TabsList>
         <TabsContent value="posts" className="pt-3">
@@ -179,7 +179,7 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
                       }
                     >
                       <Trash2 className="size-3.5" />
-                      {t('remove')}
+                      {t("remove")}
                     </Button>
                   </div>
                   <PostCard post={post} />
@@ -188,7 +188,7 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
             </div>
           ) : (
             <p className="bg-muted/50 text-muted-foreground rounded-3xl border border-dashed p-6 text-sm">
-              {t('emptyPosts')}
+              {t("emptyPosts")}
             </p>
           )}
         </TabsContent>
@@ -211,16 +211,16 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
                       }
                     >
                       <Trash2 className="size-3.5" />
-                      {t('remove')}
+                      {t("remove")}
                     </Button>
                   </div>
-                  <ImageCard {...item} loading={index < 2 ? 'eager' : 'lazy'} />
+                  <ImageCard {...item} loading={index < 2 ? "eager" : "lazy"} />
                 </div>
               )}
             />
           ) : (
             <p className="bg-muted/50 text-muted-foreground rounded-3xl border border-dashed p-6 text-sm">
-              {t('emptyAssets')}
+              {t("emptyAssets")}
             </p>
           )}
         </TabsContent>

@@ -1,19 +1,19 @@
-import { Edit3, PenLine, Plus } from 'lucide-react'
-import { headers } from 'next/headers'
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import { Edit3, PenLine, Plus } from "lucide-react"
+import { headers } from "next/headers"
+import Link from "next/link"
+import { redirect } from "next/navigation"
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { auth } from '@/lib/auth'
-import { caller } from '@/trpc/server'
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { auth } from "@/lib/auth"
+import { caller } from "@/trpc/server"
 
-import { PostCard } from '../_components/post-card'
+import { PostCard } from "../_components/post-card"
 
 export default async function MyPostsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
 
-  if (!session) redirect('/sign-in')
+  if (!session) redirect("/sign-in")
 
   const posts = await caller.post.myList()
 
@@ -41,10 +41,10 @@ export default async function MyPostsPage() {
             <div key={post.id} className="space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <Badge
-                  variant={post.status === 'published' ? 'default' : 'outline'}
+                  variant={post.status === "published" ? "default" : "outline"}
                   className="rounded-full"
                 >
-                  {post.status === 'published' ? '已发布' : '草稿'}
+                  {post.status === "published" ? "已发布" : "草稿"}
                 </Badge>
                 <Button
                   size="sm"

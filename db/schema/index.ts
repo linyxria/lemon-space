@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm'
+import { relations } from "drizzle-orm"
 import {
   index,
   integer,
@@ -9,190 +9,190 @@ import {
   timestamp,
   unique,
   uuid,
-} from 'drizzle-orm/pg-core'
+} from "drizzle-orm/pg-core"
 
-import { user } from './auth'
+import { user } from "./auth"
 
-export const assetTag = pgTable('asset_tag', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull().unique(),
-  slug: text('slug').notNull().unique(),
-  creatorId: text('creator_id').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+export const assetTag = pgTable("asset_tag", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  creatorId: text("creator_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
 export const asset = pgTable(
-  'asset',
+  "asset",
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    userId: text('user_id').notNull(),
-    title: text('title').notNull(),
-    objectKey: text('object_key').notNull(),
-    width: integer('width').notNull(),
-    height: integer('height').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id").notNull(),
+    title: text("title").notNull(),
+    objectKey: text("object_key").notNull(),
+    width: integer("width").notNull(),
+    height: integer("height").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (t) => [unique('user_id_object_key_unique').on(t.userId, t.objectKey)],
+  (t) => [unique("user_id_object_key_unique").on(t.userId, t.objectKey)],
 )
 
 export const assetTagLink = pgTable(
-  'asset_tag_link',
+  "asset_tag_link",
   {
-    assetId: uuid('asset_id')
-      .references(() => asset.id, { onDelete: 'cascade' })
+    assetId: uuid("asset_id")
+      .references(() => asset.id, { onDelete: "cascade" })
       .notNull(),
-    tagId: uuid('tag_id')
-      .references(() => assetTag.id, { onDelete: 'cascade' })
+    tagId: uuid("tag_id")
+      .references(() => assetTag.id, { onDelete: "cascade" })
       .notNull(),
   },
   (t) => [
     primaryKey({ columns: [t.tagId, t.assetId] }),
-    index('asset_tag_link_asset_id_idx').on(t.assetId),
+    index("asset_tag_link_asset_id_idx").on(t.assetId),
   ],
 )
 
 export const assetLike = pgTable(
-  'asset_like',
+  "asset_like",
   {
-    userId: text('user_id').notNull(),
-    assetId: uuid('asset_id')
-      .references(() => asset.id, { onDelete: 'cascade' })
+    userId: text("user_id").notNull(),
+    assetId: uuid("asset_id")
+      .references(() => asset.id, { onDelete: "cascade" })
       .notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.assetId, t.userId] })],
 )
 
 export const collection = pgTable(
-  'collection',
+  "collection",
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    userId: text('user_id')
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    name: text('name').notNull(),
-    description: text('description'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at')
+      .references(() => user.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
       .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (t) => [index('collection_user_id_idx').on(t.userId)],
+  (t) => [index("collection_user_id_idx").on(t.userId)],
 )
 
 export const collectionAsset = pgTable(
-  'collection_asset',
+  "collection_asset",
   {
-    collectionId: uuid('collection_id')
-      .references(() => collection.id, { onDelete: 'cascade' })
+    collectionId: uuid("collection_id")
+      .references(() => collection.id, { onDelete: "cascade" })
       .notNull(),
-    assetId: uuid('asset_id')
-      .references(() => asset.id, { onDelete: 'cascade' })
+    assetId: uuid("asset_id")
+      .references(() => asset.id, { onDelete: "cascade" })
       .notNull(),
-    addedAt: timestamp('added_at').defaultNow().notNull(),
+    addedAt: timestamp("added_at").defaultNow().notNull(),
   },
   (t) => [
     primaryKey({ columns: [t.collectionId, t.assetId] }),
-    index('collection_asset_asset_id_idx').on(t.assetId),
-    index('collection_asset_collection_id_idx').on(t.collectionId),
+    index("collection_asset_asset_id_idx").on(t.assetId),
+    index("collection_asset_collection_id_idx").on(t.collectionId),
   ],
 )
 
 export const post = pgTable(
-  'post',
+  "post",
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    authorId: text('author_id')
+    id: uuid("id").primaryKey().defaultRandom(),
+    authorId: text("author_id")
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    title: text('title').notNull(),
-    excerpt: text('excerpt').notNull(),
-    coverImageUrl: text('cover_image_url'),
-    content: text('content').notNull(),
-    contentJson: jsonb('content_json').$type<Record<string, unknown> | null>(),
-    status: text('status').notNull().default('draft'),
-    readingTime: integer('reading_time').notNull().default(1),
-    viewCount: integer('view_count').notNull().default(0),
-    publishedAt: timestamp('published_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at')
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    excerpt: text("excerpt").notNull(),
+    coverImageUrl: text("cover_image_url"),
+    content: text("content").notNull(),
+    contentJson: jsonb("content_json").$type<Record<string, unknown> | null>(),
+    status: text("status").notNull().default("draft"),
+    readingTime: integer("reading_time").notNull().default(1),
+    viewCount: integer("view_count").notNull().default(0),
+    publishedAt: timestamp("published_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
       .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (t) => [
-    index('post_author_id_idx').on(t.authorId),
-    index('post_status_published_at_idx').on(t.status, t.publishedAt),
+    index("post_author_id_idx").on(t.authorId),
+    index("post_status_published_at_idx").on(t.status, t.publishedAt),
   ],
 )
 
 export const collectionPost = pgTable(
-  'collection_post',
+  "collection_post",
   {
-    collectionId: uuid('collection_id')
-      .references(() => collection.id, { onDelete: 'cascade' })
+    collectionId: uuid("collection_id")
+      .references(() => collection.id, { onDelete: "cascade" })
       .notNull(),
-    postId: uuid('post_id')
-      .references(() => post.id, { onDelete: 'cascade' })
+    postId: uuid("post_id")
+      .references(() => post.id, { onDelete: "cascade" })
       .notNull(),
-    addedAt: timestamp('added_at').defaultNow().notNull(),
+    addedAt: timestamp("added_at").defaultNow().notNull(),
   },
   (t) => [
     primaryKey({ columns: [t.collectionId, t.postId] }),
-    index('collection_post_post_id_idx').on(t.postId),
-    index('collection_post_collection_id_idx').on(t.collectionId),
+    index("collection_post_post_id_idx").on(t.postId),
+    index("collection_post_collection_id_idx").on(t.collectionId),
   ],
 )
 
-export const postTag = pgTable('post_tag', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull().unique(),
-  slug: text('slug').notNull().unique(),
-  creatorId: text('creator_id').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+export const postTag = pgTable("post_tag", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  creatorId: text("creator_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
 export const postTagLink = pgTable(
-  'post_tag_link',
+  "post_tag_link",
   {
-    postId: uuid('post_id')
-      .references(() => post.id, { onDelete: 'cascade' })
+    postId: uuid("post_id")
+      .references(() => post.id, { onDelete: "cascade" })
       .notNull(),
-    tagId: uuid('tag_id')
-      .references(() => postTag.id, { onDelete: 'cascade' })
+    tagId: uuid("tag_id")
+      .references(() => postTag.id, { onDelete: "cascade" })
       .notNull(),
   },
   (t) => [
     primaryKey({ columns: [t.postId, t.tagId] }),
-    index('post_tag_link_tag_id_idx').on(t.tagId),
+    index("post_tag_link_tag_id_idx").on(t.tagId),
   ],
 )
 
 export const postLike = pgTable(
-  'post_like',
+  "post_like",
   {
-    userId: text('user_id')
-      .references(() => user.id, { onDelete: 'cascade' })
+    userId: text("user_id")
+      .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
-    postId: uuid('post_id')
-      .references(() => post.id, { onDelete: 'cascade' })
+    postId: uuid("post_id")
+      .references(() => post.id, { onDelete: "cascade" })
       .notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.postId, t.userId] })],
 )
 
 export const postBookmark = pgTable(
-  'post_bookmark',
+  "post_bookmark",
   {
-    userId: text('user_id')
-      .references(() => user.id, { onDelete: 'cascade' })
+    userId: text("user_id")
+      .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
-    postId: uuid('post_id')
-      .references(() => post.id, { onDelete: 'cascade' })
+    postId: uuid("post_id")
+      .references(() => post.id, { onDelete: "cascade" })
       .notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.postId, t.userId] })],
 )
@@ -238,16 +238,19 @@ export const collectionRelations = relations(collection, ({ one, many }) => ({
   posts: many(collectionPost),
 }))
 
-export const collectionAssetRelations = relations(collectionAsset, ({ one }) => ({
-  collection: one(collection, {
-    fields: [collectionAsset.collectionId],
-    references: [collection.id],
+export const collectionAssetRelations = relations(
+  collectionAsset,
+  ({ one }) => ({
+    collection: one(collection, {
+      fields: [collectionAsset.collectionId],
+      references: [collection.id],
+    }),
+    asset: one(asset, {
+      fields: [collectionAsset.assetId],
+      references: [asset.id],
+    }),
   }),
-  asset: one(asset, {
-    fields: [collectionAsset.assetId],
-    references: [asset.id],
-  }),
-}))
+)
 
 export const postRelations = relations(post, ({ one, many }) => ({
   author: one(user, {
@@ -300,4 +303,4 @@ export const postBookmarkRelations = relations(postBookmark, ({ one }) => ({
   }),
 }))
 
-export * from './auth'
+export * from "./auth"

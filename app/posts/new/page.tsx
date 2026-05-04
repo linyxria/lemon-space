@@ -1,14 +1,14 @@
-import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
 
-import { auth } from '@/lib/auth'
+import { auth } from "@/lib/auth"
 
-import { PostEditor } from '../_components/post-editor'
+import { PostEditor } from "../_components/post-editor"
 
 export default async function NewPostPage() {
   const session = await auth.api.getSession({ headers: await headers() })
 
-  if (!session) redirect('/sign-in')
+  if (!session) redirect("/sign-in")
 
   return (
     <div className="space-y-5">

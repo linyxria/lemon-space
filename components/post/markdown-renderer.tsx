@@ -1,10 +1,10 @@
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils"
 
 function renderInline(text: string) {
   const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g)
 
   return parts.map((part, index) => {
-    if (part.startsWith('`') && part.endsWith('`')) {
+    if (part.startsWith("`") && part.endsWith("`")) {
       return (
         <code
           key={`${part}-${index}`}
@@ -15,7 +15,7 @@ function renderInline(text: string) {
       )
     }
 
-    if (part.startsWith('**') && part.endsWith('**')) {
+    if (part.startsWith("**") && part.endsWith("**")) {
       return <strong key={`${part}-${index}`}>{part.slice(2, -2)}</strong>
     }
 
@@ -30,7 +30,7 @@ export function MarkdownRenderer({
   content: string
   className?: string
 }) {
-  const lines = content.split('\n')
+  const lines = content.split("\n")
   const nodes: React.ReactNode[] = []
   let index = 0
 
@@ -43,11 +43,11 @@ export function MarkdownRenderer({
       continue
     }
 
-    if (line.startsWith('```')) {
+    if (line.startsWith("```")) {
       const codeLines: string[] = []
       index += 1
 
-      while (index < lines.length && !lines[index].trim().startsWith('```')) {
+      while (index < lines.length && !lines[index].trim().startsWith("```")) {
         codeLines.push(lines[index])
         index += 1
       }
@@ -57,14 +57,14 @@ export function MarkdownRenderer({
           key={`code-${index}`}
           className="bg-foreground text-background overflow-x-auto rounded-lg p-4 text-sm leading-6"
         >
-          <code>{codeLines.join('\n')}</code>
+          <code>{codeLines.join("\n")}</code>
         </pre>,
       )
       index += 1
       continue
     }
 
-    if (line.startsWith('### ')) {
+    if (line.startsWith("### ")) {
       nodes.push(
         <h3 key={`h3-${index}`} className="pt-4 text-xl font-black">
           {renderInline(line.slice(4))}
@@ -74,7 +74,7 @@ export function MarkdownRenderer({
       continue
     }
 
-    if (line.startsWith('## ')) {
+    if (line.startsWith("## ")) {
       nodes.push(
         <h2 key={`h2-${index}`} className="pt-6 text-2xl font-black">
           {renderInline(line.slice(3))}
@@ -84,7 +84,7 @@ export function MarkdownRenderer({
       continue
     }
 
-    if (line.startsWith('# ')) {
+    if (line.startsWith("# ")) {
       nodes.push(
         <h2 key={`h1-${index}`} className="pt-6 text-3xl font-black">
           {renderInline(line.slice(2))}
@@ -94,11 +94,11 @@ export function MarkdownRenderer({
       continue
     }
 
-    if (line.startsWith('> ')) {
+    if (line.startsWith("> ")) {
       const quoteLines = [line.slice(2)]
       index += 1
 
-      while (index < lines.length && lines[index].trim().startsWith('> ')) {
+      while (index < lines.length && lines[index].trim().startsWith("> ")) {
         quoteLines.push(lines[index].trim().slice(2))
         index += 1
       }
@@ -116,11 +116,11 @@ export function MarkdownRenderer({
       continue
     }
 
-    if (line.startsWith('- ')) {
+    if (line.startsWith("- ")) {
       const items = [line.slice(2)]
       index += 1
 
-      while (index < lines.length && lines[index].trim().startsWith('- ')) {
+      while (index < lines.length && lines[index].trim().startsWith("- ")) {
         items.push(lines[index].trim().slice(2))
         index += 1
       }
@@ -144,7 +144,7 @@ export function MarkdownRenderer({
   }
 
   return (
-    <div className={cn('space-y-5 text-base leading-8 md:text-lg', className)}>
+    <div className={cn("space-y-5 text-base leading-8 md:text-lg", className)}>
       {nodes}
     </div>
   )

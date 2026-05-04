@@ -1,20 +1,20 @@
-'use client'
+"use client"
 
-import { useRouter } from '@bprogress/next/app'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Heart } from 'lucide-react'
-import { motion } from 'motion/react'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useOptimistic, useState, useTransition } from 'react'
+import { useRouter } from "@bprogress/next/app"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Heart } from "lucide-react"
+import { motion } from "motion/react"
+import Image from "next/image"
+import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { useOptimistic, useState, useTransition } from "react"
 
-import { Badge } from '@/components/ui/badge'
-import { authClient } from '@/lib/auth-client'
-import { useTRPC } from '@/trpc/client'
+import { Badge } from "@/components/ui/badge"
+import { authClient } from "@/lib/auth-client"
+import { useTRPC } from "@/trpc/client"
 
-import { useGallery } from './gallery-provider'
-import UserAvatar from './user-avatar'
+import { useGallery } from "./gallery-provider"
+import UserAvatar from "./user-avatar"
 
 const heartVariants = {
   liked: {
@@ -37,7 +37,7 @@ function getNextLikeState(state: LikeState): LikeState {
 }
 
 export default function ImageCard({
-  loading = 'lazy',
+  loading = "lazy",
   id,
   title,
   url,
@@ -48,7 +48,7 @@ export default function ImageCard({
   likeCount,
   likedByMe,
 }: {
-  loading?: 'eager' | 'lazy'
+  loading?: "eager" | "lazy"
   id: string
   title: string
   url: string
@@ -99,7 +99,7 @@ export default function ImageCard({
   const router = useRouter()
   const pathname = usePathname()
   const gallery = useGallery()
-  const t = useTranslations('ImageCard')
+  const t = useTranslations("ImageCard")
 
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -135,25 +135,25 @@ export default function ImageCard({
 
   const likeButtonClassName = `ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
     optimisticLike.isLiked
-      ? 'bg-primary/10 text-primary'
-      : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+      ? "bg-primary/10 text-primary"
+      : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
   } `
 
   const iconButtonClassName = `rounded-full bg-black/20 p-2 backdrop-blur-md transition-all active:scale-90 ${
-    optimisticLike.isLiked ? 'text-primary' : 'text-white/80 hover:text-white'
+    optimisticLike.isLiked ? "text-primary" : "text-white/80 hover:text-white"
   }`
 
-  const likeLabel = optimisticLike.isLiked ? t('unlike') : t('like')
+  const likeLabel = optimisticLike.isLiked ? t("unlike") : t("like")
 
   const renderHeart = (size: number, strokeWidth: number) => (
     <motion.div
       initial={false}
-      animate={optimisticLike.isLiked ? 'liked' : 'unliked'}
+      animate={optimisticLike.isLiked ? "liked" : "unliked"}
       variants={heartVariants}
     >
       <Heart
         size={size}
-        fill={optimisticLike.isLiked ? 'currentColor' : 'none'}
+        fill={optimisticLike.isLiked ? "currentColor" : "none"}
         strokeWidth={optimisticLike.isLiked ? 0 : strokeWidth}
       />
     </motion.div>
@@ -179,7 +179,7 @@ export default function ImageCard({
             width={width}
             height={height}
             loading={loading}
-            fetchPriority={loading === 'eager' ? 'high' : undefined}
+            fetchPriority={loading === "eager" ? "high" : undefined}
             className="block h-auto w-full object-cover"
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />

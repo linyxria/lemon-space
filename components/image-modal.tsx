@@ -1,20 +1,20 @@
-'use client'
+"use client"
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Copy, Download, ExternalLink, X } from 'lucide-react'
-import { motion } from 'motion/react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Check, Copy, Download, ExternalLink, X } from "lucide-react"
+import { motion } from "motion/react"
+import Image from "next/image"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { useState } from "react"
+import { toast } from "sonner"
 
-import { authClient } from '@/lib/auth-client'
-import { useTRPC } from '@/trpc/client'
+import { authClient } from "@/lib/auth-client"
+import { useTRPC } from "@/trpc/client"
 
-import { useGallery } from './gallery-provider'
-import { Badge } from './ui/badge'
-import { Button } from './ui/button'
+import { useGallery } from "./gallery-provider"
+import { Badge } from "./ui/badge"
+import { Button } from "./ui/button"
 
 export interface ModalAssetData {
   id: string
@@ -36,11 +36,11 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
   const gallery = useGallery()
   const queryClient = useQueryClient()
   const { data: session } = authClient.useSession()
-  const t = useTranslations('ImageModal')
+  const t = useTranslations("ImageModal")
 
   const { data: relatedAssets } = useQuery(
     trpc.asset.related.queryOptions(
-      { assetId: asset?.id ?? '', limit: 6 },
+      { assetId: asset?.id ?? "", limit: 6 },
       {
         enabled: Boolean(asset?.id),
       },
@@ -49,7 +49,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
 
   const { data: collectionsForAsset } = useQuery(
     trpc.collection.listForAsset.queryOptions(
-      { assetId: asset?.id ?? '' },
+      { assetId: asset?.id ?? "" },
       {
         enabled: Boolean(asset?.id && session?.user),
       },
@@ -81,10 +81,10 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
     try {
       await navigator.clipboard.writeText(asset.url)
       setCopied(true)
-      toast.success(t('copied'))
+      toast.success(t("copied"))
       window.setTimeout(() => setCopied(false), 1600)
     } catch {
-      toast.error(t('copyFailed'))
+      toast.error(t("copyFailed"))
     }
   }
 
@@ -172,7 +172,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant="secondary" onClick={handleCopy}>
                   {copied ? <Check size={18} /> : <Copy size={18} />}
-                  {copied ? t('copied') : t('copyLink')}
+                  {copied ? t("copied") : t("copyLink")}
                 </Button>
                 <Button
                   variant="secondary"
@@ -187,7 +187,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                   }
                 >
                   <Download size={18} />
-                  {t('download')}
+                  {t("download")}
                 </Button>
                 <Button
                   nativeButton={false}
@@ -197,7 +197,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {t('viewOriginal')}
+                      {t("viewOriginal")}
                       <ExternalLink size={20} />
                     </a>
                   }
@@ -207,14 +207,14 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
               {session?.user ? (
                 <div className="bg-muted/60 rounded-2xl border p-3">
                   <p className="text-muted-foreground mb-2 text-xs font-bold tracking-[0.12em] uppercase">
-                    {t('saveToCollection')}
+                    {t("saveToCollection")}
                   </p>
                   {collectionsForAsset && collectionsForAsset.length > 0 ? (
                     <div className="flex flex-wrap items-center gap-2">
                       {collectionsForAsset.map((item) => (
                         <Button
                           key={item.id}
-                          variant={item.included ? 'default' : 'outline'}
+                          variant={item.included ? "default" : "outline"}
                           size="sm"
                           disabled={toggleCollectionMutation.isPending}
                           onClick={() => handleToggleCollection(item.id)}
@@ -229,7 +229,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                   ) : (
                     <div className="flex items-center gap-3">
                       <p className="text-muted-foreground text-sm">
-                        {t('noCollectionYet')}
+                        {t("noCollectionYet")}
                       </p>
                       <Button
                         variant="secondary"
@@ -237,7 +237,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                         nativeButton={false}
                         render={<Link href="/collections" onClick={onClose} />}
                       >
-                        {t('createCollection')}
+                        {t("createCollection")}
                       </Button>
                     </div>
                   )}
@@ -248,10 +248,10 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="text-muted-foreground text-sm font-black tracking-[0.12em] uppercase">
-                      {t('continueExploring')}
+                      {t("continueExploring")}
                     </h4>
                     <span className="text-muted-foreground text-xs font-medium">
-                      {t('sameTagRelated')}
+                      {t("sameTagRelated")}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-2">

@@ -1,14 +1,14 @@
-'use client'
+"use client"
 
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
-import { ImageIcon, LoaderCircle, UploadCloud } from 'lucide-react'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef } from 'react'
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query"
+import { ImageIcon, LoaderCircle, UploadCloud } from "lucide-react"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { useEffect, useMemo, useRef } from "react"
 
-import ImageCard from '@/components/image-card'
-import { MasonryGrid } from '@/components/masonry-grid'
-import { Button } from '@/components/ui/button'
+import ImageCard from "@/components/image-card"
+import { MasonryGrid } from "@/components/masonry-grid"
+import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -16,8 +16,8 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '@/components/ui/empty'
-import { useTRPC } from '@/trpc/client'
+} from "@/components/ui/empty"
+import { useTRPC } from "@/trpc/client"
 
 export function GalleryList({
   tag,
@@ -26,10 +26,10 @@ export function GalleryList({
 }: {
   tag: string | undefined
   q: string | undefined
-  sort: 'latest' | 'popular'
+  sort: "latest" | "popular"
 }) {
   const trpc = useTRPC()
-  const t = useTranslations('Gallery')
+  const t = useTranslations("Gallery")
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
@@ -63,7 +63,7 @@ export function GalleryList({
           void fetchNextPage()
         }
       },
-      { rootMargin: '600px 0px' },
+      { rootMargin: "600px 0px" },
     )
 
     observer.observe(node)
@@ -74,12 +74,12 @@ export function GalleryList({
     if (tag || q)
       return (
         <div className="py-20 text-center">
-          <p className="text-muted-foreground font-medium">{t('noResult')}</p>
+          <p className="text-muted-foreground font-medium">{t("noResult")}</p>
           <Link
             href="/gallery"
             className="text-primary mt-2 inline-block text-sm font-bold hover:underline"
           >
-            {t('backToGallery')}
+            {t("backToGallery")}
           </Link>
         </div>
       )
@@ -90,13 +90,13 @@ export function GalleryList({
           <EmptyMedia variant="icon">
             <ImageIcon />
           </EmptyMedia>
-          <EmptyTitle>{t('emptyTitle')}</EmptyTitle>
-          <EmptyDescription>{t('emptyDescription')}</EmptyDescription>
+          <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
+          <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button nativeButton={false} render={<Link href="/gallery/upload" />}>
             <UploadCloud />
-            {t('uploadNow')}
+            {t("uploadNow")}
           </Button>
         </EmptyContent>
       </Empty>
@@ -108,7 +108,7 @@ export function GalleryList({
       <MasonryGrid
         items={items}
         renderItem={(item, index) => (
-          <ImageCard {...item} loading={index < 12 ? 'eager' : 'lazy'} />
+          <ImageCard {...item} loading={index < 12 ? "eager" : "lazy"} />
         )}
       />
 
@@ -116,15 +116,15 @@ export function GalleryList({
         {isFetchingNextPage ? (
           <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
             <LoaderCircle className="size-4 animate-spin" />
-            {t('loadingMore')}
+            {t("loadingMore")}
           </div>
         ) : hasNextPage ? (
           <Button variant="secondary" onClick={() => void fetchNextPage()}>
-            {t('loadMore')}
+            {t("loadMore")}
           </Button>
         ) : (
           <p className="text-muted-foreground text-sm font-medium">
-            {t('noMore')}
+            {t("noMore")}
           </p>
         )}
       </div>

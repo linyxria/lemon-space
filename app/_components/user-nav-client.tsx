@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
-import { useRouter } from '@bprogress/next/app'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from "@bprogress/next/app"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   BookMarked,
   BookOpenText,
@@ -16,12 +16,12 @@ import {
   Sun,
   UploadCloud,
   UserRound,
-} from 'lucide-react'
-import Link from 'next/link'
-import { useLocale, useTranslations } from 'next-intl'
-import { useState } from 'react'
+} from "lucide-react"
+import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
+import { useState } from "react"
 
-import { usePreferences } from '@/components/preferences-provider'
+import { usePreferences } from "@/components/preferences-provider"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -31,12 +31,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import UserAvatar from '@/components/user-avatar'
-import { authClient } from '@/lib/auth-client'
-import { useTRPC } from '@/trpc/client'
+} from "@/components/ui/dropdown-menu"
+import UserAvatar from "@/components/user-avatar"
+import { authClient } from "@/lib/auth-client"
+import { useTRPC } from "@/trpc/client"
 
-import UserNavSkeleton from './user-nav-skeleton'
+import UserNavSkeleton from "./user-nav-skeleton"
 
 export default function UserNavClient() {
   const [isSigningOut, setIsSigningOut] = useState(false)
@@ -58,8 +58,8 @@ export default function UserNavClient() {
     refetchOnWindowFocus: false,
   })
   const router = useRouter()
-  const t = useTranslations('UserNav')
-  const tCommon = useTranslations('Common')
+  const t = useTranslations("UserNav")
+  const tCommon = useTranslations("Common")
   const locale = useLocale()
   const { setLocale, setTheme, theme } = usePreferences()
 
@@ -98,16 +98,16 @@ export default function UserNavClient() {
               </p>
               <div className="text-muted-foreground mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] font-semibold">
                 <span>
-                  {stats?.postCount ?? 0} {t('postItems')}
+                  {stats?.postCount ?? 0} {t("postItems")}
                 </span>
                 <span>
-                  {stats?.assetCount ?? stats?.myCount ?? 0} {t('galleryItems')}
+                  {stats?.assetCount ?? stats?.myCount ?? 0} {t("galleryItems")}
                 </span>
                 <span>
-                  {stats?.collectionCount ?? 0} {t('collectionsShort')}
+                  {stats?.collectionCount ?? 0} {t("collectionsShort")}
                 </span>
                 <span>
-                  {stats?.likeCount ?? 0} {t('likedItems')}
+                  {stats?.likeCount ?? 0} {t("likedItems")}
                 </span>
               </div>
             </DropdownMenuLabel>
@@ -116,7 +116,7 @@ export default function UserNavClient() {
           <DropdownMenuGroup>
             <DropdownMenuLabel className="flex items-center gap-2">
               <PenLine className="size-4" />
-              {t('createGroup')}
+              {t("createGroup")}
             </DropdownMenuLabel>
             <DropdownMenuItem>
               <Link
@@ -124,7 +124,7 @@ export default function UserNavClient() {
                 className="flex w-full items-center gap-2"
               >
                 <BookOpenText />
-                {t('newPost')}
+                {t("newPost")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
@@ -133,18 +133,18 @@ export default function UserNavClient() {
                 className="flex w-full items-center gap-2"
               >
                 <UploadCloud />
-                {t('upload')}
+                {t("upload")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">
               <Library className="size-4" />
-              {t('libraryGroup')}
+              {t("libraryGroup")}
             </DropdownMenuLabel>
             <DropdownMenuItem>
               <Link href="/posts/me" className="flex w-full items-center gap-2">
                 <BookOpenText />
-                {t('myPosts')}
+                {t("myPosts")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
@@ -153,13 +153,13 @@ export default function UserNavClient() {
                 className="flex w-full items-center gap-2"
               >
                 <LayoutGrid />
-                {t('myGallery')}
+                {t("myGallery")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Link href="/likes" className="flex w-full items-center gap-2">
                 <Heart />
-                {t('myLikes')}
+                {t("myLikes")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
@@ -168,69 +168,69 @@ export default function UserNavClient() {
                 className="flex w-full items-center gap-2"
               >
                 <BookMarked />
-                {t('collections')}
+                {t("collections")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">
               <SlidersHorizontal className="size-4" />
-              {t('settingsGroup')}
+              {t("settingsGroup")}
             </DropdownMenuLabel>
             <DropdownMenuItem>
               <Link href="/profile" className="flex w-full items-center gap-2">
                 <UserRound />
-                {t('profile')}
+                {t("profile")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">
-              {theme === 'dark' ? (
+              {theme === "dark" ? (
                 <Moon className="size-4" />
               ) : (
                 <Sun className="size-4" />
               )}
-              {t('appearance')}
+              {t("appearance")}
             </DropdownMenuLabel>
             <DropdownMenuCheckboxItem
-              checked={theme === 'system'}
-              onCheckedChange={() => setTheme('system')}
+              checked={theme === "system"}
+              onCheckedChange={() => setTheme("system")}
             >
-              {tCommon('themeSystem')}
+              {tCommon("themeSystem")}
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
-              checked={theme === 'light'}
-              onCheckedChange={() => setTheme('light')}
+              checked={theme === "light"}
+              onCheckedChange={() => setTheme("light")}
             >
-              {tCommon('themeLight')}
+              {tCommon("themeLight")}
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
-              checked={theme === 'dark'}
-              onCheckedChange={() => setTheme('dark')}
+              checked={theme === "dark"}
+              onCheckedChange={() => setTheme("dark")}
             >
-              {tCommon('themeDark')}
+              {tCommon("themeDark")}
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">
               <Languages className="size-4" />
-              {t('language')}
+              {t("language")}
             </DropdownMenuLabel>
             <DropdownMenuCheckboxItem
-              checked={locale === 'zh-CN'}
-              onCheckedChange={() => setLocale('zh-CN')}
+              checked={locale === "zh-CN"}
+              onCheckedChange={() => setLocale("zh-CN")}
             >
-              {tCommon('localeZh')}
+              {tCommon("localeZh")}
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
-              checked={locale === 'en-US'}
-              onCheckedChange={() => setLocale('en-US')}
+              checked={locale === "en-US"}
+              onCheckedChange={() => setLocale("en-US")}
             >
-              {tCommon('localeEn')}
+              {tCommon("localeEn")}
             </DropdownMenuCheckboxItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
             <LogOut />
-            <span>{t('signOut')}</span>
+            <span>{t("signOut")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

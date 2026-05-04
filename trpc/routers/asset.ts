@@ -1,18 +1,18 @@
-import { TRPCError } from '@trpc/server'
-import { and, desc, eq, exists, ilike, inArray, or, sql } from 'drizzle-orm'
-import z from 'zod'
+import { TRPCError } from "@trpc/server"
+import { and, desc, eq, exists, ilike, inArray, or, sql } from "drizzle-orm"
+import z from "zod"
 
-import type { db } from '@/db'
-import { asset, assetLike, assetTag, assetTagLink, user } from '@/db/schema'
-import { chineseSlugify } from '@/lib/utils'
+import type { db } from "@/db"
+import { asset, assetLike, assetTag, assetTagLink, user } from "@/db/schema"
+import { chineseSlugify } from "@/lib/utils"
 
-import { procedure, protectedProcedure, router } from '../init'
+import { procedure, protectedProcedure, router } from "../init"
 import {
   createDistinctLikeUserCountExpr,
   createTagNamesAggExpr,
   mapObjectKeyToUrl,
   mapUserImageToUrl,
-} from './shared'
+} from "./shared"
 
 const tagListSchema = z.array(z.string().trim().min(1))
 
@@ -117,7 +117,7 @@ export const assetRouter = router({
       z.object({
         tag: z.string().trim().min(1).optional(),
         q: z.string().trim().min(1).optional(),
-        sort: z.enum(['latest', 'popular']).default('latest'),
+        sort: z.enum(["latest", "popular"]).default("latest"),
         limit: z.number().int().min(1).max(48).default(24),
         cursor: z.number().int().min(0).default(0),
       }),
@@ -206,7 +206,7 @@ export const assetRouter = router({
         // 分组：必须包含所有非聚合字段
         .groupBy(asset.id, user.id)
         .orderBy(
-          input.sort === 'popular'
+          input.sort === "popular"
             ? desc(likeCountExpr)
             : desc(asset.createdAt),
           desc(asset.createdAt),
@@ -357,8 +357,8 @@ export const assetRouter = router({
         if (error instanceof TRPCError) throw error
 
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to save asset',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to save asset",
         })
       }
     }),
@@ -375,13 +375,13 @@ export const assetRouter = router({
           saveAssets(tx, ctx.user.id, input.assets, input.tags),
         )
       } catch (error) {
-        console.error('asset.createBatch failed', error)
+        console.error("asset.createBatch failed", error)
 
         if (error instanceof TRPCError) throw error
 
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to save assets',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to save assets",
         })
       }
     }),
@@ -473,7 +473,10 @@ export const assetRouter = router({
         .select({ userId: assetLike.userId })
         .from(assetLike)
         .where(
-          and(eq(assetLike.userId, user.id), eq(assetLike.assetId, input.assetId)),
+          and(
+            eq(assetLike.userId, user.id),
+            eq(assetLike.assetId, input.assetId),
+          ),
         )
         .limit(1)
 

@@ -1,9 +1,9 @@
-import { Suspense } from 'react'
+import { Suspense } from "react"
 
-import { Skeleton } from '@/components/ui/skeleton'
-import { HydrateClient, prefetch, trpc } from '@/trpc/server'
+import { Skeleton } from "@/components/ui/skeleton"
+import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
-import { CollectionsBoard } from './_components/collections-board'
+import { CollectionsBoard } from "./_components/collections-board"
 
 export default function CollectionsPage() {
   prefetch(trpc.collection.list.queryOptions())

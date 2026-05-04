@@ -1,10 +1,10 @@
-import { TRPCError } from '@trpc/server'
-import { and, desc, eq, exists, ilike, inArray, or, sql } from 'drizzle-orm'
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import { nanoid } from 'nanoid'
-import { z } from 'zod'
+import { TRPCError } from "@trpc/server"
+import { and, desc, eq, exists, ilike, inArray, or, sql } from "drizzle-orm"
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js"
+import { nanoid } from "nanoid"
+import { z } from "zod"
 
-import type * as schema from '@/db/schema'
+import type * as schema from "@/db/schema"
 import {
   post,
   postBookmark,
@@ -12,22 +12,22 @@ import {
   postTag,
   postTagLink,
   user,
-} from '@/db/schema'
-import { chineseSlugify } from '@/lib/utils'
+} from "@/db/schema"
+import { chineseSlugify } from "@/lib/utils"
 
-import { procedure, protectedProcedure, router } from '../init'
-import { mapUserImageToUrl } from './shared'
+import { procedure, protectedProcedure, router } from "../init"
+import { mapUserImageToUrl } from "./shared"
 
-const postStatusSchema = z.enum(['draft', 'published'])
+const postStatusSchema = z.enum(["draft", "published"])
 const tagListSchema = z.array(z.string().trim().min(1).max(32)).max(8)
 
 const postInputSchema = z.object({
   title: z.string().trim().min(1).max(120),
   excerpt: z.string().trim().min(1).max(280),
-  coverImageUrl: z.string().trim().url().max(500).optional().or(z.literal('')),
+  coverImageUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
   content: z.string().trim().min(20),
   contentJson: z.record(z.string(), z.unknown()).optional().nullable(),
-  status: postStatusSchema.default('draft'),
+  status: postStatusSchema.default("draft"),
   tags: tagListSchema.default([]),
 })
 
@@ -36,7 +36,7 @@ const postIdSchema = z.object({
 })
 
 type Database = PostgresJsDatabase<typeof schema>
-type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0]
+type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0]
 
 function normalizeTags(tags: string[]) {
   return Array.from(new Set(tags.map((tag) => tag.trim()).filter(Boolean)))
@@ -45,7 +45,7 @@ function normalizeTags(tags: string[]) {
 function estimateReadingTime(content: string) {
   const cjkCount = (content.match(/[\u4e00-\u9fff]/g) ?? []).length
   const wordCount = (
-    content.replace(/[\u4e00-\u9fff]/g, ' ').match(/\S+/g) ?? []
+    content.replace(/[\u4e00-\u9fff]/g, " ").match(/\S+/g) ?? []
   ).length
 
   return Math.max(1, Math.ceil((cjkCount + wordCount) / 420))
@@ -165,7 +165,7 @@ export const postRouter = router({
         .innerJoin(user, eq(post.authorId, user.id))
         .where(
           and(
-            eq(post.status, 'published'),
+            eq(post.status, "published"),
             input.tag
               ? exists(
                   ctx.db
@@ -224,7 +224,7 @@ export const postRouter = router({
         )`.mapWith(Number),
       })
       .from(post)
-      .where(eq(post.status, 'published'))
+      .where(eq(post.status, "published"))
       .orderBy(desc(post.publishedAt), desc(post.createdAt))
       .limit(3)
 
@@ -241,7 +241,7 @@ export const postRouter = router({
       .from(postTag)
       .innerJoin(postTagLink, eq(postTag.id, postTagLink.tagId))
       .innerJoin(post, eq(postTagLink.postId, post.id))
-      .where(eq(post.status, 'published'))
+      .where(eq(post.status, "published"))
       .groupBy(postTag.id)
       .orderBy(desc(sql`count(${postTagLink.postId})`), postTag.name)
   }),
@@ -298,10 +298,10 @@ export const postRouter = router({
 
       if (
         !postRecord ||
-        (postRecord.status !== 'published' &&
+        (postRecord.status !== "published" &&
           postRecord.authorId !== ctx.session?.user.id)
       ) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Post not found' })
+        throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" })
       }
 
       const [withTags] = await attachTags(ctx.db, [postRecord])
@@ -310,9 +310,9 @@ export const postRouter = router({
         ...withTags,
         author: mapUserImageToUrl(withTags.author),
         canEdit: postRecord.authorId === ctx.session?.user.id,
-        likedByMe: Boolean('likedByMe' in withTags && withTags.likedByMe),
+        likedByMe: Boolean("likedByMe" in withTags && withTags.likedByMe),
         bookmarkedByMe: Boolean(
-          'bookmarkedByMe' in withTags && withTags.bookmarkedByMe,
+          "bookmarkedByMe" in withTags && withTags.bookmarkedByMe,
         ),
       }
     }),
@@ -365,7 +365,7 @@ export const postRouter = router({
       .from(postLike)
       .innerJoin(post, eq(postLike.postId, post.id))
       .where(
-        and(eq(postLike.userId, ctx.user.id), eq(post.status, 'published')),
+        and(eq(postLike.userId, ctx.user.id), eq(post.status, "published")),
       )
       .orderBy(desc(postLike.createdAt))
 
@@ -388,7 +388,7 @@ export const postRouter = router({
             contentJson: input.contentJson ?? null,
             status: input.status,
             readingTime: estimateReadingTime(input.content),
-            publishedAt: input.status === 'published' ? now : null,
+            publishedAt: input.status === "published" ? now : null,
           })
           .returning({ id: post.id })
 
@@ -419,7 +419,7 @@ export const postRouter = router({
         .limit(1)
 
       if (!existingPost || existingPost.authorId !== ctx.user.id) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Post not found' })
+        throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" })
       }
 
       const [updatedPost] = await ctx.db.transaction(async (tx) => {
@@ -434,7 +434,7 @@ export const postRouter = router({
             status: input.status,
             readingTime: estimateReadingTime(input.content),
             publishedAt:
-              input.status === 'published'
+              input.status === "published"
                 ? (existingPost.publishedAt ?? new Date())
                 : null,
             updatedAt: new Date(),
@@ -463,7 +463,7 @@ export const postRouter = router({
         .returning({ id: post.id })
 
       if (!deletedPost) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Post not found' })
+        throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" })
       }
 
       return { success: true }
@@ -556,7 +556,7 @@ export const postRouter = router({
     const [updatedPost] = await ctx.db
       .update(post)
       .set({ viewCount: sql`${post.viewCount} + 1` })
-      .where(and(eq(post.id, input.postId), eq(post.status, 'published')))
+      .where(and(eq(post.id, input.postId), eq(post.status, "published")))
       .returning({ viewCount: post.viewCount })
 
     return {

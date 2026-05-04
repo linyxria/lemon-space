@@ -1,17 +1,17 @@
-import { CalendarDays, Edit3 } from 'lucide-react'
-import { headers } from 'next/headers'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { CalendarDays, Edit3 } from "lucide-react"
+import { headers } from "next/headers"
+import Link from "next/link"
+import { notFound } from "next/navigation"
 
-import { MarkdownRenderer } from '@/components/post/markdown-renderer'
-import { RichTextRenderer } from '@/components/post/rich-text-renderer'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { auth } from '@/lib/auth'
-import { caller } from '@/trpc/server'
+import { MarkdownRenderer } from "@/components/post/markdown-renderer"
+import { RichTextRenderer } from "@/components/post/rich-text-renderer"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { auth } from "@/lib/auth"
+import { caller } from "@/trpc/server"
 
-import { PostActions } from '../_components/post-actions'
+import { PostActions } from "../_components/post-actions"
 
 export default async function PostPage({
   params,
@@ -40,7 +40,7 @@ export default async function PostPage({
               {tag.name}
             </Badge>
           ))}
-          {post.status === 'draft' ? (
+          {post.status === "draft" ? (
             <Badge variant="outline" className="rounded-full">
               草稿
             </Badge>
@@ -58,7 +58,7 @@ export default async function PostPage({
             <Avatar className="size-10">
               <AvatarImage src={post.author.image ?? undefined} />
               <AvatarFallback>
-                {post.author.name?.slice(0, 1) ?? 'L'}
+                {post.author.name?.slice(0, 1) ?? "L"}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -66,8 +66,8 @@ export default async function PostPage({
               <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
                 <CalendarDays className="size-3.5" />
                 {post.publishedAt
-                  ? new Date(post.publishedAt).toLocaleDateString('zh-CN')
-                  : '尚未发布'}
+                  ? new Date(post.publishedAt).toLocaleDateString("zh-CN")
+                  : "尚未发布"}
                 <span>·</span>
                 {post.readingTime} 分钟阅读
               </p>
@@ -92,7 +92,7 @@ export default async function PostPage({
           initialLikeCount={post.likeCount}
           initialBookmarkCount={post.bookmarkCount}
           initialViewCount={post.viewCount}
-          published={post.status === 'published'}
+          published={post.status === "published"}
         />
       </header>
 

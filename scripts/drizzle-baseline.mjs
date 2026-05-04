@@ -1,14 +1,14 @@
-import crypto from 'node:crypto'
-import fs from 'node:fs'
-import path from 'node:path'
+import crypto from "node:crypto"
+import fs from "node:fs"
+import path from "node:path"
 
-import dotenv from 'dotenv'
-import postgres from 'postgres'
+import dotenv from "dotenv"
+import postgres from "postgres"
 
 const envFiles =
-  process.env.NODE_ENV === 'production'
-    ? ['.env.production', '.env']
-    : ['.env.development', '.env']
+  process.env.NODE_ENV === "production"
+    ? [".env.production", ".env"]
+    : [".env.development", ".env"]
 
 for (const file of envFiles) {
   dotenv.config({ path: file, override: false })
@@ -17,20 +17,20 @@ for (const file of envFiles) {
 const databaseUrl = process.env.DATABASE_URL
 
 if (!databaseUrl) {
-  console.error('DATABASE_URL is required.')
+  console.error("DATABASE_URL is required.")
   process.exit(1)
 }
 
 const args = process.argv.slice(2)
-const tagArg = args.find((arg) => arg.startsWith('--tag='))
-const targetTag = tagArg?.slice('--tag='.length)
-const migrationsDir = path.resolve('drizzle')
-const journalPath = path.join(migrationsDir, 'meta', '_journal.json')
-const journal = JSON.parse(fs.readFileSync(journalPath, 'utf8'))
+const tagArg = args.find((arg) => arg.startsWith("--tag="))
+const targetTag = tagArg?.slice("--tag=".length)
+const migrationsDir = path.resolve("drizzle")
+const journalPath = path.join(migrationsDir, "meta", "_journal.json")
+const journal = JSON.parse(fs.readFileSync(journalPath, "utf8"))
 const entries = journal.entries
 
 if (!entries.length) {
-  console.error('No migrations found in drizzle/meta/_journal.json.')
+  console.error("No migrations found in drizzle/meta/_journal.json.")
   process.exit(1)
 }
 
@@ -48,8 +48,8 @@ const client = postgres(databaseUrl, { prepare: false, max: 1 })
 
 function getMigrationHash(entry) {
   const migrationSqlPath = path.join(migrationsDir, `${entry.tag}.sql`)
-  const migrationSql = fs.readFileSync(migrationSqlPath, 'utf8')
-  return crypto.createHash('sha256').update(migrationSql).digest('hex')
+  const migrationSql = fs.readFileSync(migrationSqlPath, "utf8")
+  return crypto.createHash("sha256").update(migrationSql).digest("hex")
 }
 
 try {

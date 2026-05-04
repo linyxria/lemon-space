@@ -1,11 +1,11 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import z from 'zod'
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import z from "zod"
 
-import { s3client } from '@/lib/s3'
-import { objectKey2Url } from '@/lib/utils'
+import { s3client } from "@/lib/s3"
+import { objectKey2Url } from "@/lib/utils"
 
-import { protectedProcedure, router } from '../init'
+import { protectedProcedure, router } from "../init"
 
 export const uploadRouter = router({
   signedUrl: protectedProcedure

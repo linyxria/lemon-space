@@ -1,45 +1,45 @@
-'use client'
+"use client"
 
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { BookMarked, BookOpenText, Heart, Images, Sparkles } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { BookMarked, BookOpenText, Heart, Images, Sparkles } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { useState } from "react"
 
-import { Button } from '@/components/ui/button'
-import { useTRPC } from '@/trpc/client'
+import { Button } from "@/components/ui/button"
+import { useTRPC } from "@/trpc/client"
 
 export function ProfileOverview() {
   const trpc = useTRPC()
-  const t = useTranslations('ProfileOverview')
+  const t = useTranslations("ProfileOverview")
   const [avatarFailed, setAvatarFailed] = useState(false)
   const { data: info } = useSuspenseQuery(trpc.user.info.queryOptions())
   const { data: stats } = useSuspenseQuery(trpc.user.stats.queryOptions())
 
   const quickLinks = [
     {
-      href: '/posts/me',
+      href: "/posts/me",
       icon: BookOpenText,
-      label: t('myPosts'),
+      label: t("myPosts"),
       value: stats.postCount,
     },
     {
-      href: '/gallery/me',
+      href: "/gallery/me",
       icon: Images,
-      label: t('myGallery'),
+      label: t("myGallery"),
       value: stats.assetCount,
     },
     {
-      href: '/likes',
+      href: "/likes",
       icon: Heart,
-      label: t('myLikes'),
+      label: t("myLikes"),
       value: stats.likeCount,
     },
     {
-      href: '/collections',
+      href: "/collections",
       icon: BookMarked,
-      label: t('collections'),
+      label: t("collections"),
       value: stats.collectionCount,
     },
   ]
@@ -49,7 +49,7 @@ export function ProfileOverview() {
       <div className="from-card via-card to-primary/10 rounded-[28px] border bg-linear-to-br p-5 shadow-sm sm:p-6">
         <div className="text-muted-foreground flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] uppercase">
           <Sparkles className="text-primary size-3.5" />
-          {t('snapshotBadge')}
+          {t("snapshotBadge")}
         </div>
         <div className="mt-4 flex items-center gap-4">
           {info.image && !avatarFailed ? (
@@ -79,13 +79,13 @@ export function ProfileOverview() {
         <div className="mt-5 grid grid-cols-2 gap-3">
           <div className="bg-hero text-hero-foreground rounded-2xl px-4 py-4">
             <p className="text-hero-muted text-[11px] tracking-[0.2em] uppercase">
-              {t('postsLabel')}
+              {t("postsLabel")}
             </p>
             <p className="mt-2 text-3xl font-black">{stats.postCount}</p>
           </div>
           <div className="bg-primary/15 text-primary rounded-2xl px-4 py-4">
             <p className="text-[11px] tracking-[0.2em] uppercase opacity-70">
-              {t('likesLabel')}
+              {t("likesLabel")}
             </p>
             <p className="mt-2 text-3xl font-black">{stats.likeCount}</p>
           </div>
@@ -96,10 +96,10 @@ export function ProfileOverview() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.28em] uppercase">
-              {t('workspaceBadge')}
+              {t("workspaceBadge")}
             </p>
             <h3 className="text-foreground mt-2 text-2xl font-black tracking-tight">
-              {t('workspaceTitle')}
+              {t("workspaceTitle")}
             </h3>
           </div>
           <Button
@@ -108,7 +108,7 @@ export function ProfileOverview() {
             render={<Link href="/posts/new" />}
           >
             <BookOpenText className="size-4" />
-            {t('writePost')}
+            {t("writePost")}
           </Button>
         </div>
 
@@ -136,7 +136,7 @@ export function ProfileOverview() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Button nativeButton={false} render={<Link href="/gallery/upload" />}>
             <Images className="size-4" />
-            {t('continueUpload')}
+            {t("continueUpload")}
           </Button>
           <Button
             variant="outline"
@@ -144,7 +144,7 @@ export function ProfileOverview() {
             render={<Link href="/collections" />}
           >
             <BookMarked className="size-4" />
-            {t('manageCollections')}
+            {t("manageCollections")}
           </Button>
         </div>
       </div>

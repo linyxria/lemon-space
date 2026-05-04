@@ -1,18 +1,18 @@
-import { betterAuth } from 'better-auth'
-import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { betterAuth } from "better-auth"
+import { drizzleAdapter } from "better-auth/adapters/drizzle"
 
-import { db } from '@/db'
-import { sendVerificationEmail } from '@/lib/auth-email'
+import { db } from "@/db"
+import { sendVerificationEmail } from "@/lib/auth-email"
 
 function isEmailVerificationEnabled() {
-  return process.env.AUTH_REQUIRE_EMAIL_VERIFICATION === 'true'
+  return process.env.AUTH_REQUIRE_EMAIL_VERIFICATION === "true"
 }
 
 const requireEmailVerification = isEmailVerificationEnabled()
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: 'pg',
+    provider: "pg",
   }),
   emailAndPassword: {
     enabled: true,

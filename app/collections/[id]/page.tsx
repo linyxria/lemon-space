@@ -1,9 +1,9 @@
-import { Suspense } from 'react'
+import { Suspense } from "react"
 
-import { Skeleton } from '@/components/ui/skeleton'
-import { HydrateClient, prefetch, trpc } from '@/trpc/server'
+import { Skeleton } from "@/components/ui/skeleton"
+import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
-import { CollectionDetail } from '../_components/collection-detail'
+import { CollectionDetail } from "../_components/collection-detail"
 
 export default async function CollectionDetailPage({
   params,

@@ -1,15 +1,15 @@
-import { getTranslations } from 'next-intl/server'
-import { Suspense } from 'react'
+import { getTranslations } from "next-intl/server"
+import { Suspense } from "react"
 
-import { Skeleton } from '@/components/ui/skeleton'
-import { HydrateClient, prefetch, trpc } from '@/trpc/server'
+import { Skeleton } from "@/components/ui/skeleton"
+import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
-import AvatarUploadCard from './_components/avatar-upload-card'
-import { PreferencesPanel } from './_components/preferences-panel'
-import { ProfileOverview } from './_components/profile-overview'
+import AvatarUploadCard from "./_components/avatar-upload-card"
+import { PreferencesPanel } from "./_components/preferences-panel"
+import { ProfileOverview } from "./_components/profile-overview"
 
 export default async function ProfilePage() {
-  const t = await getTranslations('Profile')
+  const t = await getTranslations("Profile")
   prefetch(trpc.user.info.queryOptions())
   prefetch(trpc.user.stats.queryOptions())
   prefetch(trpc.user.preferences.queryOptions())
@@ -18,13 +18,13 @@ export default async function ProfilePage() {
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col">
       <div className="from-hero via-hero to-primary/35 text-hero-foreground mb-8 rounded-[28px] bg-linear-to-r px-5 py-5 shadow-[0_20px_50px_-28px_rgba(24,24,27,0.6)] sm:px-6 sm:py-6">
         <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
-          {t('badge')}
+          {t("badge")}
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
-          {t('title')}
+          {t("title")}
         </h1>
         <p className="text-hero-muted mt-2 max-w-3xl text-sm leading-6 sm:text-[15px]">
-          {t('description')}
+          {t("description")}
         </p>
       </div>
       <HydrateClient>

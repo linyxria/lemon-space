@@ -1,10 +1,10 @@
-import { headers } from 'next/headers'
-import { notFound, redirect } from 'next/navigation'
+import { headers } from "next/headers"
+import { notFound, redirect } from "next/navigation"
 
-import { auth } from '@/lib/auth'
-import { caller } from '@/trpc/server'
+import { auth } from "@/lib/auth"
+import { caller } from "@/trpc/server"
 
-import { PostEditor } from '../../_components/post-editor'
+import { PostEditor } from "../../_components/post-editor"
 
 export default async function EditPostPage({
   params,
@@ -13,7 +13,7 @@ export default async function EditPostPage({
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
 
-  if (!session) redirect('/sign-in')
+  if (!session) redirect("/sign-in")
 
   const { id } = await params
   const post = await caller.post.byId({ id }).catch(() => null)

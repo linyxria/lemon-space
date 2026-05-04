@@ -1,11 +1,11 @@
-'use client'
+"use client"
 
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { ArrowRightToLine, ImageIcon, Sparkles } from 'lucide-react'
-import Link from 'next/link'
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { ArrowRightToLine, ImageIcon, Sparkles } from "lucide-react"
+import Link from "next/link"
 
-import ImageCard from '@/components/image-card'
-import { MasonryGrid } from '@/components/masonry-grid'
+import ImageCard from "@/components/image-card"
+import { MasonryGrid } from "@/components/masonry-grid"
 import {
   Empty,
   EmptyContent,
@@ -13,8 +13,8 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '@/components/ui/empty'
-import { useTRPC } from '@/trpc/client'
+} from "@/components/ui/empty"
+import { useTRPC } from "@/trpc/client"
 
 function EmptyGallery({
   description,
@@ -65,7 +65,7 @@ export function MyGalleryGrid() {
     <MasonryGrid
       items={data}
       renderItem={(item, index) => (
-        <ImageCard {...item} loading={index < 8 ? 'eager' : 'lazy'} />
+        <ImageCard {...item} loading={index < 8 ? "eager" : "lazy"} />
       )}
     />
   )

@@ -1,6 +1,6 @@
-import { TRPCError } from '@trpc/server'
-import { eq, sql } from 'drizzle-orm'
-import { z } from 'zod'
+import { TRPCError } from "@trpc/server"
+import { eq, sql } from "drizzle-orm"
+import { z } from "zod"
 
 import {
   asset,
@@ -10,19 +10,19 @@ import {
   postLike,
   user,
   userPreference,
-} from '@/db/schema'
+} from "@/db/schema"
 
-import { protectedProcedure, router } from '../init'
-import { mapObjectKeyToUrl, mapUserImageToUrl } from './shared'
+import { protectedProcedure, router } from "../init"
+import { mapObjectKeyToUrl, mapUserImageToUrl } from "./shared"
 
 const preferenceInputSchema = z.object({
-  locale: z.enum(['zh-CN', 'en-US']).optional(),
-  theme: z.enum(['light', 'dark', 'system']).optional(),
+  locale: z.enum(["zh-CN", "en-US"]).optional(),
+  theme: z.enum(["light", "dark", "system"]).optional(),
 })
 
 const defaultPreferences = {
-  locale: 'zh-CN' as const,
-  theme: 'system' as const,
+  locale: "zh-CN" as const,
+  theme: "system" as const,
 }
 
 export const userRouter = router({
@@ -50,8 +50,8 @@ export const userRouter = router({
         if (error instanceof TRPCError) throw error
 
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to update avatar',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update avatar",
         })
       }
     }),
@@ -162,13 +162,13 @@ export const userRouter = router({
 
     return {
       locale:
-        preferences.locale === 'en-US' || preferences.locale === 'zh-CN'
+        preferences.locale === "en-US" || preferences.locale === "zh-CN"
           ? preferences.locale
           : defaultPreferences.locale,
       theme:
-        preferences.theme === 'light' ||
-        preferences.theme === 'dark' ||
-        preferences.theme === 'system'
+        preferences.theme === "light" ||
+        preferences.theme === "dark" ||
+        preferences.theme === "system"
           ? preferences.theme
           : defaultPreferences.theme,
     }
@@ -176,7 +176,7 @@ export const userRouter = router({
   updatePreferences: protectedProcedure
     .input(
       preferenceInputSchema.refine((value) => Object.keys(value).length > 0, {
-        message: 'At least one preference must be provided',
+        message: "At least one preference must be provided",
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -192,15 +192,15 @@ export const userRouter = router({
       const nextPreferences = {
         locale:
           input.locale ??
-          (existingPreferences?.locale === 'en-US' ||
-          existingPreferences?.locale === 'zh-CN'
+          (existingPreferences?.locale === "en-US" ||
+          existingPreferences?.locale === "zh-CN"
             ? existingPreferences.locale
             : defaultPreferences.locale),
         theme:
           input.theme ??
-          (existingPreferences?.theme === 'light' ||
-          existingPreferences?.theme === 'dark' ||
-          existingPreferences?.theme === 'system'
+          (existingPreferences?.theme === "light" ||
+          existingPreferences?.theme === "dark" ||
+          existingPreferences?.theme === "system"
             ? existingPreferences.theme
             : defaultPreferences.theme),
       } as const
@@ -225,14 +225,14 @@ export const userRouter = router({
 
       return {
         locale:
-          upsertedPreferences.locale === 'en-US' ||
-          upsertedPreferences.locale === 'zh-CN'
+          upsertedPreferences.locale === "en-US" ||
+          upsertedPreferences.locale === "zh-CN"
             ? upsertedPreferences.locale
             : defaultPreferences.locale,
         theme:
-          upsertedPreferences.theme === 'light' ||
-          upsertedPreferences.theme === 'dark' ||
-          upsertedPreferences.theme === 'system'
+          upsertedPreferences.theme === "light" ||
+          upsertedPreferences.theme === "dark" ||
+          upsertedPreferences.theme === "system"
             ? upsertedPreferences.theme
             : defaultPreferences.theme,
       }

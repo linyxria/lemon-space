@@ -1,14 +1,14 @@
-import { PenLine, Plus, Sparkles } from 'lucide-react'
-import { headers } from 'next/headers'
-import Link from 'next/link'
+import { PenLine, Plus, Sparkles } from "lucide-react"
+import { headers } from "next/headers"
+import Link from "next/link"
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { auth } from '@/lib/auth'
-import { caller } from '@/trpc/server'
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { auth } from "@/lib/auth"
+import { caller } from "@/trpc/server"
 
-import { PostCard } from './_components/post-card'
-import { PostSearch } from './_components/post-search'
+import { PostCard } from "./_components/post-card"
+import { PostSearch } from "./_components/post-search"
 
 export default async function PostHomePage({
   searchParams,
@@ -81,10 +81,10 @@ export default async function PostHomePage({
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
             <Badge
-              variant={!tag ? 'default' : 'outline'}
+              variant={!tag ? "default" : "outline"}
               render={
                 <Link
-                  href={q ? `/posts?q=${encodeURIComponent(q)}` : '/posts'}
+                  href={q ? `/posts?q=${encodeURIComponent(q)}` : "/posts"}
                 />
               }
               className="rounded-full"
@@ -94,10 +94,10 @@ export default async function PostHomePage({
             {tags.map((item) => (
               <Badge
                 key={item.id}
-                variant={tag === item.slug ? 'default' : 'outline'}
+                variant={tag === item.slug ? "default" : "outline"}
                 render={
                   <Link
-                    href={`/posts?tag=${item.slug}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                    href={`/posts?tag=${item.slug}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
                   />
                 }
                 className="rounded-full"

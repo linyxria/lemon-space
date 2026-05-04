@@ -1,11 +1,11 @@
-'use client'
+"use client"
 
-import { useRouter } from '@bprogress/next/app'
-import { Search, X } from 'lucide-react'
-import { useState } from 'react'
+import { useRouter } from "@bprogress/next/app"
+import { Search, X } from "lucide-react"
+import { useState } from "react"
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export function PostSearch({
   keyword,
@@ -15,17 +15,17 @@ export function PostSearch({
   tag?: string
 }) {
   const router = useRouter()
-  const [value, setValue] = useState(keyword ?? '')
+  const [value, setValue] = useState(keyword ?? "")
 
   const handleSubmit = (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault()
     const params = new URLSearchParams()
     const nextKeyword = value.trim()
 
-    if (nextKeyword) params.set('q', nextKeyword)
-    if (tag) params.set('tag', tag)
+    if (nextKeyword) params.set("q", nextKeyword)
+    if (tag) params.set("tag", tag)
 
-    router.push(params.toString() ? `/posts?${params}` : '/posts')
+    router.push(params.toString() ? `/posts?${params}` : "/posts")
   }
 
   return (
@@ -41,7 +41,7 @@ export function PostSearch({
         {value ? (
           <button
             type="button"
-            onClick={() => setValue('')}
+            onClick={() => setValue("")}
             className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
             aria-label="清除搜索"
           >

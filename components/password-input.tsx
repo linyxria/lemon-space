@@ -1,25 +1,25 @@
-'use client'
+"use client"
 
-import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import { EyeIcon, EyeOffIcon } from "lucide-react"
 import {
   type DetailedHTMLProps,
   type InputHTMLAttributes,
   useState,
-} from 'react'
+} from "react"
 
-import { InputGroup, InputGroupAddon, InputGroupInput } from './ui/input-group'
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group"
 
 export default function PasswordInput(
   props: Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
-    'type'
+    "type"
   >,
 ) {
   const [show, setShow] = useState(false)
 
   return (
     <InputGroup>
-      <InputGroupInput {...props} type={show ? 'text' : 'password'} />
+      <InputGroupInput {...props} type={show ? "text" : "password"} />
       <InputGroupAddon
         align="inline-end"
         className="cursor-pointer"

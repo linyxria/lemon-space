@@ -1,11 +1,11 @@
-'use client'
+"use client"
 
-import { X } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
-import Image from 'next/image'
-import { useTranslations } from 'next-intl'
+import { X } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
+import Image from "next/image"
+import { useTranslations } from "next-intl"
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button"
 
 export interface PreviewFile {
   origin: File
@@ -28,7 +28,7 @@ export default function PreviewList({
   uploading: boolean
   onRemove: (id: string) => void
 }) {
-  const t = useTranslations('PreviewList')
+  const t = useTranslations("PreviewList")
 
   return (
     <div className="grid grid-cols-4 gap-1 md:grid-cols-6">
@@ -43,7 +43,7 @@ export default function PreviewList({
               exit="exit"
               variants={itemVariants}
               transition={{
-                layout: { duration: 0.3, ease: 'easeOut' },
+                layout: { duration: 0.3, ease: "easeOut" },
                 opacity: { duration: 0.2 },
               }}
               className="group border-border relative aspect-square overflow-hidden rounded border shadow"
@@ -60,8 +60,8 @@ export default function PreviewList({
                   size="icon-xs"
                   className="hover:bg-destructive bg-foreground/80 text-background absolute top-1 right-1 z-10 rounded-full opacity-0 transition group-hover:opacity-100"
                   onClick={() => onRemove(file.id)}
-                  aria-label={t('remove')}
-                  title={t('remove')}
+                  aria-label={t("remove")}
+                  title={t("remove")}
                 >
                   <X size={12} />
                 </Button>

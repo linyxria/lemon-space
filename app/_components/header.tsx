@@ -1,18 +1,18 @@
-import { Citrus } from 'lucide-react'
-import { headers } from 'next/headers'
-import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { Citrus } from "lucide-react"
+import { headers } from "next/headers"
+import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 
-import { ThemeToggle } from '@/components/theme-toggle'
-import { Button } from '@/components/ui/button'
-import { auth } from '@/lib/auth'
-import { HydrateClient, prefetch, trpc } from '@/trpc/server'
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button"
+import { auth } from "@/lib/auth"
+import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
-import { DesktopMainNav, MobileMainNav } from './main-nav'
-import UserNav from './user-nav'
+import { DesktopMainNav, MobileMainNav } from "./main-nav"
+import UserNav from "./user-nav"
 
 export default async function Header() {
-  const t = await getTranslations('Header')
+  const t = await getTranslations("Header")
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (session) {
@@ -41,14 +41,14 @@ export default async function Header() {
           <DesktopMainNav />
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
-          <ThemeToggle label={t('themeToggle')} />
+          <ThemeToggle label={t("themeToggle")} />
           {session ? (
             <HydrateClient>
               <UserNav />
             </HydrateClient>
           ) : (
             <Button nativeButton={false} render={<Link href="/sign-in" />}>
-              {t('signIn')}
+              {t("signIn")}
             </Button>
           )}
         </div>

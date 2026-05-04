@@ -1,11 +1,11 @@
-'use client'
+"use client"
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Bookmark, BookMarked, Eye, Heart } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Bookmark, BookMarked, Eye, Heart } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -14,9 +14,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { cn } from '@/lib/utils'
-import { useTRPC } from '@/trpc/client'
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+import { useTRPC } from "@/trpc/client"
 
 export function PostActions({
   postId,
@@ -79,7 +79,7 @@ export function PostActions({
   const viewMutation = useMutation(
     trpc.post.recordView.mutationOptions({
       onSuccess: (data) => {
-        if (typeof data.viewCount === 'number') {
+        if (typeof data.viewCount === "number") {
           setViewCount(data.viewCount)
         }
       },
@@ -92,7 +92,7 @@ export function PostActions({
     const key = `post-viewed:${postId}`
     if (window.sessionStorage.getItem(key)) return
 
-    window.sessionStorage.setItem(key, '1')
+    window.sessionStorage.setItem(key, "1")
     viewMutation.mutate({ postId })
   }, [postId, published, viewMutation])
 
@@ -110,26 +110,26 @@ export function PostActions({
       </span>
       <Button
         type="button"
-        variant={liked ? 'secondary' : 'outline'}
+        variant={liked ? "secondary" : "outline"}
         onClick={() => {
           if (requireSignIn()) likeMutation.mutate({ postId })
         }}
         disabled={likeMutation.isPending}
-        className={cn(liked && 'text-primary')}
+        className={cn(liked && "text-primary")}
       >
-        <Heart className={cn('size-4', liked && 'fill-current')} />
+        <Heart className={cn("size-4", liked && "fill-current")} />
         {likeCount}
       </Button>
       <Button
         type="button"
-        variant={bookmarked ? 'secondary' : 'outline'}
+        variant={bookmarked ? "secondary" : "outline"}
         onClick={() => {
           if (requireSignIn()) bookmarkMutation.mutate({ postId })
         }}
         disabled={bookmarkMutation.isPending}
-        className={cn(bookmarked && 'text-primary')}
+        className={cn(bookmarked && "text-primary")}
       >
-        <Bookmark className={cn('size-4', bookmarked && 'fill-current')} />
+        <Bookmark className={cn("size-4", bookmarked && "fill-current")} />
         {bookmarkCount}
       </Button>
       <DropdownMenu>

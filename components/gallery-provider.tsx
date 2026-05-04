@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
-import { AnimatePresence } from 'motion/react'
-import { usePathname } from 'next/navigation'
-import { createContext, useContext, useState } from 'react'
+import { AnimatePresence } from "motion/react"
+import { usePathname } from "next/navigation"
+import { createContext, useContext, useState } from "react"
 
-import ImageModal, { type ModalAssetData } from './image-modal'
+import ImageModal, { type ModalAssetData } from "./image-modal"
 
 const GalleryContext = createContext<{
   openAsset: (asset: ModalAssetData) => void
@@ -48,6 +48,6 @@ export default function GalleryProvider({
 export const useGallery = () => {
   const context = useContext(GalleryContext)
   if (!context)
-    throw new Error('useGallery must be used within GalleryProvider')
+    throw new Error("useGallery must be used within GalleryProvider")
   return context
 }

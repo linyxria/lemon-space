@@ -1,13 +1,13 @@
-'use client'
+"use client"
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Check, Sparkles, Tags } from 'lucide-react'
-import { nanoid } from 'nanoid'
-import { useTranslations } from 'next-intl'
-import { useRef, useState } from 'react'
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Check, Sparkles, Tags } from "lucide-react"
+import { nanoid } from "nanoid"
+import { useTranslations } from "next-intl"
+import { useRef, useState } from "react"
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -16,18 +16,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Progress } from '@/components/ui/progress'
-import { Spinner } from '@/components/ui/spinner'
-import { uploadFile } from '@/lib/s3'
-import { getImageDimensions } from '@/lib/utils'
-import { useTRPC } from '@/trpc/client'
+} from "@/components/ui/card"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Progress } from "@/components/ui/progress"
+import { Spinner } from "@/components/ui/spinner"
+import { uploadFile } from "@/lib/s3"
+import { getImageDimensions } from "@/lib/utils"
+import { useTRPC } from "@/trpc/client"
 
-import MetadataForm, { type MetadataValues } from './_components/metadata-form'
-import type { PreviewFile } from './_components/preview-list'
-import PreviewList from './_components/preview-list'
-import UploadArea from './_components/upload-area'
+import MetadataForm, { type MetadataValues } from "./_components/metadata-form"
+import type { PreviewFile } from "./_components/preview-list"
+import PreviewList from "./_components/preview-list"
+import UploadArea from "./_components/upload-area"
 
 function getFileFingerprint(file: File) {
   return `${file.name}:${file.size}:${file.lastModified}`
@@ -40,7 +40,7 @@ function formatBytes(bytes: number) {
 }
 
 export default function UploadPage() {
-  const t = useTranslations('UploadPage')
+  const t = useTranslations("UploadPage")
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const createBatchMutation = useMutation(
@@ -64,10 +64,10 @@ export default function UploadPage() {
   const [files, setFiles] = useState<PreviewFile[]>([])
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [status, setStatus] = useState('')
-  const [selectionMessage, setSelectionMessage] = useState('')
+  const [status, setStatus] = useState("")
+  const [selectionMessage, setSelectionMessage] = useState("")
   const [formValues, setFormValues] = useState<MetadataValues>({
-    title: '',
+    title: "",
     tags: [],
   })
 
@@ -81,7 +81,7 @@ export default function UploadPage() {
     try {
       setUploading(true)
       setProgress(0)
-      setStatus(t('started'))
+      setStatus(t("started"))
 
       // 初始化所有文件的进度
       fileProgressRef.current = {}
@@ -91,7 +91,7 @@ export default function UploadPage() {
 
       const uploadTasks = files.map(async ({ origin: file }, index) => {
         // 1. 上传文件到云端
-        const { objectKey } = await uploadFile('assets', file, {
+        const { objectKey } = await uploadFile("assets", file, {
           onProgress: (percent) => {
             // 更新当前文件的进度
             fileProgressRef.current[index] = percent
@@ -113,9 +113,9 @@ export default function UploadPage() {
 
         const finalTitle = formValues.title
           ? totalFiles > 1
-            ? `${formValues.title} - ${(index + 1).toString().padStart(2, '0')}`
+            ? `${formValues.title} - ${(index + 1).toString().padStart(2, "0")}`
             : formValues.title
-          : file.name.split('.')[0]
+          : file.name.split(".")[0]
 
         fileProgressRef.current[index] = 100
 
@@ -130,26 +130,26 @@ export default function UploadPage() {
       const assets = await Promise.all(uploadTasks)
 
       setProgress(99)
-      setStatus(t('syncing', { count: totalFiles }))
+      setStatus(t("syncing", { count: totalFiles }))
       await createBatchMutation.mutateAsync({
         assets,
         tags: formValues.tags,
       })
 
       setProgress(100)
-      setStatus(t('success'))
+      setStatus(t("success"))
 
       setTimeout(() => {
         setUploading(false)
         setFiles([])
         setProgress(0)
-        setStatus('')
-        setSelectionMessage('')
-        setFormValues({ title: '', tags: [] })
+        setStatus("")
+        setSelectionMessage("")
+        setFormValues({ title: "", tags: [] })
       }, 2000)
     } catch (err) {
       console.error(err)
-      setStatus(t('error'))
+      setStatus(t("error"))
       setUploading(false)
     }
   }
@@ -158,20 +158,20 @@ export default function UploadPage() {
     <div className="space-y-5">
       <section className="from-hero via-hero to-primary/35 text-hero-foreground rounded-[30px] border bg-linear-to-r px-5 py-5 shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:px-6 sm:py-6">
         <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
-          {t('heroBadge')}
+          {t("heroBadge")}
         </p>
         <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl font-black tracking-[-0.04em] sm:text-4xl">
-              {t('title')}
+              {t("title")}
             </h1>
             <p className="text-hero-muted mt-2 max-w-3xl text-sm">
-              {t('description')}
+              {t("description")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
-              {t('pendingCount', { count: files.length })}
+              {t("pendingCount", { count: files.length })}
             </Badge>
             {files.length > 0 ? (
               <Badge variant="outline">{formatBytes(totalSize)}</Badge>
@@ -183,12 +183,12 @@ export default function UploadPage() {
       <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
         <Card className="relative w-full rounded-[28px] shadow-[0_24px_60px_-38px_rgba(24,24,27,0.35)]">
           <CardHeader>
-            <CardTitle>{t('cardTitle')}</CardTitle>
-            <CardDescription>{t('cardDescription')}</CardDescription>
+            <CardTitle>{t("cardTitle")}</CardTitle>
+            <CardDescription>{t("cardDescription")}</CardDescription>
             <CardAction>
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Badge variant="secondary">
-                  {t('pendingCount', { count: files.length })}
+                  {t("pendingCount", { count: files.length })}
                 </Badge>
                 {files.length > 0 ? (
                   <Badge variant="outline">{formatBytes(totalSize)}</Badge>
@@ -224,9 +224,9 @@ export default function UploadPage() {
 
                 setFiles((prev) => [...prev, ...nextFiles])
                 setSelectionMessage(
-                  skipped > 0 ? t('duplicateSkipped', { count: skipped }) : '',
+                  skipped > 0 ? t("duplicateSkipped", { count: skipped }) : "",
                 )
-                setStatus('')
+                setStatus("")
               }}
             />
 
@@ -271,13 +271,13 @@ export default function UploadPage() {
               variant="secondary"
               onClick={() => {
                 setFiles([])
-                setSelectionMessage('')
-                setStatus('')
+                setSelectionMessage("")
+                setStatus("")
               }}
               disabled={files.length === 0 || uploading}
               className="min-w-24"
             >
-              {t('reset')}
+              {t("reset")}
             </Button>
             <Button
               onClick={handleUpload}
@@ -287,10 +287,10 @@ export default function UploadPage() {
               {uploading ? (
                 <>
                   <Spinner />
-                  {t('processing')}
+                  {t("processing")}
                 </>
               ) : (
-                t('startUpload')
+                t("startUpload")
               )}
             </Button>
           </CardFooter>
@@ -300,27 +300,27 @@ export default function UploadPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="text-primary size-4" />
-              {t('tipsTitle')}
+              {t("tipsTitle")}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground space-y-3 text-sm">
             <p className="flex items-start gap-2">
               <Check className="text-primary mt-0.5 size-4" />
-              {t('tip1')}
+              {t("tip1")}
             </p>
             <p className="flex items-start gap-2">
               <Check className="text-primary mt-0.5 size-4" />
-              {t('tip2')}
+              {t("tip2")}
             </p>
             <p className="flex items-start gap-2">
               <Check className="text-primary mt-0.5 size-4" />
-              {t('tip3')}
+              {t("tip3")}
             </p>
           </CardContent>
           <CardFooter className="justify-start gap-2">
             <Badge variant="outline" className="rounded-full px-2.5">
               <Tags className="size-3.5" />
-              {t('formats')}
+              {t("formats")}
             </Badge>
           </CardFooter>
         </Card>

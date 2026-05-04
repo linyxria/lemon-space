@@ -1,18 +1,18 @@
-'use client'
+"use client"
 
-import { useRouter } from '@bprogress/next/app'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { ArrowUpWideNarrow, Search, Sparkles, X } from 'lucide-react'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useRouter } from "@bprogress/next/app"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { ArrowUpWideNarrow, Search, Sparkles, X } from "lucide-react"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { useState } from "react"
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { cn } from '@/lib/utils'
-import { useTRPC } from '@/trpc/client'
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
+import { useTRPC } from "@/trpc/client"
 
 function buildGalleryHref({
   tag,
@@ -21,16 +21,16 @@ function buildGalleryHref({
 }: {
   tag?: string
   q?: string
-  sort?: 'latest' | 'popular'
+  sort?: "latest" | "popular"
 }) {
   const params = new URLSearchParams()
 
-  if (tag) params.set('tag', tag)
-  if (q) params.set('q', q)
-  if (sort && sort !== 'latest') params.set('sort', sort)
+  if (tag) params.set("tag", tag)
+  if (q) params.set("q", q)
+  if (sort && sort !== "latest") params.set("sort", sort)
 
   const query = params.toString()
-  return query ? `/gallery?${query}` : '/gallery'
+  return query ? `/gallery?${query}` : "/gallery"
 }
 
 export function TagBar({
@@ -40,20 +40,20 @@ export function TagBar({
 }: {
   selected: string | undefined
   keyword: string | undefined
-  sort: 'latest' | 'popular'
+  sort: "latest" | "popular"
 }) {
   const trpc = useTRPC()
-  const t = useTranslations('TagBar')
-  const tCommon = useTranslations('Common')
+  const t = useTranslations("TagBar")
+  const tCommon = useTranslations("Common")
   const { data } = useSuspenseQuery(trpc.asset.tags.queryOptions())
-  const [inputValue, setInputValue] = useState(keyword ?? '')
+  const [inputValue, setInputValue] = useState(keyword ?? "")
   const router = useRouter()
   const sortOptions = [
-    { value: 'latest', label: tCommon('latest') },
-    { value: 'popular', label: tCommon('popular') },
+    { value: "latest", label: tCommon("latest") },
+    { value: "popular", label: tCommon("popular") },
   ] as const
 
-  const hasFilters = Boolean(selected || keyword || sort !== 'latest')
+  const hasFilters = Boolean(selected || keyword || sort !== "latest")
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -79,22 +79,22 @@ export function TagBar({
               <Input
                 value={inputValue}
                 onChange={(event) => setInputValue(event.target.value)}
-                placeholder={t('searchPlaceholder')}
+                placeholder={t("searchPlaceholder")}
                 className="bg-background h-10 rounded-2xl pr-9 pl-9"
               />
               {inputValue ? (
                 <button
                   type="button"
-                  onClick={() => setInputValue('')}
+                  onClick={() => setInputValue("")}
                   className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition"
-                  aria-label={t('clearSearch')}
+                  aria-label={t("clearSearch")}
                 >
                   <X className="size-4" />
                 </button>
               ) : null}
             </div>
             <Button type="submit" className="h-10 rounded-2xl px-4">
-              {t('search')}
+              {t("search")}
             </Button>
           </form>
 
@@ -104,7 +104,7 @@ export function TagBar({
               {sortOptions.map((option) => (
                 <Badge
                   key={option.value}
-                  variant={sort === option.value ? 'default' : 'outline'}
+                  variant={sort === option.value ? "default" : "outline"}
                   render={
                     <Link
                       href={buildGalleryHref({
@@ -128,16 +128,16 @@ export function TagBar({
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="rounded-full px-3">
               <Sparkles className="size-3.5" />
-              {t('filtersEnabled')}
+              {t("filtersEnabled")}
             </Badge>
             {selected ? (
               <Badge variant="outline" className="rounded-full px-3">
-                {t('tag')}: {selected}
+                {t("tag")}: {selected}
               </Badge>
             ) : null}
             {keyword ? (
               <Badge variant="outline" className="rounded-full px-3">
-                {t('keyword')}: {keyword}
+                {t("keyword")}: {keyword}
               </Badge>
             ) : null}
             <Button
@@ -146,7 +146,7 @@ export function TagBar({
               nativeButton={false}
               render={<Link href="/gallery" scroll={false} />}
             >
-              {t('clear')}
+              {t("clear")}
             </Button>
           </div>
         ) : null}
@@ -158,14 +158,14 @@ export function TagBar({
             <Link
               href={buildGalleryHref({ q: keyword, sort })}
               className={cn(
-                'rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm',
+                "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm",
                 !selected
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent',
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent",
               )}
               scroll={false}
             >
-              {t('allCategories')}
+              {t("allCategories")}
             </Link>
             {data.map((tag) => {
               const isActive = selected === tag.slug
@@ -174,10 +174,10 @@ export function TagBar({
                   key={tag.id}
                   href={buildGalleryHref({ tag: tag.slug, q: keyword, sort })}
                   className={cn(
-                    'rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm',
+                    "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm",
                     isActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent',
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent",
                   )}
                   scroll={false}
                 >

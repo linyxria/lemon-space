@@ -1,17 +1,20 @@
-import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { Suspense } from 'react'
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
+import { Suspense } from "react"
 
-import { Skeleton } from '@/components/ui/skeleton'
-import { auth } from '@/lib/auth'
-import { HydrateClient, prefetch, trpc } from '@/trpc/server'
+import { Skeleton } from "@/components/ui/skeleton"
+import { auth } from "@/lib/auth"
+import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
-import { MyGalleryGrid, MyGalleryHeading } from '../_components/gallery-asset-grids'
+import {
+  MyGalleryGrid,
+  MyGalleryHeading,
+} from "../_components/gallery-asset-grids"
 
 export default async function MyGalleryPage() {
   const session = await auth.api.getSession({ headers: await headers() })
 
-  if (!session) redirect('/sign-in')
+  if (!session) redirect("/sign-in")
 
   prefetch(trpc.asset.listByMe.queryOptions())
 

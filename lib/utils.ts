@@ -1,7 +1,7 @@
-import { type ClassValue, clsx } from 'clsx'
-import slugify from 'slugify'
-import { twMerge } from 'tailwind-merge'
-import { transliterate } from 'transliteration'
+import { type ClassValue, clsx } from "clsx"
+import slugify from "slugify"
+import { twMerge } from "tailwind-merge"
+import { transliterate } from "transliteration"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -20,7 +20,7 @@ export function chineseSlugify(text: string): string {
     lower: true, // 转小写
     strict: true, // 严格去除特殊字符
     trim: true,
-    replacement: '-', // 用 - 分隔
+    replacement: "-", // 用 - 分隔
   })
 }
 

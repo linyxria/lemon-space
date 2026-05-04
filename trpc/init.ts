@@ -1,8 +1,8 @@
-import { initTRPC, TRPCError } from '@trpc/server'
-import superjson from 'superjson'
+import { initTRPC, TRPCError } from "@trpc/server"
+import superjson from "superjson"
 
-import { db } from '@/db'
-import { auth } from '@/lib/auth'
+import { db } from "@/db"
+import { auth } from "@/lib/auth"
 
 /**
  * This context creator accepts `headers` so it can be reused in both
@@ -32,7 +32,7 @@ const t = initTRPC
 // 1. 创建一个中间件
 const isAuthed = t.middleware(({ next, ctx }) => {
   if (!ctx.session) {
-    throw new TRPCError({ code: 'UNAUTHORIZED' })
+    throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
   const { user } = ctx.session

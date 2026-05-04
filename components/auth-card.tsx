@@ -1,14 +1,14 @@
-'use client'
+"use client"
 
-import { Sparkles } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { type MouseEventHandler, type ReactNode, useState } from 'react'
-import { toast } from 'sonner'
+import { Sparkles } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { type MouseEventHandler, type ReactNode, useState } from "react"
+import { toast } from "sonner"
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -16,11 +16,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { authClient } from '@/lib/auth-client'
+} from "@/components/ui/card"
+import { authClient } from "@/lib/auth-client"
 
-import { Field } from './ui/field'
-import { Spinner } from './ui/spinner'
+import { Field } from "./ui/field"
+import { Spinner } from "./ui/spinner"
 
 function SocialButton({
   title,
@@ -52,7 +52,7 @@ function SocialButton({
   )
 }
 
-type Provider = 'github' | 'google' | 'wechat' | 'apple'
+type Provider = "github" | "google" | "wechat" | "apple"
 
 export default function AuthCard({
   title,
@@ -75,7 +75,7 @@ export default function AuthCard({
   }
   form: ReactNode
 }) {
-  const t = useTranslations('AuthCard')
+  const t = useTranslations("AuthCard")
   const searchParams = useSearchParams()
 
   const [providing, setProviding] = useState<Provider>()
@@ -85,7 +85,7 @@ export default function AuthCard({
     await authClient.signIn.social(
       {
         provider,
-        callbackURL: searchParams.get('callbackURL') || '/',
+        callbackURL: searchParams.get("callbackURL") || "/",
       },
       {
         onError: (ctx) => void toast.error(ctx.error.message),
@@ -99,7 +99,7 @@ export default function AuthCard({
       <CardHeader>
         <div className="border-primary/25 bg-primary/10 text-primary mx-auto inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.16em] uppercase">
           <Sparkles className="size-3.5" />
-          {t('brand')}
+          {t("brand")}
         </div>
         <CardTitle className="text-center text-2xl font-black tracking-tight">
           {title}
@@ -111,16 +111,16 @@ export default function AuthCard({
       <CardContent className="px-10">
         <div className="grid grid-cols-2 gap-2">
           <SocialButton
-            title={t('github')}
+            title={t("github")}
             image="/github.svg"
-            isLoading={providing === 'github'}
-            onClick={() => handleSocialSignIn('github')}
+            isLoading={providing === "github"}
+            onClick={() => handleSocialSignIn("github")}
           />
           <SocialButton
-            title={t('google')}
+            title={t("google")}
             image="/google.svg"
-            isLoading={providing === 'google'}
-            onClick={() => handleSocialSignIn('google')}
+            isLoading={providing === "google"}
+            onClick={() => handleSocialSignIn("google")}
           />
           {/* <SocialButton
             title="Apple"
@@ -141,7 +141,7 @@ export default function AuthCard({
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-card text-muted-foreground px-4">
-              {t('or')}
+              {t("or")}
             </span>
           </div>
         </div>

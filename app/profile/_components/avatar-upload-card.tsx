@@ -1,21 +1,21 @@
-'use client'
+"use client"
 
-import { useRouter } from '@bprogress/next/app'
-import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
-import { Camera, LoaderCircle } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import type { ChangeEvent } from 'react'
-import { useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { useRouter } from "@bprogress/next/app"
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query"
+import { Camera, LoaderCircle } from "lucide-react"
+import { useTranslations } from "next-intl"
+import type { ChangeEvent } from "react"
+import { useRef, useState } from "react"
+import { toast } from "sonner"
 
-import { Button } from '@/components/ui/button'
-import UserAvatar from '@/components/user-avatar'
-import { uploadFile } from '@/lib/s3'
-import { useTRPC } from '@/trpc/client'
+import { Button } from "@/components/ui/button"
+import UserAvatar from "@/components/user-avatar"
+import { uploadFile } from "@/lib/s3"
+import { useTRPC } from "@/trpc/client"
 
 export default function AvatarUploadCard() {
   const trpc = useTRPC()
-  const t = useTranslations('AvatarUpload')
+  const t = useTranslations("AvatarUpload")
   const { data } = useSuspenseQuery(trpc.user.info.queryOptions())
 
   const mutation = useMutation(trpc.user.avatarUpdate.mutationOptions())
@@ -30,9 +30,9 @@ export default function AvatarUploadCard() {
 
     if (!file) return
 
-    if (!file.type.startsWith('image/')) {
-      toast.error(t('invalidFile'))
-      event.target.value = ''
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("invalidFile"))
+      event.target.value = ""
       return
     }
 
@@ -42,18 +42,18 @@ export default function AvatarUploadCard() {
       setUploading(true)
       setPreviewUrl(localPreviewUrl)
 
-      const { objectKey } = await uploadFile('avatars', file)
+      const { objectKey } = await uploadFile("avatars", file)
       await mutation.mutateAsync({ objectKey })
 
-      toast.success(t('updated'))
+      toast.success(t("updated"))
       router.refresh()
     } catch (error) {
       console.error(error)
       setPreviewUrl(undefined)
-      toast.error(t('uploadFailed'))
+      toast.error(t("uploadFailed"))
     } finally {
       setUploading(false)
-      event.target.value = ''
+      event.target.value = ""
     }
   }
 
@@ -90,12 +90,12 @@ export default function AvatarUploadCard() {
               {uploading ? (
                 <>
                   <LoaderCircle className="size-3.5 animate-spin" />
-                  {t('uploadingShort')}
+                  {t("uploadingShort")}
                 </>
               ) : (
                 <>
                   <Camera className="size-3.5" />
-                  {t('changeAvatar')}
+                  {t("changeAvatar")}
                 </>
               )}
             </Button>
@@ -103,7 +103,7 @@ export default function AvatarUploadCard() {
 
           <div className="flex min-w-0 flex-col items-center text-center sm:items-start sm:text-left">
             <span className="bg-background/80 text-muted-foreground mb-2 rounded-full px-3 py-1 text-[11px] font-medium tracking-[0.14em] uppercase shadow-sm md:hidden">
-              {t('badge')}
+              {t("badge")}
             </span>
             <p className="text-foreground text-xl font-black tracking-tight sm:text-2xl">
               {data.name}
@@ -112,10 +112,10 @@ export default function AvatarUploadCard() {
               {data.email}
             </p>
             <p className="text-muted-foreground mt-2 max-w-sm text-sm leading-6">
-              {t('description')}
+              {t("description")}
             </p>
             <p className="text-muted-foreground mt-3 text-xs sm:hidden">
-              {t('formats')}
+              {t("formats")}
             </p>
           </div>
         </div>
@@ -129,16 +129,16 @@ export default function AvatarUploadCard() {
             {uploading ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                {t('uploadingLong')}
+                {t("uploadingLong")}
               </>
             ) : (
               <>
                 <Camera className="size-4" />
-                {t('changeAvatar')}
+                {t("changeAvatar")}
               </>
             )}
           </Button>
-          <p className="text-muted-foreground text-xs">{t('formats')}</p>
+          <p className="text-muted-foreground text-xs">{t("formats")}</p>
         </div>
       </div>
     </section>

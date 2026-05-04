@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { ProgressProvider as Provider } from '@bprogress/next/app'
+import { ProgressProvider as Provider } from "@bprogress/next/app"
 
 export default function ProgressProvider({
   children,

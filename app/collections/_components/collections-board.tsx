@@ -1,32 +1,32 @@
-'use client'
+"use client"
 
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
-} from '@tanstack/react-query'
-import { BookMarked, FolderPlus, Trash2 } from 'lucide-react'
-import Link from 'next/link'
-import { useLocale, useTranslations } from 'next-intl'
-import { useState } from 'react'
-import { toast } from 'sonner'
+} from "@tanstack/react-query"
+import { BookMarked, FolderPlus, Trash2 } from "lucide-react"
+import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
+import { useState } from "react"
+import { toast } from "sonner"
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { useTRPC } from '@/trpc/client'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { useTRPC } from "@/trpc/client"
 
 export function CollectionsBoard() {
   const trpc = useTRPC()
-  const t = useTranslations('Collections')
-  const tPreferences = useTranslations('Preferences')
+  const t = useTranslations("Collections")
+  const tPreferences = useTranslations("Preferences")
   const locale = useLocale()
   const queryClient = useQueryClient()
   const { data: collections } = useSuspenseQuery(
     trpc.collection.list.queryOptions(),
   )
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
 
   const createMutation = useMutation(
     trpc.collection.create.mutationOptions({
@@ -34,9 +34,9 @@ export function CollectionsBoard() {
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.list.queryKey(),
         })
-        setName('')
-        setDescription('')
-        toast.success(tPreferences('saved'))
+        setName("")
+        setDescription("")
+        toast.success(tPreferences("saved"))
       },
     }),
   )
@@ -47,7 +47,7 @@ export function CollectionsBoard() {
         await queryClient.invalidateQueries({
           queryKey: trpc.collection.list.queryKey(),
         })
-        toast.success(tPreferences('saved'))
+        toast.success(tPreferences("saved"))
       },
     }),
   )
@@ -66,38 +66,38 @@ export function CollectionsBoard() {
     <div className="space-y-5">
       <section className="from-hero via-hero to-primary/35 text-hero-foreground rounded-[28px] border bg-linear-to-r px-6 py-6">
         <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
-          {t('title')}
+          {t("title")}
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
-          {t('title')}
+          {t("title")}
         </h1>
         <p className="text-hero-muted mt-2 max-w-2xl text-sm">
-          {t('description')}
+          {t("description")}
         </p>
       </section>
 
       <section className="bg-card rounded-[28px] border p-5 shadow-sm">
         <h2 className="text-foreground mb-3 flex items-center gap-2 text-lg font-black">
           <FolderPlus className="size-4" />
-          {t('createTitle')}
+          {t("createTitle")}
         </h2>
         <div className="grid gap-3">
           <Input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder={t('namePlaceholder')}
+            placeholder={t("namePlaceholder")}
           />
           <Textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder={t('descriptionPlaceholder')}
+            placeholder={t("descriptionPlaceholder")}
           />
           <div className="flex justify-end">
             <Button
               onClick={handleCreate}
               disabled={createMutation.isPending || name.trim().length === 0}
             >
-              {t('createButton')}
+              {t("createButton")}
             </Button>
           </div>
         </div>
@@ -124,11 +124,11 @@ export function CollectionsBoard() {
                 <BookMarked className="text-muted-foreground size-4 shrink-0" />
               </div>
               <p className="text-muted-foreground mt-3 text-xs">
-                {item.assetCount} {t('assetsCount')} · {item.postCount}{' '}
-                {t('postsCount')}
+                {item.assetCount} {t("assetsCount")} · {item.postCount}{" "}
+                {t("postsCount")}
               </p>
               <p className="text-muted-foreground mt-1 text-xs">
-                {t('updated')}:{' '}
+                {t("updated")}:{" "}
                 {new Date(item.updatedAt).toLocaleDateString(locale)}
               </p>
               <div className="mt-4 flex items-center justify-between gap-2">
@@ -138,7 +138,7 @@ export function CollectionsBoard() {
                   nativeButton={false}
                   render={<Link href={`/collections/${item.id}`} />}
                 >
-                  {t('open')}
+                  {t("open")}
                 </Button>
                 <Button
                   size="sm"
@@ -149,14 +149,14 @@ export function CollectionsBoard() {
                   }
                 >
                   <Trash2 className="size-3.5" />
-                  {t('delete')}
+                  {t("delete")}
                 </Button>
               </div>
             </article>
           ))
         ) : (
           <p className="bg-muted/50 text-muted-foreground rounded-3xl border border-dashed p-6 text-sm">
-            {t('empty')}
+            {t("empty")}
           </p>
         )}
       </section>

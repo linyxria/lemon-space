@@ -6,7 +6,7 @@ type SendEmailOptions = {
 }
 
 function shouldThrowOnMailFailure() {
-  return process.env.NODE_ENV === 'production'
+  return process.env.NODE_ENV === "production"
 }
 
 async function sendWithResend({ to, subject, html, text }: SendEmailOptions) {
@@ -15,7 +15,7 @@ async function sendWithResend({ to, subject, html, text }: SendEmailOptions) {
   const replyTo = process.env.AUTH_EMAIL_REPLY_TO
 
   if (!apiKey || !from) {
-    const warning = '[auth-email] RESEND_API_KEY or AUTH_EMAIL_FROM is missing.'
+    const warning = "[auth-email] RESEND_API_KEY or AUTH_EMAIL_FROM is missing."
     if (shouldThrowOnMailFailure()) {
       throw new Error(warning)
     }
@@ -23,11 +23,11 @@ async function sendWithResend({ to, subject, html, text }: SendEmailOptions) {
     return
   }
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       from,
@@ -53,11 +53,11 @@ async function sendWithResend({ to, subject, html, text }: SendEmailOptions) {
 
 function escapeHtml(raw: string) {
   return raw
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;')
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;")
 }
 
 export async function sendVerificationEmail({
@@ -69,11 +69,11 @@ export async function sendVerificationEmail({
   name?: string | null
   verifyUrl: string
 }) {
-  const safeName = name ? escapeHtml(name) : 'there'
+  const safeName = name ? escapeHtml(name) : "there"
   const safeUrl = escapeHtml(verifyUrl)
 
-  const subject = 'Verify your email - Lemon Space'
-  const text = `Hi ${name || 'there'},\n\nPlease verify your email by opening the link below:\n${verifyUrl}\n\nIf you did not create this account, you can ignore this email.`
+  const subject = "Verify your email - Lemon Space"
+  const text = `Hi ${name || "there"},\n\nPlease verify your email by opening the link below:\n${verifyUrl}\n\nIf you did not create this account, you can ignore this email.`
   const html = `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #18181b;">
     <h2 style="margin: 0 0 12px;">Verify your email</h2>
@@ -92,7 +92,7 @@ export async function sendVerificationEmail({
   try {
     await sendWithResend({ to: email, subject, html, text })
   } catch (error) {
-    console.error('[auth-email] verification send failed:', error)
+    console.error("[auth-email] verification send failed:", error)
 
     if (shouldThrowOnMailFailure()) {
       throw error

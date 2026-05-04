@@ -1,23 +1,23 @@
-'use client'
+"use client"
 
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { BookOpenText, Heart, ImageIcon } from 'lucide-react'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { BookOpenText, Heart, ImageIcon } from "lucide-react"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
 
-import ImageCard from '@/components/image-card'
-import { MasonryGrid } from '@/components/masonry-grid'
+import ImageCard from "@/components/image-card"
+import { MasonryGrid } from "@/components/masonry-grid"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '@/components/ui/empty'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useTRPC } from '@/trpc/client'
+} from "@/components/ui/empty"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useTRPC } from "@/trpc/client"
 
-import { PostCard } from '../../posts/_components/post-card'
+import { PostCard } from "../../posts/_components/post-card"
 
 function EmptyLike({
   description,
@@ -29,14 +29,14 @@ function EmptyLike({
   description: string
   cta: string
   href: string
-  icon: 'post' | 'asset'
+  icon: "post" | "asset"
   title: string
 }) {
   return (
     <Empty className="bg-muted/30 border border-dashed">
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          {icon === 'post' ? <BookOpenText /> : <ImageIcon />}
+          {icon === "post" ? <BookOpenText /> : <ImageIcon />}
         </EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>
         <EmptyDescription>
@@ -55,7 +55,7 @@ function EmptyLike({
 
 export function LikesBoard() {
   const trpc = useTRPC()
-  const t = useTranslations('Likes')
+  const t = useTranslations("Likes")
   const { data: posts } = useSuspenseQuery(trpc.post.likedList.queryOptions())
   const { data: assets } = useSuspenseQuery(
     trpc.asset.listByMeLike.queryOptions(),
@@ -66,11 +66,11 @@ export function LikesBoard() {
       <TabsList>
         <TabsTrigger value="posts">
           <BookOpenText className="size-4" />
-          {t('posts')} ({posts.length})
+          {t("posts")} ({posts.length})
         </TabsTrigger>
         <TabsTrigger value="assets">
           <Heart className="size-4" />
-          {t('assets')} ({assets.length})
+          {t("assets")} ({assets.length})
         </TabsTrigger>
       </TabsList>
 
@@ -84,9 +84,9 @@ export function LikesBoard() {
         ) : (
           <EmptyLike
             icon="post"
-            title={t('emptyPostsTitle')}
-            description={t('emptyPostsDescription')}
-            cta={t('browse')}
+            title={t("emptyPostsTitle")}
+            description={t("emptyPostsDescription")}
+            cta={t("browse")}
             href="/posts"
           />
         )}
@@ -97,15 +97,15 @@ export function LikesBoard() {
           <MasonryGrid
             items={assets}
             renderItem={(item, index) => (
-              <ImageCard {...item} loading={index < 8 ? 'eager' : 'lazy'} />
+              <ImageCard {...item} loading={index < 8 ? "eager" : "lazy"} />
             )}
           />
         ) : (
           <EmptyLike
             icon="asset"
-            title={t('emptyAssetsTitle')}
-            description={t('emptyAssetsDescription')}
-            cta={t('browse')}
+            title={t("emptyAssetsTitle")}
+            description={t("emptyAssetsDescription")}
+            cta={t("browse")}
             href="/gallery"
           />
         )}

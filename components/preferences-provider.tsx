@@ -1,16 +1,16 @@
-'use client'
+"use client"
 
-import { useRouter } from '@bprogress/next/app'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useLocale } from 'next-intl'
-import { useTheme } from 'next-themes'
-import { createContext, useContext, useEffect, useRef } from 'react'
+import { useRouter } from "@bprogress/next/app"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useLocale } from "next-intl"
+import { useTheme } from "next-themes"
+import { createContext, useContext, useEffect, useRef } from "react"
 
-import { authClient } from '@/lib/auth-client'
-import { type AppLocale, LOCALE_COOKIE_KEY } from '@/lib/i18n'
-import { useTRPC } from '@/trpc/client'
+import { authClient } from "@/lib/auth-client"
+import { type AppLocale, LOCALE_COOKIE_KEY } from "@/lib/i18n"
+import { useTRPC } from "@/trpc/client"
 
-export type ThemePreference = 'light' | 'dark' | 'system'
+export type ThemePreference = "light" | "dark" | "system"
 
 type PreferencesState = {
   theme: ThemePreference
@@ -25,11 +25,11 @@ type PreferencesContextValue = PreferencesState & {
 const PreferencesContext = createContext<PreferencesContextValue | null>(null)
 
 const DEFAULT_PREFERENCES: PreferencesState = {
-  theme: 'system',
+  theme: "system",
 }
 
 function normalizeTheme(value: unknown): ThemePreference {
-  return value === 'light' || value === 'dark' || value === 'system'
+  return value === "light" || value === "dark" || value === "system"
     ? value
     : DEFAULT_PREFERENCES.theme
 }
@@ -155,7 +155,7 @@ export default function PreferencesProvider({
 export function usePreferences() {
   const context = useContext(PreferencesContext)
   if (!context) {
-    throw new Error('usePreferences must be used within PreferencesProvider')
+    throw new Error("usePreferences must be used within PreferencesProvider")
   }
   return context
 }

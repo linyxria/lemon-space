@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import {
   BookMarked,
@@ -8,30 +8,30 @@ import {
   Filter,
   Search,
   Sparkles,
-} from 'lucide-react'
-import { useMemo, useState, useSyncExternalStore } from 'react'
-import { toast } from 'sonner'
+} from "lucide-react"
+import { useMemo, useState, useSyncExternalStore } from "react"
+import { toast } from "sonner"
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 import {
   RESOURCE_CATEGORIES,
   type ResourceCategory,
   type TechResource,
-} from '../_data/resources'
+} from "../_data/resources"
 
-type ResourceFilter = ResourceCategory | 'all' | 'saved'
+type ResourceFilter = ResourceCategory | "all" | "saved"
 
-const SAVED_KEY = 'lemon-space-saved-resources'
+const SAVED_KEY = "lemon-space-saved-resources"
 
 function readSavedResources() {
-  if (typeof window === 'undefined') return new Set<string>()
+  if (typeof window === "undefined") return new Set<string>()
 
   try {
-    const value = JSON.parse(window.localStorage.getItem(SAVED_KEY) ?? '[]')
+    const value = JSON.parse(window.localStorage.getItem(SAVED_KEY) ?? "[]")
     return new Set(Array.isArray(value) ? value.filter(Boolean) : [])
   } catch {
     return new Set<string>()
@@ -43,22 +43,22 @@ function getSavedSnapshot() {
 }
 
 function subscribeToSavedResources(callback: () => void) {
-  window.addEventListener('storage', callback)
+  window.addEventListener("storage", callback)
   window.addEventListener(SAVED_KEY, callback)
 
   return () => {
-    window.removeEventListener('storage', callback)
+    window.removeEventListener("storage", callback)
     window.removeEventListener(SAVED_KEY, callback)
   }
 }
 
 export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
-  const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState<ResourceFilter>('all')
+  const [query, setQuery] = useState("")
+  const [filter, setFilter] = useState<ResourceFilter>("all")
   const savedSnapshot = useSyncExternalStore(
     subscribeToSavedResources,
     getSavedSnapshot,
-    () => '[]',
+    () => "[]",
   )
   const saved = useMemo(
     () => new Set(JSON.parse(savedSnapshot) as string[]),
@@ -69,10 +69,10 @@ export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
   const normalizedQuery = query.trim().toLowerCase()
   const visibleResources = useMemo(() => {
     return resources.filter((resource) => {
-      if (filter === 'saved' && !saved.has(resource.id)) return false
+      if (filter === "saved" && !saved.has(resource.id)) return false
       if (
-        filter !== 'all' &&
-        filter !== 'saved' &&
+        filter !== "all" &&
+        filter !== "saved" &&
         resource.category !== filter
       )
         return false
@@ -85,7 +85,7 @@ export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
         resource.category,
         ...resource.tags,
       ]
-        .join(' ')
+        .join(" ")
         .toLowerCase()
 
       return haystack.includes(normalizedQuery)
@@ -105,7 +105,7 @@ export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
 
   const copyResource = async (resource: TechResource) => {
     await navigator.clipboard.writeText(resource.docsUrl ?? resource.url)
-    toast.success('链接已复制')
+    toast.success("链接已复制")
   }
 
   return (
@@ -167,10 +167,10 @@ export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
                 type="button"
                 onClick={() => setFilter(category.id)}
                 className={cn(
-                  'min-w-30 rounded-lg border px-3 py-2 text-left transition lg:min-w-0',
+                  "min-w-30 rounded-lg border px-3 py-2 text-left transition lg:min-w-0",
                   filter === category.id
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'bg-card hover:bg-muted/60',
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "bg-card hover:bg-muted/60",
                 )}
               >
                 <span className="block text-sm font-bold">
@@ -185,7 +185,7 @@ export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
         </aside>
 
         <div className="space-y-4">
-          {filter === 'all' && !normalizedQuery ? (
+          {filter === "all" && !normalizedQuery ? (
             <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {featured.map((resource) => (
                 <ResourceCard
@@ -242,8 +242,8 @@ function ResourceCard({
   return (
     <article
       className={cn(
-        'bg-card group flex min-h-48 flex-col rounded-lg border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg',
-        compact ? 'border-primary/25 bg-primary/5' : null,
+        "bg-card group flex min-h-48 flex-col rounded-lg border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg",
+        compact ? "border-primary/25 bg-primary/5" : null,
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -259,12 +259,12 @@ function ResourceCard({
         <button
           type="button"
           onClick={() => onToggleSaved(resource.id)}
-          aria-label={saved ? '取消收藏' : '收藏'}
+          aria-label={saved ? "取消收藏" : "收藏"}
           className={cn(
-            'rounded-lg p-2 transition',
+            "rounded-lg p-2 transition",
             saved
-              ? 'bg-primary/10 text-primary'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
           {saved ? (

@@ -1,18 +1,18 @@
-'use client'
+"use client"
 
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Flame, Sparkles, TrendingUp, UploadCloud } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { Flame, Sparkles, TrendingUp, UploadCloud } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { useTRPC } from '@/trpc/client'
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { useTRPC } from "@/trpc/client"
 
 export function HomeShowcase() {
   const trpc = useTRPC()
-  const t = useTranslations('Home')
+  const t = useTranslations("Home")
   const { data } = useSuspenseQuery(trpc.asset.featured.queryOptions())
 
   if (data.featuredAssets.length === 0) return null
@@ -22,27 +22,27 @@ export function HomeShowcase() {
       <div className="from-hero via-hero to-primary/35 text-hero-foreground overflow-hidden rounded-[28px] border bg-linear-to-br p-5 shadow-[0_24px_60px_-30px_rgba(24,24,27,0.65)] sm:p-6">
         <div className="text-primary flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] uppercase">
           <Sparkles size={16} />
-          {t('featured')}
+          {t("featured")}
         </div>
         <div className="mt-3 flex flex-col gap-4 lg:flex-row">
           <div className="space-y-3 lg:max-w-sm">
             <h2 className="text-hero-foreground text-3xl font-black tracking-tighter sm:text-4xl">
-              {t('featuredTitle')}
+              {t("featuredTitle")}
             </h2>
             <p className="text-hero-muted text-sm leading-6">
-              {t('featuredDesc')}
+              {t("featuredDesc")}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="rounded-full px-3">
-                {t('statFeatured', { count: data.featuredAssets.length })}
+                {t("statFeatured", { count: data.featuredAssets.length })}
               </Badge>
               <Badge variant="secondary" className="rounded-full px-3">
-                {t('statTags', { count: data.hotTags.length })}
+                {t("statTags", { count: data.hotTags.length })}
               </Badge>
             </div>
             <Badge variant="secondary" className="rounded-full px-3">
               <TrendingUp />
-              {t('featuredHint')}
+              {t("featuredHint")}
             </Badge>
             <div className="flex flex-wrap items-center gap-2">
               <Button
@@ -52,7 +52,7 @@ export function HomeShowcase() {
                 render={<Link href="/gallery?sort=popular" />}
               >
                 <TrendingUp />
-                {t('viewTrending')}
+                {t("viewTrending")}
               </Button>
               <Button
                 size="sm"
@@ -61,7 +61,7 @@ export function HomeShowcase() {
                 render={<Link href="/gallery/upload" />}
               >
                 <UploadCloud />
-                {t('uploadCallout')}
+                {t("uploadCallout")}
               </Button>
             </div>
           </div>
@@ -87,7 +87,7 @@ export function HomeShowcase() {
                     {item.title}
                   </p>
                   <span className="text-primary shrink-0 text-xs font-semibold">
-                    {item.likeCount} {t('likesSuffix')}
+                    {item.likeCount} {t("likesSuffix")}
                   </span>
                 </div>
               </Link>
@@ -99,7 +99,7 @@ export function HomeShowcase() {
       <div className="bg-card min-w-0 rounded-[28px] border p-5 shadow-sm sm:p-6">
         <div className="text-muted-foreground flex items-center gap-2 text-[11px] font-semibold tracking-[0.28em] uppercase">
           <Flame className="text-primary size-3.5" />
-          {t('hotTags')}
+          {t("hotTags")}
         </div>
         <div className="mt-4 space-y-3">
           {data.hotTags.map((tag, index) => (
@@ -110,14 +110,14 @@ export function HomeShowcase() {
             >
               <div className="flex flex-1 items-center gap-3 overflow-hidden">
                 <span className="text-muted-foreground font-mono text-xs font-bold">
-                  {(index + 1).toString().padStart(2, '0')}
+                  {(index + 1).toString().padStart(2, "0")}
                 </span>
                 <div className="flex-1 overflow-hidden">
                   <p className="text-card-foreground truncate text-sm font-bold">
                     {tag.name}
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    {tag.assetCount} {t('pieces')}
+                    {tag.assetCount} {t("pieces")}
                   </p>
                 </div>
               </div>

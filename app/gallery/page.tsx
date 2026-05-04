@@ -1,11 +1,11 @@
-import { Suspense } from 'react'
+import { Suspense } from "react"
 
-import { Skeleton } from '@/components/ui/skeleton'
-import { HydrateClient, prefetch, trpc } from '@/trpc/server'
+import { Skeleton } from "@/components/ui/skeleton"
+import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
-import { GalleryList } from './_components/gallery-list'
-import { HomeShowcase } from './_components/home-showcase'
-import { TagBar } from './_components/tag-bar'
+import { GalleryList } from "./_components/gallery-list"
+import { HomeShowcase } from "./_components/home-showcase"
+import { TagBar } from "./_components/tag-bar"
 
 export default async function GalleryPage({
   searchParams,
@@ -13,11 +13,11 @@ export default async function GalleryPage({
   searchParams: Promise<{
     tag?: string
     q?: string
-    sort?: 'latest' | 'popular'
+    sort?: "latest" | "popular"
   }>
 }) {
   const { tag, q, sort } = await searchParams
-  const resolvedSort: 'latest' | 'popular' = sort ?? 'latest'
+  const resolvedSort: "latest" | "popular" = sort ?? "latest"
 
   prefetch(
     trpc.asset.list.infiniteQueryOptions(
