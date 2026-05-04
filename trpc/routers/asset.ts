@@ -3,7 +3,7 @@ import { and, desc, eq, exists, ilike, inArray, or, sql } from 'drizzle-orm'
 import z from 'zod'
 
 import type { db } from '@/db'
-import { asset, assetTag, like, tag, user } from '@/db/schema'
+import { asset, assetLike, assetTag, assetTagLink, user } from '@/db/schema'
 import { chineseSlugify } from '@/lib/utils'
 
 import { procedure, protectedProcedure, router } from '../init'
@@ -71,9 +71,9 @@ async function saveAssets(
 
   if (savedAssets.length === 0) return savedAssets
 
-  await tx.delete(assetTag).where(
+  await tx.delete(assetTagLink).where(
     inArray(
-      assetTag.assetId,
+      assetTagLink.assetId,
       savedAssets.map(({ id }) => id),
     ),
   )
@@ -81,7 +81,7 @@ async function saveAssets(
   if (tags.length === 0) return savedAssets
 
   const insertedTags = await tx
-    .insert(tag)
+    .insert(assetTag)
     .values(
       tags.map((name) => ({
         name,
@@ -90,15 +90,15 @@ async function saveAssets(
       })),
     )
     .onConflictDoUpdate({
-      target: tag.slug,
-      set: { slug: tag.slug },
+      target: assetTag.slug,
+      set: { slug: assetTag.slug },
     })
     .returning()
 
   const tagIds = insertedTags.map(({ id }) => id)
 
   if (tagIds.length > 0) {
-    await tx.insert(assetTag).values(
+    await tx.insert(assetTagLink).values(
       savedAssets.flatMap(({ id: assetId }) =>
         tagIds.map((tagId) => ({
           assetId,
@@ -152,9 +152,9 @@ export const assetRouter = router({
           ...(ctx.session
             ? {
                 likedByMe: sql<boolean>`exists(
-              select 1 from ${like} 
-              where ${like.assetId} = ${asset.id} 
-              and ${like.userId} = ${ctx.session.user.id}
+              select 1 from ${assetLike} 
+              where ${assetLike.assetId} = ${asset.id} 
+              and ${assetLike.userId} = ${ctx.session.user.id}
             )`,
               }
             : {}),
@@ -163,10 +163,10 @@ export const assetRouter = router({
         // 关联用户
         .innerJoin(user, eq(asset.userId, user.id))
         // 关联点赞 (用于 count)
-        .leftJoin(like, eq(asset.id, like.assetId))
+        .leftJoin(assetLike, eq(asset.id, assetLike.assetId))
         // 关联标签 (两层 join 拿到标签名)
-        .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
-        .leftJoin(tag, eq(assetTag.tagId, tag.id))
+        .leftJoin(assetTagLink, eq(asset.id, assetTagLink.assetId))
+        .leftJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
         // 过滤逻辑
         .where(
           and(
@@ -174,12 +174,12 @@ export const assetRouter = router({
               ? exists(
                   ctx.db
                     .select()
-                    .from(assetTag)
-                    .innerJoin(tag, eq(assetTag.tagId, tag.id))
+                    .from(assetTagLink)
+                    .innerJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
                     .where(
                       and(
-                        eq(assetTag.assetId, asset.id),
-                        eq(tag.slug, input.tag),
+                        eq(assetTagLink.assetId, asset.id),
+                        eq(assetTag.slug, input.tag),
                       ),
                     ),
                 )
@@ -190,12 +190,12 @@ export const assetRouter = router({
                   exists(
                     ctx.db
                       .select()
-                      .from(assetTag)
-                      .innerJoin(tag, eq(assetTag.tagId, tag.id))
+                      .from(assetTagLink)
+                      .innerJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
                       .where(
                         and(
-                          eq(assetTag.assetId, asset.id),
-                          ilike(tag.name, `%${input.q}%`),
+                          eq(assetTagLink.assetId, asset.id),
+                          ilike(assetTag.name, `%${input.q}%`),
                         ),
                       ),
                   ),
@@ -235,9 +235,9 @@ export const assetRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const relatedTagIds = await ctx.db
-        .select({ tagId: assetTag.tagId })
-        .from(assetTag)
-        .where(eq(assetTag.assetId, input.assetId))
+        .select({ tagId: assetTagLink.tagId })
+        .from(assetTagLink)
+        .where(eq(assetTagLink.assetId, input.assetId))
 
       const tagIds = relatedTagIds.map(({ tagId }) => tagId)
       const likeCountExpr = createDistinctLikeUserCountExpr()
@@ -254,9 +254,9 @@ export const assetRouter = router({
           tags: createTagNamesAggExpr(),
         })
         .from(asset)
-        .leftJoin(like, eq(asset.id, like.assetId))
-        .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
-        .leftJoin(tag, eq(assetTag.tagId, tag.id))
+        .leftJoin(assetLike, eq(asset.id, assetLike.assetId))
+        .leftJoin(assetTagLink, eq(asset.id, assetTagLink.assetId))
+        .leftJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
         .where(
           tagIds.length > 0
             ? and(
@@ -264,11 +264,11 @@ export const assetRouter = router({
                 exists(
                   ctx.db
                     .select()
-                    .from(assetTag)
+                    .from(assetTagLink)
                     .where(
                       and(
-                        eq(assetTag.assetId, asset.id),
-                        inArray(assetTag.tagId, tagIds),
+                        eq(assetTagLink.assetId, asset.id),
+                        inArray(assetTagLink.tagId, tagIds),
                       ),
                     ),
                 ),
@@ -284,15 +284,15 @@ export const assetRouter = router({
   tags: procedure.query(async ({ ctx }) => {
     return await ctx.db
       .select({
-        id: tag.id,
-        name: tag.name,
-        slug: tag.slug,
-        assetCount: sql<number>`count(${assetTag.assetId})`.mapWith(Number),
+        id: assetTag.id,
+        name: assetTag.name,
+        slug: assetTag.slug,
+        assetCount: sql<number>`count(${assetTagLink.assetId})`.mapWith(Number),
       })
-      .from(tag)
-      .innerJoin(assetTag, eq(assetTag.tagId, tag.id))
-      .groupBy(tag.id)
-      .orderBy(desc(sql`count(${assetTag.assetId})`), tag.name)
+      .from(assetTag)
+      .innerJoin(assetTagLink, eq(assetTagLink.tagId, assetTag.id))
+      .groupBy(assetTag.id)
+      .orderBy(desc(sql`count(${assetTagLink.assetId})`), assetTag.name)
   }),
   featured: procedure.query(async ({ ctx }) => {
     const likeCountExpr = createDistinctLikeUserCountExpr()
@@ -307,22 +307,22 @@ export const assetRouter = router({
         likeCount: likeCountExpr,
       })
       .from(asset)
-      .leftJoin(like, eq(asset.id, like.assetId))
+      .leftJoin(assetLike, eq(asset.id, assetLike.assetId))
       .groupBy(asset.id)
       .orderBy(desc(likeCountExpr), desc(asset.createdAt))
       .limit(4)
 
     const hotTags = await ctx.db
       .select({
-        id: tag.id,
-        name: tag.name,
-        slug: tag.slug,
-        assetCount: sql<number>`count(${assetTag.assetId})`.mapWith(Number),
+        id: assetTag.id,
+        name: assetTag.name,
+        slug: assetTag.slug,
+        assetCount: sql<number>`count(${assetTagLink.assetId})`.mapWith(Number),
       })
-      .from(tag)
-      .innerJoin(assetTag, eq(assetTag.tagId, tag.id))
-      .groupBy(tag.id)
-      .orderBy(desc(sql`count(${assetTag.assetId})`), tag.name)
+      .from(assetTag)
+      .innerJoin(assetTagLink, eq(assetTagLink.tagId, assetTag.id))
+      .groupBy(assetTag.id)
+      .orderBy(desc(sql`count(${assetTagLink.assetId})`), assetTag.name)
       .limit(8)
 
     return {
@@ -398,18 +398,18 @@ export const assetRouter = router({
         createdAt: asset.createdAt,
         tags: createTagNamesAggExpr(),
         likeCount: sql<number>`(
-        select count(*) from ${like} 
-        where ${like.assetId} = ${asset.id}
+        select count(*) from ${assetLike} 
+        where ${assetLike.assetId} = ${asset.id}
       )`.mapWith(Number),
         likedByMe: sql<boolean>`exists(
-        select 1 from ${like} 
-        where ${like.assetId} = ${asset.id} 
-        and ${like.userId} = ${userId}
+        select 1 from ${assetLike} 
+        where ${assetLike.assetId} = ${asset.id} 
+        and ${assetLike.userId} = ${userId}
       )`,
       })
       .from(asset)
-      .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
-      .leftJoin(tag, eq(assetTag.tagId, tag.id))
+      .leftJoin(assetTagLink, eq(asset.id, assetTagLink.assetId))
+      .leftJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
       .where(eq(asset.userId, userId))
       .groupBy(asset.id)
       .orderBy(desc(asset.createdAt))
@@ -438,22 +438,22 @@ export const assetRouter = router({
 
         // 统计该资产的总点赞数
         likeCount: sql<number>`(
-            select count(*) from ${like} 
-            where ${like.assetId} = ${asset.id}
+            select count(*) from ${assetLike} 
+            where ${assetLike.assetId} = ${asset.id}
           )`.mapWith(Number),
       })
-      .from(like)
+      .from(assetLike)
       // 1. 联表获取资产详情
-      .innerJoin(asset, eq(like.assetId, asset.id))
-      .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
-      .leftJoin(tag, eq(assetTag.tagId, tag.id))
+      .innerJoin(asset, eq(assetLike.assetId, asset.id))
+      .leftJoin(assetTagLink, eq(asset.id, assetTagLink.assetId))
+      .leftJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
       // 2. 联表获取原作者信息（可选）
       .innerJoin(user, eq(asset.userId, user.id))
       // 3. 核心过滤：谁点的赞？
-      .where(eq(like.userId, userId))
-      .groupBy(asset.id, user.id, like.createdAt)
+      .where(eq(assetLike.userId, userId))
+      .groupBy(asset.id, user.id, assetLike.createdAt)
       // 4. 按点赞时间排序
-      .orderBy(desc(like.createdAt))
+      .orderBy(desc(assetLike.createdAt))
 
     return assets.map((item) => ({
       ...mapObjectKeyToUrl(item),
@@ -470,18 +470,25 @@ export const assetRouter = router({
       const { db, user } = ctx
 
       const existing = await db
-        .select({ userId: like.userId })
-        .from(like)
-        .where(and(eq(like.userId, user.id), eq(like.assetId, input.assetId)))
+        .select({ userId: assetLike.userId })
+        .from(assetLike)
+        .where(
+          and(eq(assetLike.userId, user.id), eq(assetLike.assetId, input.assetId)),
+        )
         .limit(1)
 
       if (existing.length > 0) {
         await db
-          .delete(like)
-          .where(and(eq(like.userId, user.id), eq(like.assetId, input.assetId)))
+          .delete(assetLike)
+          .where(
+            and(
+              eq(assetLike.userId, user.id),
+              eq(assetLike.assetId, input.assetId),
+            ),
+          )
       } else {
         await db
-          .insert(like)
+          .insert(assetLike)
           .values({ userId: user.id, assetId: input.assetId })
           .onConflictDoNothing()
       }

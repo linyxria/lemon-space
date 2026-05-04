@@ -7,12 +7,17 @@ import { motion } from 'motion/react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from 'react'
 
-import { usePreferences } from '@/components/preferences-provider'
 import { Badge } from '@/components/ui/badge'
 import { authClient } from '@/lib/auth-client'
-import { useOptimisticLike } from '@/lib/use-optimistic-like'
 import { useTRPC } from '@/trpc/client'
 
 import { useGallery } from './gallery-provider'
@@ -83,6 +88,18 @@ function useAnimatedCount(value: number, duration = 180) {
   return displayValue
 }
 
+type LikeState = {
+  isLiked: boolean
+  count: number
+}
+
+function getNextLikeState(state: LikeState): LikeState {
+  return {
+    isLiked: !state.isLiked,
+    count: Math.max(0, state.count + (state.isLiked ? -1 : 1)),
+  }
+}
+
 export default function ImageCard({
   loading = 'lazy',
   id,
@@ -112,16 +129,18 @@ export default function ImageCard({
   const { data: session } = authClient.useSession()
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const { optimisticLike, optimisticToggle, commit, rollback } =
-    useOptimisticLike(
-      useMemo(
-        () => ({
-          isLiked: likedByMe ?? false,
-          count: likeCount,
-        }),
-        [likeCount, likedByMe],
-      ),
-    )
+  const [isLikeTransitionPending, startLikeTransition] = useTransition()
+  const likeState = useMemo(
+    () => ({
+      isLiked: likedByMe ?? false,
+      count: likeCount,
+    }),
+    [likeCount, likedByMe],
+  )
+  const [optimisticLike, toggleOptimisticLike] = useOptimistic<LikeState, void>(
+    likeState,
+    (current) => getNextLikeState(current),
+  )
   const animatedLikeCount = useAnimatedCount(optimisticLike.count)
 
   const likeMutation = useMutation(
@@ -146,7 +165,6 @@ export default function ImageCard({
   const pathname = usePathname()
   const gallery = useGallery()
   const t = useTranslations('ImageCard')
-  const { showCardTags } = usePreferences()
 
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -156,21 +174,17 @@ export default function ImageCard({
       return
     }
 
-    if (likeMutation.isPending) return
+    if (likeMutation.isPending || isLikeTransitionPending) return
 
-    const { previous, next } = optimisticToggle()
+    startLikeTransition(async () => {
+      toggleOptimisticLike(undefined)
 
-    likeMutation.mutate(
-      { assetId: id },
-      {
-        onSuccess: () => {
-          commit(next)
-        },
-        onError: () => {
-          rollback(previous)
-        },
-      },
-    )
+      try {
+        await likeMutation.mutateAsync({ assetId: id })
+      } catch {
+        // useOptimistic falls back to the confirmed props when the action settles.
+      }
+    })
   }
 
   const likeButtonClassName = `ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
@@ -229,7 +243,7 @@ export default function ImageCard({
           <button
             type="button"
             onClick={handleLikeClick}
-            disabled={likeMutation.isPending}
+            disabled={likeMutation.isPending || isLikeTransitionPending}
             aria-label={likeLabel}
             className={iconButtonClassName}
           >
@@ -239,20 +253,23 @@ export default function ImageCard({
       </div>
       {/* 2. 底部作者栏 */}
       <div className="bg-card border-t px-3.5 py-2.5">
-        {showCardTags && tags && tags.length > 0 ? (
-          <div className="mb-2 flex flex-wrap items-center gap-1.5">
-            {tags.slice(0, 2).map((tag) => (
+        {tags && tags.length > 0 ? (
+          <div className="mb-2 flex min-w-0 items-center gap-1.5 overflow-hidden">
+            {tags.slice(0, 4).map((tag) => (
               <Badge
                 key={tag}
                 variant="outline"
-                className="rounded-full px-2 text-[10px]"
+                className="min-w-0 shrink truncate rounded-full px-2 text-[10px]"
               >
                 {tag}
               </Badge>
             ))}
-            {tags.length > 2 ? (
-              <Badge variant="ghost" className="rounded-full px-2 text-[10px]">
-                +{tags.length - 2}
+            {tags.length > 4 ? (
+              <Badge
+                variant="ghost"
+                className="shrink-0 rounded-full px-2 text-[10px]"
+              >
+                +{tags.length - 4}
               </Badge>
             ) : null}
           </div>
@@ -272,7 +289,7 @@ export default function ImageCard({
           <button
             type="button"
             onClick={handleLikeClick}
-            disabled={likeMutation.isPending}
+            disabled={likeMutation.isPending || isLikeTransitionPending}
             aria-label={likeLabel}
             className={likeButtonClassName}
           >

@@ -4,22 +4,24 @@ import { useRouter } from '@bprogress/next/app'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   BookMarked,
-  Flame,
+  BookOpenText,
   Heart,
   Languages,
   LayoutGrid,
+  Library,
   LogOut,
   Moon,
+  PenLine,
   SlidersHorizontal,
   Sun,
   UploadCloud,
+  UserRound,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { usePreferences } from '@/components/preferences-provider'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -59,8 +61,7 @@ export default function UserNavClient() {
   const t = useTranslations('UserNav')
   const tCommon = useTranslations('Common')
   const locale = useLocale()
-  const { setLocale, setShowCardTags, setTheme, showCardTags, theme } =
-    usePreferences()
+  const { setLocale, setTheme, theme } = usePreferences()
 
   const handleSignOut = async () => {
     setIsSigningOut(true)
@@ -83,13 +84,6 @@ export default function UserNavClient() {
 
   return (
     <div className="flex items-center gap-2 sm:gap-4">
-      <Link href="/upload">
-        <Button variant="secondary" className="flex items-center gap-2">
-          <UploadCloud size={18} />
-          <span className="hidden sm:inline">{t('upload')}</span>
-        </Button>
-      </Link>
-
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2">
           <span className="hidden font-medium sm:block">{data.name}</span>
@@ -102,29 +96,68 @@ export default function UserNavClient() {
               <p className="text-muted-foreground text-xs font-normal">
                 {data.email}
               </p>
-              <div className="text-muted-foreground mt-2 flex items-center gap-2 text-[11px] font-semibold">
+              <div className="text-muted-foreground mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] font-semibold">
                 <span>
-                  {stats?.myCount ?? 0} {t('uploads')}
+                  {stats?.postCount ?? 0} {t('postItems')}
                 </span>
                 <span>
-                  {stats?.likeCount ?? 0} {t('likes')}
+                  {stats?.assetCount ?? stats?.myCount ?? 0} {t('galleryItems')}
+                </span>
+                <span>
+                  {stats?.collectionCount ?? 0} {t('collectionsShort')}
+                </span>
+                <span>
+                  {stats?.likeCount ?? 0} {t('likedItems')}
                 </span>
               </div>
             </DropdownMenuLabel>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex items-center gap-2">
+              <PenLine className="size-4" />
+              {t('createGroup')}
+            </DropdownMenuLabel>
             <DropdownMenuItem>
-              <Link href="/profile" className="flex w-full items-center gap-2">
+              <Link
+                href="/posts/new"
+                className="flex w-full items-center gap-2"
+              >
+                <BookOpenText />
+                {t('newPost')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link
+                href="/gallery/upload"
+                className="flex w-full items-center gap-2"
+              >
+                <UploadCloud />
+                {t('upload')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="flex items-center gap-2">
+              <Library className="size-4" />
+              {t('libraryGroup')}
+            </DropdownMenuLabel>
+            <DropdownMenuItem>
+              <Link href="/posts/me" className="flex w-full items-center gap-2">
+                <BookOpenText />
+                {t('myPosts')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link
+                href="/gallery/me"
+                className="flex w-full items-center gap-2"
+              >
                 <LayoutGrid />
                 {t('myGallery')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link
-                href="/profile?tab=likes"
-                className="flex w-full items-center gap-2"
-              >
+              <Link href="/likes" className="flex w-full items-center gap-2">
                 <Heart />
                 {t('myLikes')}
               </Link>
@@ -138,30 +171,17 @@ export default function UserNavClient() {
                 {t('collections')}
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="flex items-center gap-2">
+              <SlidersHorizontal className="size-4" />
+              {t('settingsGroup')}
+            </DropdownMenuLabel>
             <DropdownMenuItem>
-              <Link
-                href="/preferences"
-                className="flex w-full items-center gap-2"
-              >
-                <SlidersHorizontal />
-                {t('preferences')}
+              <Link href="/profile" className="flex w-full items-center gap-2">
+                <UserRound />
+                {t('profile')}
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link
-                href="/?sort=popular"
-                className="flex w-full items-center gap-2"
-              >
-                <Flame />
-                {t('hotIdeas')}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuCheckboxItem
-              checked={showCardTags}
-              onCheckedChange={(checked) => setShowCardTags(Boolean(checked))}
-            >
-              {t('showCardTags')}
-            </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="flex items-center gap-2">
               {theme === 'dark' ? (

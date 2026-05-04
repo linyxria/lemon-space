@@ -72,13 +72,13 @@ export async function sendVerificationEmail({
   const safeName = name ? escapeHtml(name) : 'there'
   const safeUrl = escapeHtml(verifyUrl)
 
-  const subject = 'Verify your email - Lemon Gallery'
+  const subject = 'Verify your email - Lemon Space'
   const text = `Hi ${name || 'there'},\n\nPlease verify your email by opening the link below:\n${verifyUrl}\n\nIf you did not create this account, you can ignore this email.`
   const html = `
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #18181b;">
     <h2 style="margin: 0 0 12px;">Verify your email</h2>
     <p style="margin: 0 0 12px;">Hi ${safeName},</p>
-    <p style="margin: 0 0 16px;">Thanks for signing up for Lemon Gallery. Confirm your email to finish setting up your account.</p>
+    <p style="margin: 0 0 16px;">Thanks for signing up for Lemon Space. Confirm your email to finish setting up your account.</p>
     <p style="margin: 0 0 20px;">
       <a href="${safeUrl}" style="display: inline-block; background: #18181b; color: white; text-decoration: none; padding: 10px 14px; border-radius: 8px;">
         Verify email

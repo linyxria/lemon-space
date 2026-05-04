@@ -109,18 +109,18 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
       />
 
       {/* 2. 弹窗主体 */}
-      <div className="bg-card relative z-10 h-[calc(100dvh-1.5rem)] w-full max-w-[1380px] overflow-hidden rounded-3xl shadow-[0_32px_64px_-24px_rgba(0,0,0,0.3)] sm:h-[calc(100dvh-3rem)] md:max-h-[92vh]">
+      <div className="bg-card relative z-10 h-[calc(100dvh-1.5rem)] w-full max-w-345 overflow-hidden rounded-3xl shadow-[0_32px_64px_-24px_rgba(0,0,0,0.3)] sm:h-[calc(100dvh-3rem)] md:max-h-[92vh]">
         {/* 3. 关闭按钮 */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-80 rounded-full bg-black/40 p-3 text-white shadow-lg backdrop-blur-md transition-all hover:bg-black/60 active:scale-90"
+          className="absolute top-4 right-4 z-80 rounded-full bg-black/40 p-1.5 text-white shadow-lg backdrop-blur-md transition-all hover:bg-black/60 active:scale-90"
         >
-          <X size={22} strokeWidth={2.5} />
+          <X size={18} />
         </button>
 
         <div className="grid h-full grid-rows-[auto_1fr] md:grid-cols-[minmax(0,1.25fr)_minmax(22rem,0.75fr)] md:grid-rows-1">
           {/* 4. 图片展示区：桌面双栏左侧主视觉 */}
-          <div className="bg-hero relative h-[40dvh] min-h-[15rem] overflow-hidden md:h-full md:min-h-0">
+          <div className="bg-hero relative h-[40dvh] min-h-60 overflow-hidden md:h-full md:min-h-0">
             {/* 底层氛围模糊图 */}
             <Image
               src={asset.url}
@@ -271,7 +271,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                         }
                         className="group text-left"
                       >
-                        <div className="bg-muted relative aspect-[4/5] overflow-hidden rounded-2xl">
+                        <div className="bg-muted relative aspect-4/5 overflow-hidden rounded-2xl">
                           <Image
                             src={item.url}
                             alt={item.title}

@@ -11,29 +11,21 @@ import { useTRPC } from '@/trpc/client'
 
 import { type ThemePreference, useTheme } from './theme-provider'
 
-type SortPreference = 'latest' | 'popular'
-
 type PreferencesState = {
-  showCardTags: boolean
-  defaultSort: SortPreference
   theme: ThemePreference
 }
 
 type PreferencesContextValue = PreferencesState & {
   locale: AppLocale
-  setShowCardTags: (value: boolean) => void
-  setDefaultSort: (value: SortPreference) => void
   setTheme: (value: ThemePreference) => void
   setLocale: (value: AppLocale) => void
 }
 
 const PreferencesContext = createContext<PreferencesContextValue | null>(null)
 
-const STORAGE_KEY = 'lemon-gallery-preferences'
+const STORAGE_KEY = 'lemon-space-preferences'
 
 const DEFAULT_PREFERENCES: PreferencesState = {
-  showCardTags: true,
-  defaultSort: 'latest',
   theme: 'system',
 }
 
@@ -55,14 +47,6 @@ function readStoredPreferences(): PreferencesState {
     const parsed = JSON.parse(raw) as Partial<PreferencesState>
 
     return {
-      showCardTags:
-        typeof parsed.showCardTags === 'boolean'
-          ? parsed.showCardTags
-          : DEFAULT_PREFERENCES.showCardTags,
-      defaultSort:
-        parsed.defaultSort === 'popular'
-          ? 'popular'
-          : DEFAULT_PREFERENCES.defaultSort,
       theme: normalizeTheme(parsed.theme),
     }
   } catch {
@@ -108,11 +92,6 @@ export default function PreferencesProvider({
 
   const remotePreferences = preferencesQuery.data
     ? {
-        showCardTags: preferencesQuery.data.showCardTags,
-        defaultSort:
-          preferencesQuery.data.defaultSort === 'popular'
-            ? 'popular'
-            : DEFAULT_PREFERENCES.defaultSort,
         theme: normalizeTheme(preferencesQuery.data.theme),
       }
     : null
@@ -159,15 +138,9 @@ export default function PreferencesProvider({
 
     if (session?.user) {
       const payload: {
-        showCardTags?: boolean
-        defaultSort?: SortPreference
         theme?: ThemePreference
       } = {}
 
-      if (patch.showCardTags !== undefined)
-        payload.showCardTags = patch.showCardTags
-      if (patch.defaultSort !== undefined)
-        payload.defaultSort = patch.defaultSort
       if (patch.theme !== undefined) payload.theme = patch.theme
 
       if (Object.keys(payload).length > 0) {
@@ -200,8 +173,6 @@ export default function PreferencesProvider({
       value={{
         ...resolvedPreferences,
         locale,
-        setShowCardTags: (value) => updatePreferences({ showCardTags: value }),
-        setDefaultSort: (value) => updatePreferences({ defaultSort: value }),
         setTheme: (value) => updatePreferences({ theme: value }),
         setLocale,
       }}

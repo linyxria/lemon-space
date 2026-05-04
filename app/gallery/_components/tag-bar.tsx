@@ -30,7 +30,7 @@ function buildGalleryHref({
   if (sort && sort !== 'latest') params.set('sort', sort)
 
   const query = params.toString()
-  return query ? `/?${query}` : '/'
+  return query ? `/gallery?${query}` : '/gallery'
 }
 
 export function TagBar({
@@ -144,7 +144,7 @@ export function TagBar({
               variant="ghost"
               size="sm"
               nativeButton={false}
-              render={<Link href="/" scroll={false} />}
+              render={<Link href="/gallery" scroll={false} />}
             >
               {t('clear')}
             </Button>

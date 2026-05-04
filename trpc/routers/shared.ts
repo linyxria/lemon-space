@@ -1,15 +1,15 @@
 import { sql } from 'drizzle-orm'
 
-import { like, tag } from '@/db/schema'
+import { assetLike, assetTag } from '@/db/schema'
 import { objectKey2Url } from '@/lib/utils'
 
 export function createDistinctLikeUserCountExpr() {
-  return sql<number>`count(distinct ${like.userId})`.mapWith(Number)
+  return sql<number>`count(distinct ${assetLike.userId})`.mapWith(Number)
 }
 
 export function createTagNamesAggExpr() {
   return sql<string[]>`coalesce(
-    json_agg(distinct ${tag.name}) filter (where ${tag.name} is not null),
+    json_agg(distinct ${assetTag.name}) filter (where ${assetTag.name} is not null),
     '[]'
   )`.as('tags')
 }

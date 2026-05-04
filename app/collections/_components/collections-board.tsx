@@ -124,7 +124,8 @@ export function CollectionsBoard() {
                 <BookMarked className="text-muted-foreground size-4 shrink-0" />
               </div>
               <p className="text-muted-foreground mt-3 text-xs">
-                {item.assetCount} {t('assetsCount')}
+                {item.assetCount} {t('assetsCount')} · {item.postCount}{' '}
+                {t('postsCount')}
               </p>
               <p className="text-muted-foreground mt-1 text-xs">
                 {t('updated')}:{' '}

@@ -76,7 +76,7 @@ export function GalleryList({
         <div className="py-20 text-center">
           <p className="text-muted-foreground font-medium">{t('noResult')}</p>
           <Link
-            href="/"
+            href="/gallery"
             className="text-primary mt-2 inline-block text-sm font-bold hover:underline"
           >
             {t('backToGallery')}
@@ -94,7 +94,7 @@ export function GalleryList({
           <EmptyDescription>{t('emptyDescription')}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button nativeButton={false} render={<Link href="/upload" />}>
+          <Button nativeButton={false} render={<Link href="/gallery/upload" />}>
             <UploadCloud />
             {t('uploadNow')}
           </Button>

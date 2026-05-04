@@ -1,14 +1,6 @@
 'use client'
 
-import {
-  CheckCheck,
-  Languages,
-  Monitor,
-  Moon,
-  Sun,
-  Tags,
-  TrendingUp,
-} from 'lucide-react'
+import { CheckCheck, Languages, Monitor, Moon, Sun } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { usePreferences } from '@/components/preferences-provider'
@@ -19,30 +11,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 export function PreferencesPanel() {
   const t = useTranslations('Preferences')
   const tCommon = useTranslations('Common')
-  const {
-    defaultSort,
-    locale,
-    setDefaultSort,
-    setLocale,
-    setShowCardTags,
-    setTheme,
-    showCardTags,
-    theme,
-  } = usePreferences()
+  const { locale, setLocale, setTheme, theme } = usePreferences()
 
   return (
-    <div className="space-y-5">
-      <section className="from-hero via-hero to-primary/35 text-hero-foreground rounded-[28px] border bg-linear-to-r px-6 py-6">
+    <section className="space-y-5">
+      <div>
         <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
           {t('title')}
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
+        <h2 className="mt-2 text-2xl font-black tracking-tight">
           {t('title')}
-        </h1>
-        <p className="text-hero-muted mt-2 max-w-2xl text-sm">
+        </h2>
+        <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
           {t('description')}
         </p>
-      </section>
+      </div>
 
       <div className="grid gap-4">
         <Card className="rounded-3xl">
@@ -102,58 +85,11 @@ export function PreferencesPanel() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tags className="size-4" />
-              {t('showTagsTitle')}
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">{t('showTagsDesc')}</p>
-          </CardHeader>
-          <CardContent className="flex items-center gap-2">
-            <Button
-              variant={showCardTags ? 'default' : 'outline'}
-              onClick={() => setShowCardTags(true)}
-            >
-              {tCommon('on')}
-            </Button>
-            <Button
-              variant={!showCardTags ? 'default' : 'outline'}
-              onClick={() => setShowCardTags(false)}
-            >
-              {tCommon('off')}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-3xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="size-4" />
-              {t('sortTitle')}
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">{t('sortDesc')}</p>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-2">
-            <Button
-              variant={defaultSort === 'latest' ? 'default' : 'outline'}
-              onClick={() => setDefaultSort('latest')}
-            >
-              {tCommon('latest')}
-            </Button>
-            <Button
-              variant={defaultSort === 'popular' ? 'default' : 'outline'}
-              onClick={() => setDefaultSort('popular')}
-            >
-              {tCommon('popular')}
-            </Button>
-            <Badge variant="secondary" className="ml-auto rounded-full px-3">
-              <CheckCheck className="size-3.5" />
-              {t('saved')}
-            </Badge>
-          </CardContent>
-        </Card>
+        <Badge variant="secondary" className="ml-auto w-fit rounded-full px-3">
+          <CheckCheck className="size-3.5" />
+          {t('saved')}
+        </Badge>
       </div>
-    </div>
+    </section>
   )
 }

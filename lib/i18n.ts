@@ -1,4 +1,4 @@
-export const LOCALE_COOKIE_KEY = 'lemon-gallery-locale'
+export const LOCALE_COOKIE_KEY = 'lemon-space-locale'
 
 export const SUPPORTED_LOCALES = ['zh-CN', 'en-US'] as const
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number]

@@ -6,11 +6,11 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { Toaster } from 'sonner'
 
 import GalleryProvider from '@/components/gallery-provider'
 import PreferencesProvider from '@/components/preferences-provider'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/sonner'
 import { TRPCReactProvider } from '@/trpc/client'
 
 import Header from './_components/header'
@@ -27,8 +27,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Lemon Gallery',
-  description: 'Gallery preview for Lemon Squeezy',
+  title: 'Lemon Space',
+  description: 'A personal writing space with a visual gallery.',
 }
 
 export default async function RootLayout({

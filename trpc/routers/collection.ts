@@ -1,16 +1,22 @@
 import { TRPCError } from '@trpc/server'
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { z } from 'zod'
 
 import type * as schema from '@/db/schema'
 import {
   asset,
+  assetLike,
   assetTag,
+  assetTagLink,
   collection,
-  collectionItem,
-  like,
-  tag,
+  collectionAsset,
+  collectionPost,
+  post,
+  postBookmark,
+  postLike,
+  postTag,
+  postTagLink,
   user,
 } from '@/db/schema'
 
@@ -58,12 +64,19 @@ export const collectionRouter = router({
         description: collection.description,
         createdAt: collection.createdAt,
         updatedAt: collection.updatedAt,
-        assetCount: sql<number>`count(${collectionItem.assetId})`.mapWith(
+        assetCount: sql<number>`count(distinct ${collectionAsset.assetId})`.mapWith(
+          Number,
+        ),
+        postCount: sql<number>`count(distinct ${collectionPost.postId})`.mapWith(
           Number,
         ),
       })
       .from(collection)
-      .leftJoin(collectionItem, eq(collection.id, collectionItem.collectionId))
+      .leftJoin(
+        collectionAsset,
+        eq(collection.id, collectionAsset.collectionId),
+      )
+      .leftJoin(collectionPost, eq(collection.id, collectionPost.collectionId))
       .where(eq(collection.userId, ctx.user.id))
       .groupBy(collection.id)
       .orderBy(desc(collection.updatedAt), desc(collection.createdAt))
@@ -107,7 +120,7 @@ export const collectionRouter = router({
           width: asset.width,
           height: asset.height,
           createdAt: asset.createdAt,
-          addedAt: collectionItem.addedAt,
+          addedAt: collectionAsset.addedAt,
           user: {
             id: user.id,
             name: user.name,
@@ -116,26 +129,84 @@ export const collectionRouter = router({
           likeCount: likeCountExpr,
           tags: createTagNamesAggExpr(),
           likedByMe: sql<boolean>`exists(
-            select 1 from ${like}
-            where ${like.assetId} = ${asset.id}
-            and ${like.userId} = ${ctx.user.id}
+            select 1 from ${assetLike}
+            where ${assetLike.assetId} = ${asset.id}
+            and ${assetLike.userId} = ${ctx.user.id}
           )`,
         })
-        .from(collectionItem)
-        .innerJoin(asset, eq(collectionItem.assetId, asset.id))
+        .from(collectionAsset)
+        .innerJoin(asset, eq(collectionAsset.assetId, asset.id))
         .innerJoin(user, eq(asset.userId, user.id))
-        .leftJoin(like, eq(asset.id, like.assetId))
-        .leftJoin(assetTag, eq(asset.id, assetTag.assetId))
-        .leftJoin(tag, eq(assetTag.tagId, tag.id))
-        .where(eq(collectionItem.collectionId, input.collectionId))
-        .groupBy(asset.id, user.id, collectionItem.addedAt)
-        .orderBy(desc(collectionItem.addedAt))
+        .leftJoin(assetLike, eq(asset.id, assetLike.assetId))
+        .leftJoin(assetTagLink, eq(asset.id, assetTagLink.assetId))
+        .leftJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
+        .where(eq(collectionAsset.collectionId, input.collectionId))
+        .groupBy(asset.id, user.id, collectionAsset.addedAt)
+        .orderBy(desc(collectionAsset.addedAt))
+
+      const posts = await ctx.db
+        .select({
+          id: post.id,
+          title: post.title,
+          excerpt: post.excerpt,
+          coverImageUrl: post.coverImageUrl,
+          readingTime: post.readingTime,
+          viewCount: post.viewCount,
+          publishedAt: post.publishedAt,
+          addedAt: collectionPost.addedAt,
+          likeCount: sql<number>`(
+            select count(*) from ${postLike}
+            where ${postLike.postId} = ${post.id}
+          )`.mapWith(Number),
+          bookmarkCount: sql<number>`(
+            select count(*) from ${postBookmark}
+            where ${postBookmark.postId} = ${post.id}
+          )`.mapWith(Number),
+        })
+        .from(collectionPost)
+        .innerJoin(post, eq(collectionPost.postId, post.id))
+        .where(eq(collectionPost.collectionId, input.collectionId))
+        .orderBy(desc(collectionPost.addedAt))
+
+      const postTags =
+        posts.length > 0
+          ? await ctx.db
+              .select({
+                postId: postTagLink.postId,
+                id: postTag.id,
+                name: postTag.name,
+                slug: postTag.slug,
+              })
+              .from(postTagLink)
+              .innerJoin(postTag, eq(postTagLink.tagId, postTag.id))
+              .where(
+                inArray(
+                  postTagLink.postId,
+                  posts.map((item) => item.id),
+                ),
+              )
+          : []
+
+      const tagsByPost = new Map<
+        string,
+        Array<{ id: string; name: string; slug: string }>
+      >()
+
+      for (const tag of postTags) {
+        const tags = tagsByPost.get(tag.postId) ?? []
+        tags.push({ id: tag.id, name: tag.name, slug: tag.slug })
+        tagsByPost.set(tag.postId, tags)
+      }
 
       return {
         ...collectionInfo,
         assets: assets.map((item) => ({
           ...mapObjectKeyToUrl(item),
           user: mapUserImageToUrl(item.user),
+        })),
+        posts: posts.map((item) => ({
+          ...item,
+          tags: tagsByPost.get(item.id) ?? [],
         })),
       }
     }),
@@ -251,12 +322,12 @@ export const collectionRouter = router({
       })
 
       const existingItem = await ctx.db
-        .select({ assetId: collectionItem.assetId })
-        .from(collectionItem)
+        .select({ assetId: collectionAsset.assetId })
+        .from(collectionAsset)
         .where(
           and(
-            eq(collectionItem.collectionId, input.collectionId),
-            eq(collectionItem.assetId, input.assetId),
+            eq(collectionAsset.collectionId, input.collectionId),
+            eq(collectionAsset.assetId, input.assetId),
           ),
         )
         .limit(1)
@@ -264,17 +335,69 @@ export const collectionRouter = router({
       const included = existingItem.length === 0
 
       if (included) {
-        await ctx.db.insert(collectionItem).values({
+        await ctx.db.insert(collectionAsset).values({
           collectionId: input.collectionId,
           assetId: input.assetId,
         })
       } else {
         await ctx.db
-          .delete(collectionItem)
+          .delete(collectionAsset)
           .where(
             and(
-              eq(collectionItem.collectionId, input.collectionId),
-              eq(collectionItem.assetId, input.assetId),
+              eq(collectionAsset.collectionId, input.collectionId),
+              eq(collectionAsset.assetId, input.assetId),
+            ),
+          )
+      }
+
+      await ctx.db
+        .update(collection)
+        .set({ updatedAt: new Date() })
+        .where(eq(collection.id, input.collectionId))
+
+      return {
+        included,
+      }
+    }),
+  togglePost: protectedProcedure
+    .input(
+      z.object({
+        collectionId: z.string().trim().min(1),
+        postId: z.string().trim().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCollectionOwner({
+        db: ctx.db,
+        userId: ctx.user.id,
+        collectionId: input.collectionId,
+      })
+
+      const existingPost = await ctx.db
+        .select({ postId: collectionPost.postId })
+        .from(collectionPost)
+        .where(
+          and(
+            eq(collectionPost.collectionId, input.collectionId),
+            eq(collectionPost.postId, input.postId),
+          ),
+        )
+        .limit(1)
+
+      const included = existingPost.length === 0
+
+      if (included) {
+        await ctx.db.insert(collectionPost).values({
+          collectionId: input.collectionId,
+          postId: input.postId,
+        })
+      } else {
+        await ctx.db
+          .delete(collectionPost)
+          .where(
+            and(
+              eq(collectionPost.collectionId, input.collectionId),
+              eq(collectionPost.postId, input.postId),
             ),
           )
       }
@@ -302,13 +425,40 @@ export const collectionRouter = router({
           description: collection.description,
           updatedAt: collection.updatedAt,
           assetCount: sql<number>`(
-            select count(*) from ${collectionItem}
-            where ${collectionItem.collectionId} = ${collection.id}
+            select count(*) from ${collectionAsset}
+            where ${collectionAsset.collectionId} = ${collection.id}
           )`.mapWith(Number),
           included: sql<boolean>`exists(
-            select 1 from ${collectionItem}
-            where ${collectionItem.collectionId} = ${collection.id}
-            and ${collectionItem.assetId} = ${input.assetId}
+            select 1 from ${collectionAsset}
+            where ${collectionAsset.collectionId} = ${collection.id}
+            and ${collectionAsset.assetId} = ${input.assetId}
+          )`,
+        })
+        .from(collection)
+        .where(eq(collection.userId, ctx.user.id))
+        .orderBy(desc(collection.updatedAt), desc(collection.createdAt))
+    }),
+  listForPost: protectedProcedure
+    .input(
+      z.object({
+        postId: z.string().trim().min(1),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db
+        .select({
+          id: collection.id,
+          name: collection.name,
+          description: collection.description,
+          updatedAt: collection.updatedAt,
+          postCount: sql<number>`(
+            select count(*) from ${collectionPost}
+            where ${collectionPost.collectionId} = ${collection.id}
+          )`.mapWith(Number),
+          included: sql<boolean>`exists(
+            select 1 from ${collectionPost}
+            where ${collectionPost.collectionId} = ${collection.id}
+            and ${collectionPost.postId} = ${input.postId}
           )`,
         })
         .from(collection)

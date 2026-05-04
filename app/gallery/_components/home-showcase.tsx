@@ -49,7 +49,7 @@ export function HomeShowcase() {
                 size="sm"
                 variant="secondary"
                 nativeButton={false}
-                render={<Link href="/?sort=popular" />}
+                render={<Link href="/gallery?sort=popular" />}
               >
                 <TrendingUp />
                 {t('viewTrending')}
@@ -58,7 +58,7 @@ export function HomeShowcase() {
                 size="sm"
                 variant="secondary"
                 nativeButton={false}
-                render={<Link href="/upload" />}
+                render={<Link href="/gallery/upload" />}
               >
                 <UploadCloud />
                 {t('uploadCallout')}
@@ -69,7 +69,7 @@ export function HomeShowcase() {
             {data.featuredAssets.map((item) => (
               <Link
                 key={item.id}
-                href="/?sort=popular"
+                href="/gallery?sort=popular"
                 className="group overflow-hidden rounded-3xl bg-white/8 p-2 backdrop-blur-sm transition hover:bg-white/12"
               >
                 <div className="relative aspect-4/5 overflow-hidden rounded-2xl">
@@ -105,7 +105,7 @@ export function HomeShowcase() {
           {data.hotTags.map((tag, index) => (
             <Link
               key={tag.id}
-              href={`/?tag=${tag.slug}`}
+              href={`/gallery?tag=${tag.slug}`}
               className="hover:border-primary/30 hover:bg-primary/10 flex items-center justify-between gap-4 overflow-hidden rounded-2xl border px-4 py-3 transition"
             >
               <div className="flex flex-1 items-center gap-3 overflow-hidden">

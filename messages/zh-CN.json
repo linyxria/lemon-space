@@ -19,17 +19,27 @@
   },
   "UserNav": {
     "upload": "发布灵感",
+    "createGroup": "创作",
+    "libraryGroup": "资料库",
+    "discoverGroup": "发现",
+    "settingsGroup": "设置",
+    "newPost": "写文章",
+    "myPosts": "我的文章",
     "myGallery": "我的画廊",
     "myLikes": "我的喜欢",
     "collections": "我的收藏夹",
+    "profile": "个人中心",
     "preferences": "偏好设置",
     "hotIdeas": "热门灵感",
-    "showCardTags": "卡片显示标签",
     "appearance": "外观",
     "language": "语言",
     "signOut": "退出登录",
     "uploads": "上传",
-    "likes": "喜欢"
+    "likes": "喜欢",
+    "postItems": "文章",
+    "collectionsShort": "收藏夹",
+    "galleryItems": "图片",
+    "likedItems": "喜欢"
   },
   "TagBar": {
     "searchPlaceholder": "搜标题或标签，比如：极简、海报、登录页",
@@ -67,12 +77,21 @@
   "Profile": {
     "badge": "创作者空间",
     "title": "个人中心",
-    "description": "管理你的头像、上传作品和收藏内容，把这个页面变成你在 Lemon Gallery 的个人名片。"
+    "description": "管理你的头像、上传作品和收藏内容，把这个页面变成你在 Lemon Space 的个人名片。"
   },
   "ProfileOverview": {
     "snapshotBadge": "创作者快照",
+    "postsLabel": "文章",
     "uploadsLabel": "上传作品",
     "likesLabel": "获得喜欢",
+    "workspaceBadge": "内容入口",
+    "workspaceTitle": "你的 Lemon Space",
+    "writePost": "写文章",
+    "manageCollections": "管理收藏夹",
+    "myPosts": "我的文章",
+    "myGallery": "我的画廊",
+    "myLikes": "我的喜欢",
+    "collections": "收藏夹",
     "recentBadge": "最近上传",
     "recentTitle": "你的灵感轨迹",
     "continueUpload": "继续上传",
@@ -124,15 +143,11 @@
     "languageDesc": "切换后会同步更新导航、筛选和功能页文案。",
     "themeTitle": "深色模式",
     "themeDesc": "选择浅色、深色，或跟随系统自动切换。",
-    "showTagsTitle": "卡片显示标签",
-    "showTagsDesc": "在瀑布流卡片中显示或隐藏标签信息。",
-    "sortTitle": "默认排序",
-    "sortDesc": "当首页没有显式排序参数时，自动使用这个偏好。",
     "saved": "已自动保存"
   },
   "Collections": {
     "title": "收藏夹",
-    "description": "把喜欢的图归档成主题集，方便回看和分享。",
+    "description": "把喜欢的文章和图片归档成主题集，方便回看和分享。",
     "createTitle": "新建收藏夹",
     "namePlaceholder": "例如：登录页灵感、插画风格参考",
     "descriptionPlaceholder": "写一点说明，帮助你未来快速找到它",
@@ -141,10 +156,26 @@
     "open": "打开",
     "delete": "删除",
     "assetsCount": "张图片",
+    "postsCount": "篇文章",
+    "posts": "文章",
+    "assets": "图片",
+    "emptyPosts": "这个收藏夹还没有文章。",
+    "emptyAssets": "这个收藏夹还没有图片。",
     "back": "返回收藏夹列表",
     "update": "更新信息",
     "updated": "最近更新",
     "remove": "移除"
+  },
+  "Likes": {
+    "title": "我的喜欢",
+    "description": "统一查看你喜欢过的文章和图片，不再把内容入口绑在画廊下面。",
+    "posts": "文章",
+    "assets": "图片",
+    "browse": "去看看",
+    "emptyPostsTitle": "还没有喜欢的文章",
+    "emptyPostsDescription": "在文章详情里点喜欢后，它会出现在这里。",
+    "emptyAssetsTitle": "还没有喜欢的图片",
+    "emptyAssetsDescription": "在画廊里点喜欢后，图片会出现在这里。"
   },
   "AuthCard": {
     "brand": "Lemon ID",
@@ -153,7 +184,7 @@
     "or": "或者"
   },
   "SignIn": {
-    "title": "登录 Lemon Gallery",
+    "title": "登录 Lemon Space",
     "description": "欢迎回来，继续整理你的灵感收藏。",
     "noAccount": "还没有账户？",
     "register": "注册",
@@ -172,7 +203,7 @@
   },
   "SignUp": {
     "title": "创建你的账户",
-    "description": "加入 Lemon Gallery，开始沉淀你的视觉灵感库。",
+    "description": "加入 Lemon Space，开始沉淀你的写作与视觉灵感库。",
     "hasAccount": "已经有账户了？",
     "signIn": "登录",
     "submit": "创建账号",

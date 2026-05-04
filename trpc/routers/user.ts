@@ -2,22 +2,26 @@ import { TRPCError } from '@trpc/server'
 import { eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
-import { asset, like, user, userPreference } from '@/db/schema'
+import {
+  asset,
+  assetLike,
+  collection,
+  post,
+  postLike,
+  user,
+  userPreference,
+} from '@/db/schema'
 
 import { protectedProcedure, router } from '../init'
 import { mapObjectKeyToUrl, mapUserImageToUrl } from './shared'
 
 const preferenceInputSchema = z.object({
   locale: z.enum(['zh-CN', 'en-US']).optional(),
-  showCardTags: z.boolean().optional(),
-  defaultSort: z.enum(['latest', 'popular']).optional(),
   theme: z.enum(['light', 'dark', 'system']).optional(),
 })
 
 const defaultPreferences = {
   locale: 'zh-CN' as const,
-  showCardTags: true,
-  defaultSort: 'latest' as const,
   theme: 'system' as const,
 }
 
@@ -54,7 +58,14 @@ export const userRouter = router({
   stats: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.user.id
 
-    const [myCount, likeCount, totalReceivedLikes] = await Promise.all([
+    const [
+      assetCount,
+      assetLikeCount,
+      postCount,
+      postLikeCount,
+      collectionCount,
+      totalReceivedLikes,
+    ] = await Promise.all([
       ctx.db
         .select({ count: sql<number>`count(*)` })
         .from(asset)
@@ -63,21 +74,44 @@ export const userRouter = router({
 
       ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(like)
-        .where(eq(like.userId, userId))
+        .from(assetLike)
+        .where(eq(assetLike.userId, userId))
         .then((res) => Number(res[0].count)),
 
       ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(like)
-        .innerJoin(asset, eq(like.assetId, asset.id))
+        .from(post)
+        .where(eq(post.authorId, userId))
+        .then((res) => Number(res[0].count)),
+
+      ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(postLike)
+        .where(eq(postLike.userId, userId))
+        .then((res) => Number(res[0].count)),
+
+      ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(collection)
+        .where(eq(collection.userId, userId))
+        .then((res) => Number(res[0].count)),
+
+      ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(assetLike)
+        .innerJoin(asset, eq(assetLike.assetId, asset.id))
         .where(eq(asset.userId, userId))
         .then((res) => Number(res[0].count)),
     ])
 
     return {
-      myCount,
-      likeCount,
+      myCount: assetCount,
+      likeCount: assetLikeCount + postLikeCount,
+      assetCount,
+      assetLikeCount,
+      postCount,
+      postLikeCount,
+      collectionCount,
       totalReceivedLikes,
     }
   }),
@@ -86,12 +120,12 @@ export const userRouter = router({
       ctx.db
         .select({
           myCount: sql<number>`count(distinct ${asset.id})`.mapWith(Number),
-          totalReceivedLikes: sql<number>`count(${like.assetId})`.mapWith(
+          totalReceivedLikes: sql<number>`count(${assetLike.assetId})`.mapWith(
             Number,
           ),
         })
         .from(asset)
-        .leftJoin(like, eq(like.assetId, asset.id))
+        .leftJoin(assetLike, eq(assetLike.assetId, asset.id))
         .where(eq(asset.userId, ctx.user.id))
         .then((res) => ({
           myCount: res[0]?.myCount ?? 0,
@@ -118,8 +152,6 @@ export const userRouter = router({
     const [preferences] = await ctx.db
       .select({
         locale: userPreference.locale,
-        showCardTags: userPreference.showCardTags,
-        defaultSort: userPreference.defaultSort,
         theme: userPreference.theme,
       })
       .from(userPreference)
@@ -133,11 +165,6 @@ export const userRouter = router({
         preferences.locale === 'en-US' || preferences.locale === 'zh-CN'
           ? preferences.locale
           : defaultPreferences.locale,
-      showCardTags: preferences.showCardTags,
-      defaultSort:
-        preferences.defaultSort === 'popular'
-          ? 'popular'
-          : defaultPreferences.defaultSort,
       theme:
         preferences.theme === 'light' ||
         preferences.theme === 'dark' ||
@@ -156,8 +183,6 @@ export const userRouter = router({
       const [existingPreferences] = await ctx.db
         .select({
           locale: userPreference.locale,
-          showCardTags: userPreference.showCardTags,
-          defaultSort: userPreference.defaultSort,
           theme: userPreference.theme,
         })
         .from(userPreference)
@@ -171,13 +196,6 @@ export const userRouter = router({
           existingPreferences?.locale === 'zh-CN'
             ? existingPreferences.locale
             : defaultPreferences.locale),
-        showCardTags:
-          input.showCardTags ?? existingPreferences?.showCardTags ?? true,
-        defaultSort:
-          input.defaultSort ??
-          (existingPreferences?.defaultSort === 'popular'
-            ? 'popular'
-            : defaultPreferences.defaultSort),
         theme:
           input.theme ??
           (existingPreferences?.theme === 'light' ||
@@ -202,8 +220,6 @@ export const userRouter = router({
         })
         .returning({
           locale: userPreference.locale,
-          showCardTags: userPreference.showCardTags,
-          defaultSort: userPreference.defaultSort,
           theme: userPreference.theme,
         })
 
@@ -213,11 +229,6 @@ export const userRouter = router({
           upsertedPreferences.locale === 'zh-CN'
             ? upsertedPreferences.locale
             : defaultPreferences.locale,
-        showCardTags: upsertedPreferences.showCardTags,
-        defaultSort:
-          upsertedPreferences.defaultSort === 'popular'
-            ? 'popular'
-            : defaultPreferences.defaultSort,
         theme:
           upsertedPreferences.theme === 'light' ||
           upsertedPreferences.theme === 'dark' ||

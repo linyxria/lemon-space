@@ -5,21 +5,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { HydrateClient, prefetch, trpc } from '@/trpc/server'
 
 import AvatarUploadCard from './_components/avatar-upload-card'
+import { PreferencesPanel } from './_components/preferences-panel'
 import { ProfileOverview } from './_components/profile-overview'
-import { ProfileTabs } from './_components/profile-tabs'
 
-export default async function ProfilePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ tab?: 'my' | 'likes' }>
-}) {
-  const { tab } = await searchParams
+export default async function ProfilePage() {
   const t = await getTranslations('Profile')
   prefetch(trpc.user.info.queryOptions())
   prefetch(trpc.user.stats.queryOptions())
-  prefetch(trpc.user.dashboard.queryOptions())
-  prefetch(trpc.asset.listByMe.queryOptions())
-  prefetch(trpc.asset.listByMeLike.queryOptions())
+  prefetch(trpc.user.preferences.queryOptions())
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col">
@@ -54,21 +47,9 @@ export default async function ProfilePage({
           <ProfileOverview />
         </Suspense>
         <Suspense
-          fallback={
-            <div className="flex w-full max-w-xs flex-col gap-7">
-              <div className="flex flex-col gap-3">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-              <div className="flex flex-col gap-3">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-              <Skeleton className="h-8 w-24" />
-            </div>
-          }
+          fallback={<Skeleton className="h-96 w-full rounded-[28px]" />}
         >
-          <ProfileTabs defaultTab={tab === 'likes' ? 'likes' : 'my'} />
+          <PreferencesPanel />
         </Suspense>
       </HydrateClient>
     </div>

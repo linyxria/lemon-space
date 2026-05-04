@@ -15,8 +15,11 @@ import ImageCard from '@/components/image-card'
 import { MasonryGrid } from '@/components/masonry-grid'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useTRPC } from '@/trpc/client'
+
+import { PostCard } from '../../posts/_components/post-card'
 
 function CollectionEditor({
   initialName,
@@ -98,6 +101,16 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
     }),
   )
 
+  const togglePostMutation = useMutation(
+    trpc.collection.togglePost.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.collection.detail.queryKey({ collectionId }),
+        })
+      },
+    }),
+  )
+
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2">
@@ -139,36 +152,79 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
         />
       </section>
 
-      {data.assets.length > 0 ? (
-        <MasonryGrid
-          items={data.assets}
-          renderItem={(item, index) => (
-            <div className="space-y-2">
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  disabled={toggleAssetMutation.isPending}
-                  onClick={() =>
-                    toggleAssetMutation.mutate({
-                      collectionId,
-                      assetId: item.id,
-                    })
-                  }
-                >
-                  <Trash2 className="size-3.5" />
-                  {t('remove')}
-                </Button>
-              </div>
-              <ImageCard {...item} loading={index < 2 ? 'eager' : 'lazy'} />
+      <Tabs defaultValue="posts">
+        <TabsList>
+          <TabsTrigger value="posts">
+            {t('posts')} ({data.posts.length})
+          </TabsTrigger>
+          <TabsTrigger value="assets">
+            {t('assets')} ({data.assets.length})
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="posts" className="pt-3">
+          {data.posts.length > 0 ? (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {data.posts.map((post) => (
+                <div key={post.id} className="space-y-2">
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={togglePostMutation.isPending}
+                      onClick={() =>
+                        togglePostMutation.mutate({
+                          collectionId,
+                          postId: post.id,
+                        })
+                      }
+                    >
+                      <Trash2 className="size-3.5" />
+                      {t('remove')}
+                    </Button>
+                  </div>
+                  <PostCard post={post} />
+                </div>
+              ))}
             </div>
+          ) : (
+            <p className="bg-muted/50 text-muted-foreground rounded-3xl border border-dashed p-6 text-sm">
+              {t('emptyPosts')}
+            </p>
           )}
-        />
-      ) : (
-        <p className="bg-muted/50 text-muted-foreground rounded-3xl border border-dashed p-6 text-sm">
-          {t('empty')}
-        </p>
-      )}
+        </TabsContent>
+        <TabsContent value="assets" className="pt-3">
+          {data.assets.length > 0 ? (
+            <MasonryGrid
+              items={data.assets}
+              renderItem={(item, index) => (
+                <div className="space-y-2">
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={toggleAssetMutation.isPending}
+                      onClick={() =>
+                        toggleAssetMutation.mutate({
+                          collectionId,
+                          assetId: item.id,
+                        })
+                      }
+                    >
+                      <Trash2 className="size-3.5" />
+                      {t('remove')}
+                    </Button>
+                  </div>
+                  <ImageCard {...item} loading={index < 2 ? 'eager' : 'lazy'} />
+                </div>
+              )}
+            />
+          ) : (
+            <p className="bg-muted/50 text-muted-foreground rounded-3xl border border-dashed p-6 text-sm">
+              {t('emptyAssets')}
+            </p>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

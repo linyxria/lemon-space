@@ -1,5 +1,4 @@
 import { S3Client } from '@aws-sdk/client-s3'
-import axios from 'axios'
 
 import { api } from '@/trpc/client'
 
@@ -15,6 +14,7 @@ export const s3client = new S3Client({
 const CACHE_CONTROL_BY_FOLDER = {
   assets: 'public, max-age=31536000, immutable',
   avatars: 'public, max-age=31536000, immutable',
+  posts: 'public, max-age=31536000, immutable',
 }
 
 function getSafeExtension(filename: string) {
@@ -36,12 +36,53 @@ async function getFileHash(file: File) {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+function putFile({
+  cacheControl,
+  contentType,
+  file,
+  onProgress,
+  url,
+}: {
+  cacheControl: string
+  contentType: string
+  file: File
+  onProgress?: (percent: number) => void
+  url: string
+}) {
+  return new Promise<void>((resolve, reject) => {
+    const request = new XMLHttpRequest()
+
+    request.open('PUT', url)
+    request.setRequestHeader('Cache-Control', cacheControl)
+    request.setRequestHeader('Content-Type', contentType)
+
+    request.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return
+      onProgress?.(Math.round((event.loaded * 100) / event.total))
+    }
+
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 300) {
+        onProgress?.(100)
+        resolve()
+        return
+      }
+
+      reject(new Error(`Upload failed with status ${request.status}`))
+    }
+
+    request.onerror = () => reject(new Error('Upload failed'))
+    request.onabort = () => reject(new Error('Upload cancelled'))
+    request.send(file)
+  })
+}
+
 /**
  * 纯粹的文件上传逻辑
  * 返回 objectKey，不涉及任何具体的业务数据库操作
  */
 export async function uploadFile(
-  folder: 'assets' | 'avatars',
+  folder: 'assets' | 'avatars' | 'posts',
   file: File,
   { onProgress }: { onProgress?: (percent: number) => void } = {},
 ) {
@@ -49,26 +90,23 @@ export async function uploadFile(
   const objectKey = `${folder}/${hash}.${getSafeExtension(file.name) || 'bin'}`
   const cacheControl = CACHE_CONTROL_BY_FOLDER[folder]
 
-  const signedUrl = await api.upload.signedUrl.mutate({
+  const uploadTarget = await api.upload.signedUrl.mutate({
     Key: objectKey,
     ContentType: file.type,
     CacheControl: cacheControl,
   })
 
-  // 3. 执行上传
-  await axios.put(signedUrl, file, {
-    headers: {
-      'Cache-Control': cacheControl,
-      'Content-Type': file.type,
-    },
-    onUploadProgress: ({ loaded, total }) => {
-      const percent = total ? Math.round((loaded * 100) / total) : 0
-      onProgress?.(percent)
-    },
+  await putFile({
+    cacheControl,
+    contentType: file.type,
+    file,
+    onProgress,
+    url: uploadTarget.signedUrl,
   })
 
   return {
     objectKey,
+    url: uploadTarget.publicUrl,
     // hash,
   }
 }

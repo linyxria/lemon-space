@@ -15,9 +15,9 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'http',
-        hostname: 'localhost',
+        hostname: '127.0.0.1',
         port: '9000',
-        pathname: '/lemon-gallery/**',
+        pathname: '/lemon-space/**',
       },
     ],
     dangerouslyAllowLocalIP: true,

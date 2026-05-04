@@ -3,6 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import z from 'zod'
 
 import { s3client } from '@/lib/s3'
+import { objectKey2Url } from '@/lib/utils'
 
 import { protectedProcedure, router } from '../init'
 
@@ -24,6 +25,9 @@ export const uploadRouter = router({
         CacheControl: input.CacheControl,
       })
       const signedUrl = await getSignedUrl(s3client, command, { expiresIn: 60 })
-      return signedUrl
+      return {
+        signedUrl,
+        publicUrl: objectKey2Url(input.Key),
+      }
     }),
 })
