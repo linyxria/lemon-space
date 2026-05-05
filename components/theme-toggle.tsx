@@ -1,18 +1,17 @@
 "use client"
 
 import { Moon, Sun } from "lucide-react"
-import { useSyncExternalStore } from "react"
 
 import {
   type ThemePreference,
   usePreferences,
 } from "@/components/preferences-provider"
 import { Button } from "@/components/ui/button"
+import { useHydrated } from "@/hooks/hydration"
 
 type VisibleThemePreference = Exclude<ThemePreference, "system">
 
 const THEME_SEQUENCE: VisibleThemePreference[] = ["light", "dark"]
-const subscribe = () => () => {}
 
 function getVisibleTheme(theme: ThemePreference): VisibleThemePreference {
   return theme === "dark" ? "dark" : "light"
@@ -20,11 +19,7 @@ function getVisibleTheme(theme: ThemePreference): VisibleThemePreference {
 
 export function ThemeToggle({ label }: { label: string }) {
   const { setTheme, theme } = usePreferences()
-  const isHydrated = useSyncExternalStore(
-    subscribe,
-    () => true,
-    () => false,
-  )
+  const isHydrated = useHydrated()
   const currentTheme = getVisibleTheme(isHydrated ? theme : "light")
   const Icon = currentTheme === "dark" ? Moon : Sun
   const nextTheme =

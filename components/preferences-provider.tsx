@@ -6,6 +6,7 @@ import { useLocale } from "next-intl"
 import { useTheme } from "next-themes"
 import { createContext, useContext, useEffect, useRef } from "react"
 
+import { useHydrated } from "@/hooks/hydration"
 import { authClient } from "@/lib/auth-client"
 import { type AppLocale, LOCALE_COOKIE_KEY } from "@/lib/i18n"
 import { useTRPC } from "@/trpc/client"
@@ -45,6 +46,7 @@ export default function PreferencesProvider({
   const queryClient = useQueryClient()
   const { setTheme: setNextTheme, theme: nextTheme } = useTheme()
   const { data: session } = authClient.useSession()
+  const isHydrated = useHydrated()
   const hasUserSwitchedLocaleRef = useRef(false)
   const hasAppliedRemoteLocaleRef = useRef(false)
 
@@ -70,7 +72,9 @@ export default function PreferencesProvider({
     ? normalizeTheme(preferencesQuery.data.theme)
     : null
   const resolvedPreferences = {
-    theme: normalizeTheme(nextTheme ?? remoteTheme),
+    theme: normalizeTheme(
+      isHydrated ? (nextTheme ?? remoteTheme) : remoteTheme,
+    ),
   }
 
   useEffect(() => {

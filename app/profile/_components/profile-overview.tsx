@@ -58,11 +58,11 @@ export function ProfileOverview() {
               alt={info.name}
               width={72}
               height={72}
-              className="rounded-3xl object-cover shadow-[0_14px_36px_-24px_rgba(24,24,27,0.45)]"
+              className="size-18 rounded-3xl object-cover shadow-[0_14px_36px_-24px_rgba(24,24,27,0.45)]"
               onError={() => setAvatarFailed(true)}
             />
           ) : (
-            <div className="bg-muted text-muted-foreground flex size-[72px] items-center justify-center rounded-3xl text-2xl font-black">
+            <div className="bg-muted text-muted-foreground flex size-18 items-center justify-center rounded-3xl text-2xl font-black">
               {info.name.slice(0, 1)}
             </div>
           )}
