@@ -76,17 +76,7 @@
         }
       },
       "uniqueConstraints": {},
-      "policies": {
-        "Enable read access for all users": {
-          "name": "Enable read access for all users",
-          "as": "PERMISSIVE",
-          "for": "SELECT",
-          "to": [
-            "public"
-          ],
-          "using": "true"
-        }
-      },
+      "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
@@ -152,26 +142,7 @@
           ]
         }
       },
-      "policies": {
-        "Enable read access for all users": {
-          "name": "Enable read access for all users",
-          "as": "PERMISSIVE",
-          "for": "SELECT",
-          "to": [
-            "public"
-          ],
-          "using": "true"
-        },
-        "Enable insert for users based on user_id": {
-          "name": "Enable insert for users based on user_id",
-          "as": "PERMISSIVE",
-          "for": "INSERT",
-          "to": [
-            "public"
-          ],
-          "withCheck": "requesting_user_id() = \"user_id\""
-        }
-      },
+      "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
@@ -225,26 +196,7 @@
         }
       },
       "uniqueConstraints": {},
-      "policies": {
-        "Enable read access for all users": {
-          "name": "Enable read access for all users",
-          "as": "PERMISSIVE",
-          "for": "SELECT",
-          "to": [
-            "public"
-          ],
-          "using": "true"
-        },
-        "Enable insert for users based on user_id": {
-          "name": "Enable insert for users based on user_id",
-          "as": "PERMISSIVE",
-          "for": "INSERT",
-          "to": [
-            "public"
-          ],
-          "withCheck": "requesting_user_id() = \"user_id\""
-        }
-      },
+      "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
@@ -304,26 +256,7 @@
           ]
         }
       },
-      "policies": {
-        "Enable read access for all users": {
-          "name": "Enable read access for all users",
-          "as": "PERMISSIVE",
-          "for": "SELECT",
-          "to": [
-            "public"
-          ],
-          "using": "true"
-        },
-        "Enable insert for users based on creator_id": {
-          "name": "Enable insert for users based on creator_id",
-          "as": "PERMISSIVE",
-          "for": "INSERT",
-          "to": [
-            "public"
-          ],
-          "withCheck": "requesting_user_id() = \"creator_id\""
-        }
-      },
+      "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     }

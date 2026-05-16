@@ -1,0 +1,25 @@
+name: lemon-space
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: lemon-space-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lemon_space
+      POSTGRES_USER: lemon
+      POSTGRES_PASSWORD: lemon
+    ports:
+      - "54323:5432"
+    volumes:
+      - data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lemon -d lemon_space"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  data:
+    name: lemon-space-data

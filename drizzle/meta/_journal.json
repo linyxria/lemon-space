@@ -71,6 +71,13 @@
       "when": 1777877778315,
       "tag": "0009_drop_user_preference_display_options",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1778412857871,
+      "tag": "0010_same_captain_stacy",
+      "breakpoints": true
     }
   ]
 }
