@@ -19,7 +19,7 @@ export function PreferencesPanel() {
         <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
           {t("title")}
         </p>
-        <h2 className="mt-2 text-2xl font-black tracking-tight">
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
           {t("title")}
         </h2>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm">

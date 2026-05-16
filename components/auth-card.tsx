@@ -3,7 +3,6 @@
 import { Sparkles } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { type MouseEventHandler, type ReactNode, useState } from "react"
 import { toast } from "sonner"
@@ -58,6 +57,7 @@ export default function AuthCard({
   title,
   description,
   sub,
+  callbackURL,
   button,
   form,
 }: {
@@ -68,6 +68,7 @@ export default function AuthCard({
     to: string
     action: string
   }
+  callbackURL: string
   button: {
     text: string
     form: string
@@ -76,7 +77,6 @@ export default function AuthCard({
   form: ReactNode
 }) {
   const t = useTranslations("AuthCard")
-  const searchParams = useSearchParams()
 
   const [providing, setProviding] = useState<Provider>()
 
@@ -85,7 +85,7 @@ export default function AuthCard({
     await authClient.signIn.social(
       {
         provider,
-        callbackURL: searchParams.get("callbackURL") || "/",
+        callbackURL,
       },
       {
         onError: (ctx) => void toast.error(ctx.error.message),
@@ -101,7 +101,7 @@ export default function AuthCard({
           <Sparkles className="size-3.5" />
           {t("brand")}
         </div>
-        <CardTitle className="text-center text-2xl font-black tracking-tight">
+        <CardTitle className="text-center text-2xl font-semibold tracking-tight">
           {title}
         </CardTitle>
         <CardDescription className="text-center text-sm">

@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
@@ -9,9 +10,17 @@ import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
 import { LikesBoard } from "./_components/likes-board"
 
+export const metadata: Metadata = {
+  title: "Likes",
+  description: "Review posts and gallery images you liked.",
+}
+
 export default async function LikesPage() {
-  const t = await getTranslations("Likes")
-  const session = await auth.api.getSession({ headers: await headers() })
+  const requestHeaders = await headers()
+  const [t, session] = await Promise.all([
+    getTranslations("Likes"),
+    auth.api.getSession({ headers: requestHeaders }),
+  ])
 
   if (!session) redirect("/sign-in")
 
@@ -25,7 +34,7 @@ export default async function LikesPage() {
           <p className="text-primary text-xs font-bold tracking-[0.24em] uppercase">
             Likes
           </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight">
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
             {t("title")}
           </h1>
           <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-6">

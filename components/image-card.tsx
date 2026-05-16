@@ -3,9 +3,8 @@
 import { useRouter } from "@bprogress/next/app"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Heart } from "lucide-react"
-import { motion } from "motion/react"
+import { domAnimation, LazyMotion, m } from "motion/react"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useOptimistic, useState, useTransition } from "react"
 
@@ -34,6 +33,30 @@ function getNextLikeState(state: LikeState): LikeState {
     isLiked: !state.isLiked,
     count: Math.max(0, state.count + (state.isLiked ? -1 : 1)),
   }
+}
+
+function AnimatedHeart({
+  isLiked,
+  size,
+  strokeWidth,
+}: {
+  isLiked: boolean
+  size: number
+  strokeWidth: number
+}) {
+  return (
+    <m.div
+      initial={false}
+      animate={isLiked ? "liked" : "unliked"}
+      variants={heartVariants}
+    >
+      <Heart
+        size={size}
+        fill={isLiked ? "currentColor" : "none"}
+        strokeWidth={isLiked ? 0 : strokeWidth}
+      />
+    </m.div>
+  )
 }
 
 function ImageTags({ tags }: { tags: string[] }) {
@@ -145,8 +168,7 @@ export default function ImageCard({
     }),
   )
 
-  const router = useRouter()
-  const pathname = usePathname()
+  const { push } = useRouter()
   const gallery = useGallery()
   const t = useTranslations("ImageCard")
 
@@ -154,7 +176,8 @@ export default function ImageCard({
     e.stopPropagation()
 
     if (!session) {
-      router.push(`/sign-in?callbackURL=${encodeURIComponent(pathname)}`)
+      const pathname = window.location.pathname
+      push(`/sign-in?callbackURL=${encodeURIComponent(pathname)}`)
       return
     }
 
@@ -182,6 +205,17 @@ export default function ImageCard({
     })
   }
 
+  const openPreview = () => {
+    gallery.openAsset({ id, title, url, width, height, tags })
+  }
+
+  const handlePreviewKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return
+
+    event.preventDefault()
+    openPreview()
+  }
+
   const likeButtonClassName = `ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
     optimisticLike.isLiked
       ? "bg-primary/10 text-primary"
@@ -194,87 +228,85 @@ export default function ImageCard({
 
   const likeLabel = optimisticLike.isLiked ? t("unlike") : t("like")
 
-  const renderHeart = (size: number, strokeWidth: number) => (
-    <motion.div
-      initial={false}
-      animate={optimisticLike.isLiked ? "liked" : "unliked"}
-      variants={heartVariants}
-    >
-      <Heart
-        size={size}
-        fill={optimisticLike.isLiked ? "currentColor" : "none"}
-        strokeWidth={optimisticLike.isLiked ? 0 : strokeWidth}
-      />
-    </motion.div>
-  )
-
   return (
-    <div className="bg-card group ring-border hover:ring-ring/40 relative w-full max-w-full min-w-0 overflow-hidden rounded-lg shadow-sm ring-1 transition-all hover:shadow-lg">
-      {/* 图片区域容器 */}
-      <div
-        className="bg-muted relative cursor-zoom-in overflow-hidden"
-        onClick={() =>
-          gallery.openAsset({ id, title, url, width, height, tags })
-        }
-      >
-        {/* 优雅核心：使用原生 CSS transition。
+    <LazyMotion features={domAnimation}>
+      <div className="bg-card group ring-border hover:ring-ring/40 relative w-full max-w-full min-w-0 overflow-hidden rounded-lg shadow-sm ring-1 transition-all hover:shadow-lg">
+        {/* 图片区域容器 */}
+        <div
+          role="button"
+          tabIndex={0}
+          className="bg-muted relative block w-full cursor-zoom-in overflow-hidden text-left"
+          onClick={openPreview}
+          onKeyDown={handlePreviewKeyDown}
+          aria-label={title}
+        >
+          {/* 优雅核心：使用原生 CSS transition。
              这里的 duration 和 timing-function 调教得与 Framer Motion 一致。
              只有在 hover 图片容器时，内部 div 才缩放。
           */}
-        <div className="h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105">
-          <Image
-            src={url}
-            alt={title}
-            width={width}
-            height={height}
-            loading={loading}
-            fetchPriority={loading === "eager" ? "high" : undefined}
-            className="block h-auto w-full object-cover"
-            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
-        </div>
+          <div className="h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105">
+            <Image
+              src={url}
+              alt={title}
+              width={width}
+              height={height}
+              loading={loading}
+              fetchPriority={loading === "eager" ? "high" : undefined}
+              className="block h-auto w-full object-cover"
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          </div>
 
-        <div className="absolute inset-0 z-10 hidden items-start justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:flex">
-          <button
-            type="button"
-            onClick={handleLikeClick}
-            disabled={likeMutation.isPending || isLikeTransitionPending}
-            aria-label={likeLabel}
-            className={iconButtonClassName}
-          >
-            {renderHeart(20, 2)}
-          </button>
+          <div className="absolute inset-0 z-10 hidden items-start justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:flex">
+            <button
+              type="button"
+              onClick={handleLikeClick}
+              disabled={likeMutation.isPending || isLikeTransitionPending}
+              aria-label={likeLabel}
+              className={iconButtonClassName}
+            >
+              <AnimatedHeart
+                isLiked={optimisticLike.isLiked}
+                size={20}
+                strokeWidth={2}
+              />
+            </button>
+          </div>
         </div>
-      </div>
-      {/* 2. 底部作者栏 */}
-      <div className="bg-card border-t px-3.5 py-2.5">
-        {tags && tags.length > 0 ? <ImageTags tags={tags} /> : null}
+        {/* 2. 底部作者栏 */}
+        <div className="bg-card border-t px-3.5 py-2.5">
+          {tags && tags.length > 0 ? <ImageTags tags={tags} /> : null}
 
-        <div className="flex min-w-0 items-center">
-          {user ? (
-            <div className="flex min-w-0 items-center gap-2 overflow-hidden">
-              <UserAvatar size="sm" name={user.name} image={user.image} />
-              <span className="text-card-foreground truncate text-[12px] font-bold">
-                {user.name}
+          <div className="flex min-w-0 items-center">
+            {user ? (
+              <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+                <UserAvatar size="sm" name={user.name} image={user.image} />
+                <span className="text-card-foreground truncate text-[12px] font-bold">
+                  {user.name}
+                </span>
+              </div>
+            ) : null}
+
+            {/* 交互小胶囊 */}
+            <button
+              type="button"
+              onClick={handleLikeClick}
+              disabled={likeMutation.isPending || isLikeTransitionPending}
+              aria-label={likeLabel}
+              className={likeButtonClassName}
+            >
+              <AnimatedHeart
+                isLiked={optimisticLike.isLiked}
+                size={13}
+                strokeWidth={2.5}
+              />
+              <span className="font-mono text-[11px] font-bold tabular-nums">
+                {optimisticLike.count}
               </span>
-            </div>
-          ) : null}
-
-          {/* 交互小胶囊 */}
-          <button
-            type="button"
-            onClick={handleLikeClick}
-            disabled={likeMutation.isPending || isLikeTransitionPending}
-            aria-label={likeLabel}
-            className={likeButtonClassName}
-          >
-            {renderHeart(13, 2.5)}
-            <span className="font-mono text-[11px] font-bold tabular-nums">
-              {optimisticLike.count}
-            </span>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </LazyMotion>
   )
 }

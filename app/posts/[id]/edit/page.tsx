@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { headers } from "next/headers"
 import { notFound, redirect } from "next/navigation"
 
@@ -5,6 +6,11 @@ import { auth } from "@/lib/auth"
 import { caller } from "@/trpc/server"
 
 import { PostEditor } from "../../_components/post-editor"
+
+export const metadata: Metadata = {
+  title: "Edit Post",
+  description: "Edit an existing Lemon Space post.",
+}
 
 export default async function EditPostPage({
   params,
@@ -26,7 +32,7 @@ export default async function EditPostPage({
         <p className="text-primary text-xs font-bold tracking-[0.24em] uppercase">
           Writing Studio
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-[-0.04em]">
+        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">
           编辑文章
         </h1>
       </section>

@@ -44,14 +44,18 @@ export function GalleryList({
   const items = useMemo(() => {
     const seen = new Set<string>()
 
-    return data.pages
-      .flatMap((page) => page.items)
-      .filter((item) => {
-        if (seen.has(item.id)) return false
+    const items: (typeof data.pages)[number]["items"] = []
+
+    for (const page of data.pages) {
+      for (const item of page.items) {
+        if (seen.has(item.id)) continue
         seen.add(item.id)
-        return true
-      })
-  }, [data.pages])
+        items.push(item)
+      }
+    }
+
+    return items
+  }, [data])
 
   useEffect(() => {
     const node = loadMoreRef.current
@@ -107,7 +111,7 @@ export function GalleryList({
     <div className="space-y-6">
       <MasonryGrid
         items={items}
-        renderItem={(item, index) => (
+        itemNode={(item, index) => (
           <ImageCard {...item} loading={index < 12 ? "eager" : "lazy"} />
         )}
       />

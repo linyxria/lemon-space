@@ -1,7 +1,7 @@
 "use client"
 
 import { X } from "lucide-react"
-import { AnimatePresence, motion } from "motion/react"
+import { AnimatePresence, domAnimation, LazyMotion, m } from "motion/react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 
@@ -32,10 +32,10 @@ export default function PreviewList({
 
   return (
     <div className="grid grid-cols-4 gap-1 md:grid-cols-6">
-      <AnimatePresence mode="popLayout">
-        {files.map((file) => {
-          return (
-            <motion.div
+      <LazyMotion features={domAnimation}>
+        <AnimatePresence mode="popLayout">
+          {files.map((file) => (
+            <m.div
               key={file.id}
               layout
               initial="initial"
@@ -52,6 +52,7 @@ export default function PreviewList({
                 src={file.preview}
                 alt={file.origin.name}
                 fill
+                sizes="(max-width: 768px) 25vw, 12vw"
                 onLoad={() => URL.revokeObjectURL(file.preview)}
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
@@ -66,10 +67,10 @@ export default function PreviewList({
                   <X size={12} />
                 </Button>
               )}
-            </motion.div>
-          )
-        })}
-      </AnimatePresence>
+            </m.div>
+          ))}
+        </AnimatePresence>
+      </LazyMotion>
     </div>
   )
 }

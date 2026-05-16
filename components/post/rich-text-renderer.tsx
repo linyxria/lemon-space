@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/core"
+import Image from "next/image"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
@@ -34,11 +35,13 @@ function renderChildren(
 
 function renderNode(node: RichTextContent, key: string): ReactNode {
   if (node.type === "text") {
-    return <span key={key}>{renderMarks(node, node.text)}</span>
+    const children = renderMarks(node, node.text)
+    return <span key={key}>{children}</span>
   }
 
   if (node.type === "paragraph") {
-    return <p key={key}>{renderChildren(node.content, key)}</p>
+    const children = renderChildren(node.content, key)
+    return <p key={key}>{children}</p>
   }
 
   if (node.type === "heading") {
@@ -51,21 +54,23 @@ function renderNode(node: RichTextContent, key: string): ReactNode {
   }
 
   if (node.type === "bulletList") {
-    return <ul key={key}>{renderChildren(node.content, key)}</ul>
+    const children = renderChildren(node.content, key)
+    return <ul key={key}>{children}</ul>
   }
 
   if (node.type === "orderedList") {
-    return <ol key={key}>{renderChildren(node.content, key)}</ol>
+    const children = renderChildren(node.content, key)
+    return <ol key={key}>{children}</ol>
   }
 
   if (node.type === "listItem") {
-    return <li key={key}>{renderChildren(node.content, key)}</li>
+    const children = renderChildren(node.content, key)
+    return <li key={key}>{children}</li>
   }
 
   if (node.type === "blockquote") {
-    return (
-      <blockquote key={key}>{renderChildren(node.content, key)}</blockquote>
-    )
+    const children = renderChildren(node.content, key)
+    return <blockquote key={key}>{children}</blockquote>
   }
 
   if (node.type === "codeBlock") {
@@ -90,17 +95,30 @@ function renderNode(node: RichTextContent, key: string): ReactNode {
 
     if (!src) return null
 
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img key={key} src={src} alt={alt} />
+    return (
+      <Image
+        key={key}
+        src={src}
+        alt={alt}
+        width={1200}
+        height={800}
+        sizes="(max-width: 768px) 100vw, 896px"
+        className="my-6 max-h-155 w-full rounded-lg border object-cover"
+        unoptimized
+      />
+    )
   }
 
-  return <div key={key}>{renderChildren(node.content, key)}</div>
+  const children = renderChildren(node.content, key)
+  return <div key={key}>{children}</div>
 }
 
 export function RichTextRenderer({ content }: { content: RichTextContent }) {
+  const children = renderChildren(content.content, "rich-text")
+
   return (
-    <div className="[&_a]:text-primary [&_blockquote]:text-muted-foreground [&_code]:bg-muted [&_hr]:border-border [&_pre]:bg-muted max-w-none text-base leading-8 [&_a]:underline [&_blockquote]:my-5 [&_blockquote]:border-l-4 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:mt-8 [&_h1]:mb-4 [&_h1]:text-4xl [&_h1]:font-black [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-3xl [&_h2]:font-black [&_h2]:tracking-tight [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-2xl [&_h3]:font-bold [&_h4]:mt-5 [&_h4]:mb-2 [&_h4]:text-xl [&_h4]:font-bold [&_hr]:my-8 [&_img]:my-6 [&_img]:max-h-155 [&_img]:w-full [&_img]:rounded-lg [&_img]:border [&_img]:object-cover [&_li]:my-1 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-4 [&_pre]:my-5 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:p-4 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-bold [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6">
-      {renderChildren(content.content, "rich-text")}
+    <div className="[&_a]:text-primary [&_blockquote]:text-muted-foreground [&_code]:bg-muted [&_hr]:border-border [&_pre]:bg-muted [&_blockquote]:bg-primary/5 max-w-none text-base leading-8 [&_a]:underline [&_blockquote]:my-5 [&_blockquote]:rounded-lg [&_blockquote]:border [&_blockquote]:p-4 [&_code]:rounded [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:mt-8 [&_h1]:mb-4 [&_h1]:text-4xl [&_h1]:font-semibold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-3xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-2xl [&_h3]:font-bold [&_h4]:mt-5 [&_h4]:mb-2 [&_h4]:text-xl [&_h4]:font-bold [&_hr]:my-8 [&_li]:my-1 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-4 [&_pre]:my-5 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:p-4 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-bold [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6">
+      {children}
     </div>
   )
 }

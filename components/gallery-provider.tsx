@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "motion/react"
 import { usePathname } from "next/navigation"
-import { createContext, useContext, useState } from "react"
+import { createContext, use, useState } from "react"
 
 import ImageModal, { type ModalAssetData } from "./image-modal"
 
@@ -46,7 +46,7 @@ export default function GalleryProvider({
 }
 
 export const useGallery = () => {
-  const context = useContext(GalleryContext)
+  const context = use(GalleryContext)
   if (!context)
     throw new Error("useGallery must be used within GalleryProvider")
   return context

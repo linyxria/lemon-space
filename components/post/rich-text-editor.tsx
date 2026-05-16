@@ -1,5 +1,6 @@
 "use client"
 
+import type { Editor as TiptapEditor } from "@tiptap/core"
 import Image from "@tiptap/extension-image"
 import Placeholder from "@tiptap/extension-placeholder"
 import Typography from "@tiptap/extension-typography"
@@ -20,7 +21,7 @@ import {
   Strikethrough,
   Undo2,
 } from "lucide-react"
-import { useState } from "react"
+import { useReducer } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,11 +30,36 @@ import { cn } from "@/lib/utils"
 
 import type { RichTextContent } from "./rich-text-renderer"
 
+type EditorPanel = "link" | "image" | "markdown" | null
+
+type RichTextEditorState = {
+  panel: EditorPanel
+  linkUrl: string
+  imageUrl: string
+  markdownText: string
+  uploading: boolean
+}
+
+const initialEditorState: RichTextEditorState = {
+  panel: null,
+  linkUrl: "",
+  imageUrl: "",
+  markdownText: "",
+  uploading: false,
+}
+
+function richTextEditorReducer(
+  state: RichTextEditorState,
+  patch: Partial<RichTextEditorState>,
+) {
+  return { ...state, ...patch }
+}
+
 function textToDoc(text: string): RichTextContent {
-  const paragraphs = text
-    .split(/\n{2,}/)
-    .map((part) => part.trim())
-    .filter(Boolean)
+  const paragraphs = text.split(/\n{2,}/).flatMap((part) => {
+    const trimmed = part.trim()
+    return trimmed ? [trimmed] : []
+  })
 
   return {
     type: "doc",
@@ -251,6 +277,219 @@ function ToolbarButton({
   )
 }
 
+function RichTextToolbar({
+  editor,
+  panel,
+  onSetLink,
+  onSetPanel,
+}: {
+  editor: TiptapEditor | null
+  panel: EditorPanel
+  onSetLink: () => void
+  onSetPanel: (panel: EditorPanel) => void
+}) {
+  const togglePanel = (nextPanel: Exclude<EditorPanel, null>) => {
+    onSetPanel(panel === nextPanel ? null : nextPanel)
+  }
+
+  return (
+    <div className="bg-muted/40 flex flex-wrap items-center gap-1 border-b p-2">
+      <ToolbarButton
+        label="撤销"
+        disabled={!editor?.can().undo()}
+        onClick={() => editor?.chain().focus().undo().run()}
+      >
+        <Undo2 className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="重做"
+        disabled={!editor?.can().redo()}
+        onClick={() => editor?.chain().focus().redo().run()}
+      >
+        <Redo2 className="size-4" />
+      </ToolbarButton>
+      <span className="bg-border mx-1 h-5 w-px" />
+      <ToolbarButton
+        label="二级标题"
+        active={editor?.isActive("heading", { level: 2 })}
+        onClick={() =>
+          editor?.chain().focus().toggleHeading({ level: 2 }).run()
+        }
+      >
+        <Heading2 className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="加粗"
+        active={editor?.isActive("bold")}
+        onClick={() => editor?.chain().focus().toggleBold().run()}
+      >
+        <Bold className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="斜体"
+        active={editor?.isActive("italic")}
+        onClick={() => editor?.chain().focus().toggleItalic().run()}
+      >
+        <Italic className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="删除线"
+        active={editor?.isActive("strike")}
+        onClick={() => editor?.chain().focus().toggleStrike().run()}
+      >
+        <Strikethrough className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="行内代码"
+        active={editor?.isActive("code")}
+        onClick={() => editor?.chain().focus().toggleCode().run()}
+      >
+        <Code className="size-4" />
+      </ToolbarButton>
+      <span className="bg-border mx-1 h-5 w-px" />
+      <ToolbarButton
+        label="无序列表"
+        active={editor?.isActive("bulletList")}
+        onClick={() => editor?.chain().focus().toggleBulletList().run()}
+      >
+        <List className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="有序列表"
+        active={editor?.isActive("orderedList")}
+        onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+      >
+        <ListOrdered className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="引用"
+        active={editor?.isActive("blockquote")}
+        onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+      >
+        <Quote className="size-4" />
+      </ToolbarButton>
+      <span className="bg-border mx-1 h-5 w-px" />
+      <ToolbarButton
+        label="链接"
+        active={editor?.isActive("link")}
+        onClick={onSetLink}
+      >
+        <LinkIcon className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton label="图片" onClick={() => togglePanel("image")}>
+        <ImageIcon className="size-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        label="插入 Markdown"
+        active={panel === "markdown"}
+        onClick={() => togglePanel("markdown")}
+      >
+        <FileCode2 className="size-4" />
+      </ToolbarButton>
+    </div>
+  )
+}
+
+function RichTextPanel({
+  state,
+  onChangeState,
+  onApplyLink,
+  onRemoveLink,
+  onAddImageUrl,
+  onUploadImage,
+  onInsertMarkdown,
+}: {
+  state: RichTextEditorState
+  onChangeState: (patch: Partial<RichTextEditorState>) => void
+  onApplyLink: () => void
+  onRemoveLink: () => void
+  onAddImageUrl: () => void
+  onUploadImage: (file: File | undefined) => void
+  onInsertMarkdown: () => void
+}) {
+  if (!state.panel) return null
+
+  return (
+    <div className="bg-muted/20 grid gap-2 border-b p-3 md:grid-cols-[minmax(0,1fr)_auto]">
+      {state.panel === "link" ? (
+        <>
+          <Input
+            value={state.linkUrl}
+            onChange={(event) => onChangeState({ linkUrl: event.target.value })}
+            placeholder="https://example.com"
+            onKeyDown={(event) => {
+              if (event.key === "Enter") onApplyLink()
+            }}
+          />
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" onClick={onApplyLink}>
+              应用链接
+            </Button>
+            <Button type="button" variant="outline" onClick={onRemoveLink}>
+              移除
+            </Button>
+          </div>
+        </>
+      ) : state.panel === "image" ? (
+        <>
+          <div className="grid gap-2">
+            <Input
+              value={state.imageUrl}
+              onChange={(event) =>
+                onChangeState({ imageUrl: event.target.value })
+              }
+              placeholder="https://example.com/image.png"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") onAddImageUrl()
+              }}
+            />
+            {onUploadImage ? (
+              <Input
+                type="file"
+                accept="image/*"
+                disabled={state.uploading}
+                onChange={(event) => {
+                  onUploadImage(event.target.files?.[0])
+                  event.target.value = ""
+                }}
+              />
+            ) : null}
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={!state.imageUrl.trim() || state.uploading}
+            onClick={onAddImageUrl}
+          >
+            插入图片
+          </Button>
+        </>
+      ) : (
+        <>
+          <Textarea
+            value={state.markdownText}
+            onChange={(event) =>
+              onChangeState({ markdownText: event.target.value })
+            }
+            placeholder={
+              "## 标题\n\n正文支持 **加粗**、`代码`、[链接](https://example.com)\n\n- 列表项\n> 引用"
+            }
+            className="min-h-40 font-mono text-sm"
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={!state.markdownText.trim()}
+            onClick={onInsertMarkdown}
+          >
+            插入 Markdown
+          </Button>
+        </>
+      )}
+    </div>
+  )
+}
+
 export function RichTextEditor({
   value,
   fallbackText,
@@ -264,11 +503,10 @@ export function RichTextEditor({
   onChange: (contentJson: RichTextContent, plainText: string) => void
   onUploadImage?: (file: File) => Promise<string>
 }) {
-  const [panel, setPanel] = useState<"link" | "image" | "markdown" | null>(null)
-  const [linkUrl, setLinkUrl] = useState("")
-  const [imageUrl, setImageUrl] = useState("")
-  const [markdownText, setMarkdownText] = useState("")
-  const [uploading, setUploading] = useState(false)
+  const [state, setState] = useReducer(
+    richTextEditorReducer,
+    initialEditorState,
+  )
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -292,7 +530,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "min-h-120 max-w-none px-5 py-4 text-base leading-6 outline-none [&_blockquote]:my-3 [&_blockquote]:border-l-4 [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-2xl [&_h2]:font-black [&_h2]:tracking-tight [&_h3]:mt-4 [&_h3]:mb-1.5 [&_h3]:text-xl [&_h3]:font-bold [&_hr]:my-5 [&_hr]:border-border [&_img]:my-3 [&_img]:max-h-120 [&_img]:w-full [&_img]:rounded-lg [&_img]:border [&_img]:object-cover [&_li]:my-0.5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-4 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-bold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6",
+          "min-h-120 max-w-none px-5 py-4 text-base leading-6 outline-none [&_blockquote]:my-3 [&_blockquote]:border-l-4 [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h3]:mt-4 [&_h3]:mb-1.5 [&_h3]:text-xl [&_h3]:font-bold [&_hr]:my-5 [&_hr]:border-border [&_img]:my-3 [&_img]:max-h-120 [&_img]:w-full [&_img]:rounded-lg [&_img]:border [&_img]:object-cover [&_li]:my-0.5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-4 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-bold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6",
       },
     },
     onUpdate: ({ editor }) => {
@@ -304,16 +542,18 @@ export function RichTextEditor({
     if (!editor) return
 
     const previousUrl = editor.getAttributes("link").href as string | undefined
-    setLinkUrl(previousUrl ?? "")
-    setPanel((value) => (value === "link" ? null : "link"))
+    setState({
+      linkUrl: previousUrl ?? "",
+      panel: state.panel === "link" ? null : "link",
+    })
   }
 
   const applyLink = () => {
     if (!editor) return
 
-    if (linkUrl.trim() === "") {
+    if (state.linkUrl.trim() === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run()
-      setPanel(null)
+      setState({ panel: null })
       return
     }
 
@@ -321,53 +561,50 @@ export function RichTextEditor({
       .chain()
       .focus()
       .extendMarkRange("link")
-      .setLink({ href: linkUrl.trim() })
+      .setLink({ href: state.linkUrl.trim() })
       .run()
-    setPanel(null)
+    setState({ panel: null })
   }
 
   const removeLink = () => {
     if (!editor) return
 
     editor.chain().focus().extendMarkRange("link").unsetLink().run()
-    setLinkUrl("")
-    setPanel(null)
+    setState({ linkUrl: "", panel: null })
   }
 
   const addImageUrl = () => {
     if (!editor) return
 
-    if (!imageUrl.trim()) return
+    if (!state.imageUrl.trim()) return
 
-    editor.chain().focus().setImage({ src: imageUrl.trim() }).run()
-    setImageUrl("")
-    setPanel(null)
+    editor.chain().focus().setImage({ src: state.imageUrl.trim() }).run()
+    setState({ imageUrl: "", panel: null })
   }
 
   const uploadImage = async (file: File | undefined) => {
     if (!file || !editor || !onUploadImage) return
 
-    setUploading(true)
+    setState({ uploading: true })
     try {
       const url = await onUploadImage(file)
       editor.chain().focus().setImage({ src: url }).run()
-      setPanel(null)
+      setState({ panel: null })
     } finally {
-      setUploading(false)
+      setState({ uploading: false })
     }
   }
 
   const insertMarkdown = () => {
-    if (!editor || !markdownText.trim()) return
+    if (!editor || !state.markdownText.trim()) return
 
-    const doc = parseMarkdownToDoc(markdownText)
+    const doc = parseMarkdownToDoc(state.markdownText)
     editor
       .chain()
       .focus()
       .insertContent(doc.content ?? [])
       .run()
-    setMarkdownText("")
-    setPanel(null)
+    setState({ markdownText: "", panel: null })
   }
 
   return (
@@ -377,182 +614,21 @@ export function RichTextEditor({
         invalid && "border-destructive",
       )}
     >
-      <div className="bg-muted/40 flex flex-wrap items-center gap-1 border-b p-2">
-        <ToolbarButton
-          label="撤销"
-          disabled={!editor?.can().undo()}
-          onClick={() => editor?.chain().focus().undo().run()}
-        >
-          <Undo2 className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="重做"
-          disabled={!editor?.can().redo()}
-          onClick={() => editor?.chain().focus().redo().run()}
-        >
-          <Redo2 className="size-4" />
-        </ToolbarButton>
-        <span className="bg-border mx-1 h-5 w-px" />
-        <ToolbarButton
-          label="二级标题"
-          active={editor?.isActive("heading", { level: 2 })}
-          onClick={() =>
-            editor?.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-        >
-          <Heading2 className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="加粗"
-          active={editor?.isActive("bold")}
-          onClick={() => editor?.chain().focus().toggleBold().run()}
-        >
-          <Bold className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="斜体"
-          active={editor?.isActive("italic")}
-          onClick={() => editor?.chain().focus().toggleItalic().run()}
-        >
-          <Italic className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="删除线"
-          active={editor?.isActive("strike")}
-          onClick={() => editor?.chain().focus().toggleStrike().run()}
-        >
-          <Strikethrough className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="行内代码"
-          active={editor?.isActive("code")}
-          onClick={() => editor?.chain().focus().toggleCode().run()}
-        >
-          <Code className="size-4" />
-        </ToolbarButton>
-        <span className="bg-border mx-1 h-5 w-px" />
-        <ToolbarButton
-          label="无序列表"
-          active={editor?.isActive("bulletList")}
-          onClick={() => editor?.chain().focus().toggleBulletList().run()}
-        >
-          <List className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="有序列表"
-          active={editor?.isActive("orderedList")}
-          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="引用"
-          active={editor?.isActive("blockquote")}
-          onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-        >
-          <Quote className="size-4" />
-        </ToolbarButton>
-        <span className="bg-border mx-1 h-5 w-px" />
-        <ToolbarButton
-          label="链接"
-          active={editor?.isActive("link")}
-          onClick={setLink}
-        >
-          <LinkIcon className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="图片"
-          onClick={() =>
-            setPanel((value) => (value === "image" ? null : "image"))
-          }
-        >
-          <ImageIcon className="size-4" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="插入 Markdown"
-          active={panel === "markdown"}
-          onClick={() =>
-            setPanel((value) => (value === "markdown" ? null : "markdown"))
-          }
-        >
-          <FileCode2 className="size-4" />
-        </ToolbarButton>
-      </div>
-      {panel ? (
-        <div className="bg-muted/20 grid gap-2 border-b p-3 md:grid-cols-[minmax(0,1fr)_auto]">
-          {panel === "link" ? (
-            <>
-              <Input
-                value={linkUrl}
-                onChange={(event) => setLinkUrl(event.target.value)}
-                placeholder="https://example.com"
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") applyLink()
-                }}
-              />
-              <div className="flex gap-2">
-                <Button type="button" variant="secondary" onClick={applyLink}>
-                  应用链接
-                </Button>
-                <Button type="button" variant="outline" onClick={removeLink}>
-                  移除
-                </Button>
-              </div>
-            </>
-          ) : panel === "image" ? (
-            <>
-              <div className="grid gap-2">
-                <Input
-                  value={imageUrl}
-                  onChange={(event) => setImageUrl(event.target.value)}
-                  placeholder="https://example.com/image.png"
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") addImageUrl()
-                  }}
-                />
-                {onUploadImage ? (
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    disabled={uploading}
-                    onChange={(event) => {
-                      void uploadImage(event.target.files?.[0])
-                      event.target.value = ""
-                    }}
-                  />
-                ) : null}
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={!imageUrl.trim() || uploading}
-                onClick={addImageUrl}
-              >
-                插入图片
-              </Button>
-            </>
-          ) : (
-            <>
-              <Textarea
-                value={markdownText}
-                onChange={(event) => setMarkdownText(event.target.value)}
-                placeholder={
-                  "## 标题\n\n正文支持 **加粗**、`代码`、[链接](https://example.com)\n\n- 列表项\n> 引用"
-                }
-                className="min-h-40 font-mono text-sm"
-              />
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={!markdownText.trim()}
-                onClick={insertMarkdown}
-              >
-                插入 Markdown
-              </Button>
-            </>
-          )}
-        </div>
-      ) : null}
+      <RichTextToolbar
+        editor={editor}
+        panel={state.panel}
+        onSetLink={setLink}
+        onSetPanel={(panel) => setState({ panel })}
+      />
+      <RichTextPanel
+        state={state}
+        onChangeState={setState}
+        onApplyLink={applyLink}
+        onRemoveLink={removeLink}
+        onAddImageUrl={addImageUrl}
+        onUploadImage={(file) => void uploadImage(file)}
+        onInsertMarkdown={insertMarkdown}
+      />
       <EditorContent editor={editor} />
     </div>
   )

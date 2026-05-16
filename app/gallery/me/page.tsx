@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
@@ -10,6 +11,11 @@ import {
   MyGalleryGrid,
   MyGalleryHeading,
 } from "../_components/gallery-asset-grids"
+
+export const metadata: Metadata = {
+  title: "My Gallery",
+  description: "Manage your uploaded Lemon Space gallery images.",
+}
 
 export default async function MyGalleryPage() {
   const session = await auth.api.getSession({ headers: await headers() })

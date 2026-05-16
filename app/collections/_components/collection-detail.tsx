@@ -8,7 +8,7 @@ import {
 import { ArrowLeft, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { useReducer } from "react"
 import { toast } from "sonner"
 
 import ImageCard from "@/components/image-card"
@@ -20,6 +20,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { useTRPC } from "@/trpc/client"
 
 import { PostCard } from "../../posts/_components/post-card"
+
+type CollectionEditorState = {
+  name: string
+  description: string
+}
 
 function CollectionEditor({
   initialName,
@@ -36,8 +41,16 @@ function CollectionEditor({
   updateLabel: string
   descriptionPlaceholder: string
 }) {
-  const [name, setName] = useState(initialName)
-  const [description, setDescription] = useState(initialDescription)
+  const [{ name, description }, setEditorState] = useReducer(
+    (state: CollectionEditorState, patch: Partial<CollectionEditorState>) => ({
+      ...state,
+      ...patch,
+    }),
+    {
+      name: initialName,
+      description: initialDescription,
+    },
+  )
 
   const handleUpdate = () => {
     const trimmedName = name.trim()
@@ -51,10 +64,15 @@ function CollectionEditor({
 
   return (
     <div className="mt-4 grid gap-3">
-      <Input value={name} onChange={(event) => setName(event.target.value)} />
+      <Input
+        value={name}
+        onChange={(event) => setEditorState({ name: event.target.value })}
+      />
       <Textarea
         value={description}
-        onChange={(event) => setDescription(event.target.value)}
+        onChange={(event) =>
+          setEditorState({ description: event.target.value })
+        }
         placeholder={descriptionPlaceholder}
       />
       <div className="flex justify-end">
@@ -126,7 +144,7 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
       </div>
 
       <section className="bg-card rounded-[28px] border p-5 shadow-sm">
-        <h1 className="text-foreground text-3xl font-black tracking-tight">
+        <h1 className="text-foreground text-3xl font-semibold tracking-tight">
           {data.name}
         </h1>
         {data.description ? (
@@ -196,7 +214,7 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
           {data.assets.length > 0 ? (
             <MasonryGrid
               items={data.assets}
-              renderItem={(item, index) => (
+              itemNode={(item, index) => (
                 <div className="space-y-2">
                   <div className="flex justify-end">
                     <Button

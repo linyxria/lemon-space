@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { Suspense } from "react"
 
@@ -7,6 +8,11 @@ import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 import AvatarUploadCard from "./_components/avatar-upload-card"
 import { PreferencesPanel } from "./_components/preferences-panel"
 import { ProfileOverview } from "./_components/profile-overview"
+
+export const metadata: Metadata = {
+  title: "Profile",
+  description: "Manage your profile, preferences, and account details.",
+}
 
 export default async function ProfilePage() {
   const t = await getTranslations("Profile")
@@ -20,7 +26,7 @@ export default async function ProfilePage() {
         <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
           {t("badge")}
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
+        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
           {t("title")}
         </h1>
         <p className="text-hero-muted mt-2 max-w-3xl text-sm leading-6 sm:text-[15px]">

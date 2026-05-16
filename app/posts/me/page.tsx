@@ -1,4 +1,5 @@
 import { Edit3, PenLine, Plus } from "lucide-react"
+import type { Metadata } from "next"
 import { headers } from "next/headers"
 import Link from "next/link"
 import { redirect } from "next/navigation"
@@ -9,6 +10,11 @@ import { auth } from "@/lib/auth"
 import { caller } from "@/trpc/server"
 
 import { PostCard } from "../_components/post-card"
+
+export const metadata: Metadata = {
+  title: "My Posts",
+  description: "Manage your Lemon Space posts and drafts.",
+}
 
 export default async function MyPostsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -24,7 +30,9 @@ export default async function MyPostsPage() {
           <p className="text-primary text-xs font-bold tracking-[0.24em] uppercase">
             Writing
           </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight">我的文章</h1>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+            我的文章
+          </h1>
           <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-6">
             管理你发布过的文章和草稿。
           </p>
@@ -63,7 +71,7 @@ export default async function MyPostsPage() {
       ) : (
         <section className="bg-muted/50 rounded-lg border border-dashed p-8 text-center">
           <Plus className="text-muted-foreground mx-auto size-8" />
-          <h2 className="mt-3 text-xl font-black">还没有文章</h2>
+          <h2 className="mt-3 text-xl font-semibold">还没有文章</h2>
           <p className="text-muted-foreground mt-2 text-sm">
             写下第一篇文章后，它会出现在这里。
           </p>

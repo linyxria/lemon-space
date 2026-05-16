@@ -1,4 +1,5 @@
 import { PenLine, Plus, Sparkles } from "lucide-react"
+import type { Metadata } from "next"
 import { headers } from "next/headers"
 import Link from "next/link"
 
@@ -10,6 +11,11 @@ import { caller } from "@/trpc/server"
 import { PostCard } from "./_components/post-card"
 import { PostSearch } from "./_components/post-search"
 
+export const metadata: Metadata = {
+  title: "Posts",
+  description: "Read writing, tutorials, project notes, and ideas.",
+}
+
 export default async function PostHomePage({
   searchParams,
 }: {
@@ -18,14 +24,21 @@ export default async function PostHomePage({
     q?: string
   }>
 }) {
-  const [{ tag, q }, session] = await Promise.all([
-    searchParams,
-    auth.api.getSession({ headers: await headers() }),
-  ])
-  const [{ items }, tags, featured] = await Promise.all([
+  const searchParamsPromise = searchParams
+  const sessionPromise = headers().then((requestHeaders) =>
+    auth.api.getSession({ headers: requestHeaders }),
+  )
+  const postListPromise = searchParamsPromise.then(({ tag, q }) =>
     caller.post.list({ tag, q, limit: 18 }),
-    caller.post.tags(),
-    caller.post.featured(),
+  )
+  const tagsPromise = caller.post.tags()
+  const featuredPromise = caller.post.featured()
+  const [{ tag, q }, session, { items }, tags, featured] = await Promise.all([
+    searchParamsPromise,
+    sessionPromise,
+    postListPromise,
+    tagsPromise,
+    featuredPromise,
   ])
   const heroPost = featured[0] ?? items[0]
   const secondaryPosts = items.filter((post) => post.id !== heroPost?.id)
@@ -46,7 +59,7 @@ export default async function PostHomePage({
               </Badge>
             ) : null}
           </div>
-          <h1 className="mt-5 max-w-2xl text-4xl font-black tracking-tighter md:text-5xl">
+          <h1 className="mt-5 max-w-2xl text-4xl font-semibold tracking-tighter md:text-5xl">
             文章与灵感的个人空间
           </h1>
           <p className="text-hero-muted mt-4 max-w-xl text-base leading-7">
@@ -75,7 +88,7 @@ export default async function PostHomePage({
         </div>
 
         <aside className="bg-card rounded-lg border p-5">
-          <h2 className="text-lg font-black">探索文章</h2>
+          <h2 className="text-lg font-semibold">探索文章</h2>
           <div className="mt-4">
             <PostSearch keyword={q} tag={tag} />
           </div>
@@ -116,7 +129,7 @@ export default async function PostHomePage({
               <p className="text-primary text-xs font-bold tracking-[0.24em] uppercase">
                 Latest Essay
               </p>
-              <h2 className="mt-1 text-2xl font-black tracking-[-0.03em]">
+              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.03em]">
                 最近文章
               </h2>
             </div>
@@ -126,7 +139,7 @@ export default async function PostHomePage({
       ) : (
         <section className="bg-muted/50 rounded-lg border border-dashed p-8 text-center">
           <Plus className="text-muted-foreground mx-auto size-8" />
-          <h2 className="mt-3 text-xl font-black">还没有文章</h2>
+          <h2 className="mt-3 text-xl font-semibold">还没有文章</h2>
           <p className="text-muted-foreground mt-2 text-sm">
             登录后发布第一篇文章，这里就会成为你的文章主页。
           </p>

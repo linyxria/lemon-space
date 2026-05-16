@@ -297,33 +297,36 @@ export const assetRouter = router({
   featured: procedure.query(async ({ ctx }) => {
     const likeCountExpr = createDistinctLikeUserCountExpr()
 
-    const featuredAssets = await ctx.db
-      .select({
-        id: asset.id,
-        title: asset.title,
-        objectKey: asset.objectKey,
-        width: asset.width,
-        height: asset.height,
-        likeCount: likeCountExpr,
-      })
-      .from(asset)
-      .leftJoin(assetLike, eq(asset.id, assetLike.assetId))
-      .groupBy(asset.id)
-      .orderBy(desc(likeCountExpr), desc(asset.createdAt))
-      .limit(4)
-
-    const hotTags = await ctx.db
-      .select({
-        id: assetTag.id,
-        name: assetTag.name,
-        slug: assetTag.slug,
-        assetCount: sql<number>`count(${assetTagLink.assetId})`.mapWith(Number),
-      })
-      .from(assetTag)
-      .innerJoin(assetTagLink, eq(assetTagLink.tagId, assetTag.id))
-      .groupBy(assetTag.id)
-      .orderBy(desc(sql`count(${assetTagLink.assetId})`), assetTag.name)
-      .limit(8)
+    const [featuredAssets, hotTags] = await Promise.all([
+      ctx.db
+        .select({
+          id: asset.id,
+          title: asset.title,
+          objectKey: asset.objectKey,
+          width: asset.width,
+          height: asset.height,
+          likeCount: likeCountExpr,
+        })
+        .from(asset)
+        .leftJoin(assetLike, eq(asset.id, assetLike.assetId))
+        .groupBy(asset.id)
+        .orderBy(desc(likeCountExpr), desc(asset.createdAt))
+        .limit(4),
+      ctx.db
+        .select({
+          id: assetTag.id,
+          name: assetTag.name,
+          slug: assetTag.slug,
+          assetCount: sql<number>`count(${assetTagLink.assetId})`.mapWith(
+            Number,
+          ),
+        })
+        .from(assetTag)
+        .innerJoin(assetTagLink, eq(assetTagLink.tagId, assetTag.id))
+        .groupBy(assetTag.id)
+        .orderBy(desc(sql`count(${assetTagLink.assetId})`), assetTag.name)
+        .limit(8),
+    ])
 
     return {
       featuredAssets: featuredAssets.map((item) => mapObjectKeyToUrl(item)),

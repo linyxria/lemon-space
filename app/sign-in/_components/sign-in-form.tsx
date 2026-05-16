@@ -2,7 +2,6 @@
 
 import { useRouter } from "@bprogress/next/app"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
-import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -27,17 +26,19 @@ const formSchema = z.object({
   password: zUtils.password(),
 })
 
-export default function SignInForm() {
+export default function SignInForm({
+  callbackURL,
+  emailFromQuery,
+}: {
+  callbackURL: string
+  emailFromQuery: string
+}) {
   const t = useTranslations("SignIn")
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const { refresh, replace } = useRouter()
   const [resending, setResending] = useState(false)
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
     string | null
   >(null)
-
-  const callbackURL = searchParams.get("callbackURL") || "/"
-  const emailFromQuery = searchParams.get("email") ?? ""
 
   const form = useForm({
     resolver: standardSchemaResolver(formSchema),
@@ -57,6 +58,7 @@ export default function SignInForm() {
         to: "/sign-up",
         action: t("register"),
       }}
+      callbackURL={callbackURL}
       button={{
         text: t("submit"),
         form: "sign-in",
@@ -77,8 +79,8 @@ export default function SignInForm() {
                   onSuccess: () => {
                     setPendingVerificationEmail(null)
                     toast.success(t("welcome"))
-                    router.replace(callbackURL)
-                    router.refresh()
+                    replace(callbackURL)
+                    refresh()
                   },
                   onError: (ctx) => {
                     if (ctx.error.code === "EMAIL_NOT_VERIFIED") {

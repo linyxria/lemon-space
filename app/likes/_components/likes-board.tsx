@@ -96,7 +96,7 @@ export function LikesBoard() {
         {assets.length > 0 ? (
           <MasonryGrid
             items={assets}
-            renderItem={(item, index) => (
+            itemNode={(item, index) => (
               <ImageCard {...item} loading={index < 8 ? "eager" : "lazy"} />
             )}
           />

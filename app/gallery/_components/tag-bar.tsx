@@ -47,7 +47,7 @@ export function TagBar({
   const tCommon = useTranslations("Common")
   const { data } = useSuspenseQuery(trpc.asset.tags.queryOptions())
   const [inputValue, setInputValue] = useState(keyword ?? "")
-  const router = useRouter()
+  const { push } = useRouter()
   const sortOptions = [
     { value: "latest", label: tCommon("latest") },
     { value: "popular", label: tCommon("popular") },
@@ -59,7 +59,7 @@ export function TagBar({
     event.preventDefault()
     const nextKeyword = inputValue.trim()
 
-    router.push(
+    push(
       buildGalleryHref({
         tag: selected,
         q: nextKeyword || undefined,

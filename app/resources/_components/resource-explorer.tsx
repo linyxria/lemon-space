@@ -117,7 +117,7 @@ export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
               <Sparkles className="size-3.5" />
               Developer Directory
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
               技术导航
             </h1>
             <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-6">
@@ -131,17 +131,17 @@ export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
               <div>
-                <p className="text-2xl font-black">{resources.length}</p>
+                <p className="text-2xl font-semibold">{resources.length}</p>
                 <p className="text-muted-foreground text-xs">条目</p>
               </div>
               <div>
-                <p className="text-2xl font-black">
+                <p className="text-2xl font-semibold">
                   {RESOURCE_CATEGORIES.length - 2}
                 </p>
                 <p className="text-muted-foreground text-xs">分类</p>
               </div>
               <div>
-                <p className="text-2xl font-black">{saved.size}</p>
+                <p className="text-2xl font-semibold">{saved.size}</p>
                 <p className="text-muted-foreground text-xs">收藏</p>
               </div>
             </div>
@@ -214,7 +214,7 @@ export function ResourceExplorer({ resources }: { resources: TechResource[] }) {
 
           {visibleResources.length === 0 ? (
             <div className="bg-muted/40 rounded-lg border border-dashed p-8 text-center">
-              <p className="text-lg font-black">没有匹配的技术条目</p>
+              <p className="text-lg font-semibold">没有匹配的技术条目</p>
               <p className="text-muted-foreground mt-2 text-sm">
                 换个关键词，或回到全部分类继续浏览。
               </p>
@@ -248,11 +248,13 @@ function ResourceCard({
     >
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="bg-hero text-hero-foreground flex size-10 shrink-0 items-center justify-center rounded-lg text-sm font-black">
+          <div className="bg-hero text-hero-foreground flex size-10 shrink-0 items-center justify-center rounded-lg text-sm font-semibold">
             {resource.name.slice(0, 2)}
           </div>
           <div className="min-w-0">
-            <h2 className="truncate text-base font-black">{resource.name}</h2>
+            <h2 className="truncate text-base font-semibold">
+              {resource.name}
+            </h2>
             <p className="text-muted-foreground text-xs">{resource.level}</p>
           </div>
         </div>

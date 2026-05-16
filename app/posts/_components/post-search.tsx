@@ -14,7 +14,7 @@ export function PostSearch({
   keyword?: string
   tag?: string
 }) {
-  const router = useRouter()
+  const { push } = useRouter()
   const [value, setValue] = useState(keyword ?? "")
 
   const handleSubmit = (event: React.ChangeEvent<HTMLFormElement>) => {
@@ -25,7 +25,7 @@ export function PostSearch({
     if (nextKeyword) params.set("q", nextKeyword)
     if (tag) params.set("tag", tag)
 
-    router.push(params.toString() ? `/posts?${params}` : "/posts")
+    push(params.toString() ? `/posts?${params}` : "/posts")
   }
 
   return (

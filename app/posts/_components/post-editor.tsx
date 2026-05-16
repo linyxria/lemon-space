@@ -66,7 +66,7 @@ const emptyContent = `## 写下这一节的主题
 
 export function PostEditor({ post }: { post?: EditorPost }) {
   const trpc = useTRPC()
-  const router = useRouter()
+  const { push } = useRouter()
   const queryClient = useQueryClient()
   const [coverUploading, setCoverUploading] = useState(false)
   const [editorImageUploading, setEditorImageUploading] = useState(false)
@@ -90,7 +90,7 @@ export function PostEditor({ post }: { post?: EditorPost }) {
           queryKey: trpc.post.myList.queryKey(),
         })
         toast.success("文章已保存")
-        router.push(`/posts/${data.id}`)
+        push(`/posts/${data.id}`)
       },
     }),
   )
@@ -102,7 +102,7 @@ export function PostEditor({ post }: { post?: EditorPost }) {
           queryKey: trpc.post.myList.queryKey(),
         })
         toast.success("文章已更新")
-        router.push(`/posts/${data.id}`)
+        push(`/posts/${data.id}`)
       },
     }),
   )
@@ -322,7 +322,7 @@ export function PostEditor({ post }: { post?: EditorPost }) {
 
       <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
         <div className="bg-card rounded-lg border p-5">
-          <h2 className="text-lg font-black">发布设置</h2>
+          <h2 className="text-lg font-semibold">发布设置</h2>
           <p className="text-muted-foreground mt-2 text-sm leading-6">
             草稿只有作者本人能看到；发布后会出现在文章首页、标签页和文章详情。
           </p>

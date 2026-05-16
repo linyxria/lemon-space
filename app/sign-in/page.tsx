@@ -1,10 +1,23 @@
 import { CheckCircle2 } from "lucide-react"
+import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
 import SignInForm from "./_components/sign-in-form"
 
-export default async function SignInPage() {
-  const t = await getTranslations("SignInPage")
+export const metadata: Metadata = {
+  title: "Sign In",
+  description: "Sign in to your Lemon Space account.",
+}
+
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackURL?: string; email?: string }>
+}) {
+  const [t, { callbackURL = "/", email = "" }] = await Promise.all([
+    getTranslations("SignInPage"),
+    searchParams,
+  ])
 
   return (
     <section className="bg-card overflow-hidden rounded-lg border p-4 shadow-[0_24px_55px_-35px_rgba(24,24,27,0.35)] sm:p-6 lg:p-8 dark:shadow-[0_24px_55px_-35px_rgba(0,0,0,0.8)]">
@@ -13,7 +26,7 @@ export default async function SignInPage() {
           <p className="border-primary/20 bg-primary/10 text-primary inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.18em] uppercase">
             {t("badge")}
           </p>
-          <h1 className="text-foreground max-w-lg text-4xl font-black tracking-[-0.04em]">
+          <h1 className="text-foreground max-w-lg text-4xl font-semibold tracking-[-0.04em]">
             {t("title")}
           </h1>
           <p className="text-muted-foreground max-w-xl text-sm leading-7">
@@ -34,7 +47,7 @@ export default async function SignInPage() {
             </p>
           </div>
         </div>
-        <SignInForm />
+        <SignInForm callbackURL={callbackURL} emailFromQuery={email} />
       </div>
     </section>
   )

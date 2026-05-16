@@ -2,8 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Bookmark, BookMarked, Eye, Heart } from "lucide-react"
-import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useEffect, useReducer } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +17,23 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { useTRPC } from "@/trpc/client"
+
+type PostActionState = {
+  liked: boolean
+  bookmarked: boolean
+  likeCount: number
+  bookmarkCount: number
+  viewCount: number
+}
+
+type PostActionStatePatch = Partial<PostActionState>
+
+function postActionReducer(
+  state: PostActionState,
+  patch: PostActionStatePatch,
+) {
+  return { ...state, ...patch }
+}
 
 export function PostActions({
   postId,
@@ -39,27 +56,30 @@ export function PostActions({
 }) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
-  const router = useRouter()
-  const pathname = usePathname()
-  const [liked, setLiked] = useState(initialLiked)
-  const [bookmarked, setBookmarked] = useState(initialBookmarked)
-  const [likeCount, setLikeCount] = useState(initialLikeCount)
-  const [bookmarkCount, setBookmarkCount] = useState(initialBookmarkCount)
-  const [viewCount, setViewCount] = useState(initialViewCount)
+  const { push } = useRouter()
+  const [{ liked, bookmarked, likeCount, bookmarkCount, viewCount }, setState] =
+    useReducer(postActionReducer, {
+      liked: initialLiked,
+      bookmarked: initialBookmarked,
+      likeCount: initialLikeCount,
+      bookmarkCount: initialBookmarkCount,
+      viewCount: initialViewCount,
+    })
 
   const likeMutation = useMutation(
     trpc.post.toggleLike.mutationOptions({
       onSuccess: (data) => {
-        setLiked(data.likedByMe)
-        setLikeCount(data.likeCount)
+        setState({ liked: data.likedByMe, likeCount: data.likeCount })
       },
     }),
   )
   const bookmarkMutation = useMutation(
     trpc.post.toggleBookmark.mutationOptions({
       onSuccess: (data) => {
-        setBookmarked(data.bookmarkedByMe)
-        setBookmarkCount(data.bookmarkCount)
+        setState({
+          bookmarked: data.bookmarkedByMe,
+          bookmarkCount: data.bookmarkCount,
+        })
       },
     }),
   )
@@ -80,7 +100,7 @@ export function PostActions({
     trpc.post.recordView.mutationOptions({
       onSuccess: (data) => {
         if (typeof data.viewCount === "number") {
-          setViewCount(data.viewCount)
+          setState({ viewCount: data.viewCount })
         }
       },
     }),
@@ -98,7 +118,8 @@ export function PostActions({
 
   const requireSignIn = () => {
     if (canInteract) return true
-    router.push(`/sign-in?callbackURL=${encodeURIComponent(pathname)}`)
+    const pathname = window.location.pathname
+    push(`/sign-in?callbackURL=${encodeURIComponent(pathname)}`)
     return false
   }
 

@@ -26,7 +26,7 @@ export function HomeShowcase() {
         </div>
         <div className="mt-3 flex flex-col gap-4 lg:flex-row">
           <div className="space-y-3 lg:max-w-sm">
-            <h2 className="text-hero-foreground text-3xl font-black tracking-tighter sm:text-4xl">
+            <h2 className="text-hero-foreground text-3xl font-semibold tracking-tighter sm:text-4xl">
               {t("featuredTitle")}
             </h2>
             <p className="text-hero-muted text-sm leading-6">

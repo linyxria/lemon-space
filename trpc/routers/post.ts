@@ -39,7 +39,14 @@ type Database = PostgresJsDatabase<typeof schema>
 type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0]
 
 function normalizeTags(tags: string[]) {
-  return Array.from(new Set(tags.map((tag) => tag.trim()).filter(Boolean)))
+  return Array.from(
+    new Set(
+      tags.flatMap((tag) => {
+        const trimmed = tag.trim()
+        return trimmed ? [trimmed] : []
+      }),
+    ),
+  )
 }
 
 function estimateReadingTime(content: string) {

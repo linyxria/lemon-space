@@ -12,8 +12,11 @@ import { DesktopMainNav, MobileMainNav } from "./main-nav"
 import UserNav from "./user-nav"
 
 export default async function Header() {
-  const t = await getTranslations("Header")
-  const session = await auth.api.getSession({ headers: await headers() })
+  const requestHeaders = await headers()
+  const [t, session] = await Promise.all([
+    getTranslations("Header"),
+    auth.api.getSession({ headers: requestHeaders }),
+  ])
 
   if (session) {
     prefetch(trpc.user.info.queryOptions())
@@ -26,7 +29,7 @@ export default async function Header() {
         <div className="flex min-w-0 items-center gap-6">
           <Link
             href="/"
-            className="text-foreground group flex shrink-0 items-center gap-1.5 text-lg font-black tracking-tighter sm:gap-2 sm:text-xl"
+            className="text-foreground group flex shrink-0 items-center gap-1.5 text-lg font-semibold tracking-tighter sm:gap-2 sm:text-xl"
           >
             <div className="bg-foreground text-background group-hover:bg-primary group-hover:text-primary-foreground rounded-xl p-1.5 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
               <Citrus size={18} className="sm:h-5 sm:w-5" strokeWidth={2.5} />

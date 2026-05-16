@@ -62,12 +62,12 @@ export function ProfileOverview() {
               onError={() => setAvatarFailed(true)}
             />
           ) : (
-            <div className="bg-muted text-muted-foreground flex size-18 items-center justify-center rounded-3xl text-2xl font-black">
+            <div className="bg-muted text-muted-foreground flex size-18 items-center justify-center rounded-3xl text-2xl font-semibold">
               {info.name.slice(0, 1)}
             </div>
           )}
           <div className="min-w-0">
-            <h2 className="text-foreground truncate text-2xl font-black tracking-tight">
+            <h2 className="text-foreground truncate text-2xl font-semibold tracking-tight">
               {info.name}
             </h2>
             <p className="text-muted-foreground truncate text-sm">
@@ -77,17 +77,17 @@ export function ProfileOverview() {
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3">
-          <div className="bg-hero text-hero-foreground rounded-2xl px-4 py-4">
+          <div className="bg-hero text-hero-foreground rounded-2xl p-4">
             <p className="text-hero-muted text-[11px] tracking-[0.2em] uppercase">
               {t("postsLabel")}
             </p>
-            <p className="mt-2 text-3xl font-black">{stats.postCount}</p>
+            <p className="mt-2 text-3xl font-semibold">{stats.postCount}</p>
           </div>
-          <div className="bg-primary/15 text-primary rounded-2xl px-4 py-4">
+          <div className="bg-primary/15 text-primary rounded-2xl p-4">
             <p className="text-[11px] tracking-[0.2em] uppercase opacity-70">
               {t("likesLabel")}
             </p>
-            <p className="mt-2 text-3xl font-black">{stats.likeCount}</p>
+            <p className="mt-2 text-3xl font-semibold">{stats.likeCount}</p>
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@ export function ProfileOverview() {
             <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.28em] uppercase">
               {t("workspaceBadge")}
             </p>
-            <h3 className="text-foreground mt-2 text-2xl font-black tracking-tight">
+            <h3 className="text-foreground mt-2 text-2xl font-semibold tracking-tight">
               {t("workspaceTitle")}
             </h3>
           </div>
@@ -127,7 +127,7 @@ export function ProfileOverview() {
                     <Icon className="text-primary size-4" />
                     {item.label}
                   </span>
-                  <span className="text-2xl font-black">{item.value}</span>
+                  <span className="text-2xl font-semibold">{item.value}</span>
                 </div>
               </Link>
             )

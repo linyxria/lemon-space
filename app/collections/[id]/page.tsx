@@ -1,9 +1,15 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
 import { CollectionDetail } from "../_components/collection-detail"
+
+export const metadata: Metadata = {
+  title: "Collection",
+  description: "View a saved Lemon Space collection.",
+}
 
 export default async function CollectionDetailPage({
   params,

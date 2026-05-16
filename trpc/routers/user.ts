@@ -148,8 +148,8 @@ export const userRouter = router({
       recentUploads: recentUploads.map((item) => mapObjectKeyToUrl(item)),
     }
   }),
-  preferences: protectedProcedure.query(async ({ ctx }) => {
-    const [preferences] = await ctx.db
+  preferences: protectedProcedure.query(({ ctx }) => {
+    return ctx.db
       .select({
         locale: userPreference.locale,
         theme: userPreference.theme,
@@ -157,21 +157,22 @@ export const userRouter = router({
       .from(userPreference)
       .where(eq(userPreference.userId, ctx.user.id))
       .limit(1)
+      .then(([preferences]) => {
+        if (!preferences) return defaultPreferences
 
-    if (!preferences) return defaultPreferences
-
-    return {
-      locale:
-        preferences.locale === "en-US" || preferences.locale === "zh-CN"
-          ? preferences.locale
-          : defaultPreferences.locale,
-      theme:
-        preferences.theme === "light" ||
-        preferences.theme === "dark" ||
-        preferences.theme === "system"
-          ? preferences.theme
-          : defaultPreferences.theme,
-    }
+        return {
+          locale:
+            preferences.locale === "en-US" || preferences.locale === "zh-CN"
+              ? preferences.locale
+              : defaultPreferences.locale,
+          theme:
+            preferences.theme === "light" ||
+            preferences.theme === "dark" ||
+            preferences.theme === "system"
+              ? preferences.theme
+              : defaultPreferences.theme,
+        }
+      })
   }),
   updatePreferences: protectedProcedure
     .input(

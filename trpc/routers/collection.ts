@@ -112,61 +112,62 @@ export const collectionRouter = router({
 
       const likeCountExpr = createDistinctLikeUserCountExpr()
 
-      const assets = await ctx.db
-        .select({
-          id: asset.id,
-          title: asset.title,
-          objectKey: asset.objectKey,
-          width: asset.width,
-          height: asset.height,
-          createdAt: asset.createdAt,
-          addedAt: collectionAsset.addedAt,
-          user: {
-            id: user.id,
-            name: user.name,
-            image: user.image,
-          },
-          likeCount: likeCountExpr,
-          tags: createTagNamesAggExpr(),
-          likedByMe: sql<boolean>`exists(
-            select 1 from ${assetLike}
-            where ${assetLike.assetId} = ${asset.id}
-            and ${assetLike.userId} = ${ctx.user.id}
-          )`,
-        })
-        .from(collectionAsset)
-        .innerJoin(asset, eq(collectionAsset.assetId, asset.id))
-        .innerJoin(user, eq(asset.userId, user.id))
-        .leftJoin(assetLike, eq(asset.id, assetLike.assetId))
-        .leftJoin(assetTagLink, eq(asset.id, assetTagLink.assetId))
-        .leftJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
-        .where(eq(collectionAsset.collectionId, input.collectionId))
-        .groupBy(asset.id, user.id, collectionAsset.addedAt)
-        .orderBy(desc(collectionAsset.addedAt))
-
-      const posts = await ctx.db
-        .select({
-          id: post.id,
-          title: post.title,
-          excerpt: post.excerpt,
-          coverImageUrl: post.coverImageUrl,
-          readingTime: post.readingTime,
-          viewCount: post.viewCount,
-          publishedAt: post.publishedAt,
-          addedAt: collectionPost.addedAt,
-          likeCount: sql<number>`(
-            select count(*) from ${postLike}
-            where ${postLike.postId} = ${post.id}
-          )`.mapWith(Number),
-          bookmarkCount: sql<number>`(
-            select count(*) from ${postBookmark}
-            where ${postBookmark.postId} = ${post.id}
-          )`.mapWith(Number),
-        })
-        .from(collectionPost)
-        .innerJoin(post, eq(collectionPost.postId, post.id))
-        .where(eq(collectionPost.collectionId, input.collectionId))
-        .orderBy(desc(collectionPost.addedAt))
+      const [assets, posts] = await Promise.all([
+        ctx.db
+          .select({
+            id: asset.id,
+            title: asset.title,
+            objectKey: asset.objectKey,
+            width: asset.width,
+            height: asset.height,
+            createdAt: asset.createdAt,
+            addedAt: collectionAsset.addedAt,
+            user: {
+              id: user.id,
+              name: user.name,
+              image: user.image,
+            },
+            likeCount: likeCountExpr,
+            tags: createTagNamesAggExpr(),
+            likedByMe: sql<boolean>`exists(
+              select 1 from ${assetLike}
+              where ${assetLike.assetId} = ${asset.id}
+              and ${assetLike.userId} = ${ctx.user.id}
+            )`,
+          })
+          .from(collectionAsset)
+          .innerJoin(asset, eq(collectionAsset.assetId, asset.id))
+          .innerJoin(user, eq(asset.userId, user.id))
+          .leftJoin(assetLike, eq(asset.id, assetLike.assetId))
+          .leftJoin(assetTagLink, eq(asset.id, assetTagLink.assetId))
+          .leftJoin(assetTag, eq(assetTagLink.tagId, assetTag.id))
+          .where(eq(collectionAsset.collectionId, input.collectionId))
+          .groupBy(asset.id, user.id, collectionAsset.addedAt)
+          .orderBy(desc(collectionAsset.addedAt)),
+        ctx.db
+          .select({
+            id: post.id,
+            title: post.title,
+            excerpt: post.excerpt,
+            coverImageUrl: post.coverImageUrl,
+            readingTime: post.readingTime,
+            viewCount: post.viewCount,
+            publishedAt: post.publishedAt,
+            addedAt: collectionPost.addedAt,
+            likeCount: sql<number>`(
+              select count(*) from ${postLike}
+              where ${postLike.postId} = ${post.id}
+            )`.mapWith(Number),
+            bookmarkCount: sql<number>`(
+              select count(*) from ${postBookmark}
+              where ${postBookmark.postId} = ${post.id}
+            )`.mapWith(Number),
+          })
+          .from(collectionPost)
+          .innerJoin(post, eq(collectionPost.postId, post.id))
+          .where(eq(collectionPost.collectionId, input.collectionId))
+          .orderBy(desc(collectionPost.addedAt)),
+      ])
 
       const postTags =
         posts.length > 0

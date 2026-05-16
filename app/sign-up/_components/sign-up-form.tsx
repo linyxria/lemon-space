@@ -2,7 +2,6 @@
 
 import { useRouter } from "@bprogress/next/app"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
-import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -27,10 +26,9 @@ const formSchema = z.object({
   password: zUtils.password(),
 })
 
-export default function SignUpForm() {
+export default function SignUpForm({ callbackURL }: { callbackURL: string }) {
   const t = useTranslations("SignUp")
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const { refresh, replace } = useRouter()
   const form = useForm({
     resolver: standardSchemaResolver(formSchema),
     defaultValues: {
@@ -41,8 +39,6 @@ export default function SignUpForm() {
   })
   const [isPending, startTransition] = useTransition()
 
-  const callbackURL = searchParams.get("callbackURL") || "/"
-
   return (
     <AuthCard
       title={t("title")}
@@ -52,6 +48,7 @@ export default function SignUpForm() {
         to: "/sign-in",
         action: t("signIn"),
       }}
+      callbackURL={callbackURL}
       button={{
         text: t("submit"),
         form: "sign-up",
@@ -82,8 +79,8 @@ export default function SignUpForm() {
                     // }
 
                     toast.success(t("welcome"))
-                    router.replace(callbackURL)
-                    router.refresh()
+                    replace(callbackURL)
+                    refresh()
                   },
                   onError: (ctx) => void toast.error(ctx.error.message),
                 },

@@ -16,6 +16,24 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useTRPC } from "@/trpc/client"
 
+const dateFormatters = {
+  "en-US": new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  }),
+  "zh-CN": new Intl.DateTimeFormat("zh-CN", {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  }),
+} as const
+
+function formatDate(value: Date | string, locale: string) {
+  const formatter =
+    dateFormatters[locale as keyof typeof dateFormatters] ??
+    dateFormatters["en-US"]
+  return formatter.format(new Date(value))
+}
+
 export function CollectionsBoard() {
   const trpc = useTRPC()
   const t = useTranslations("Collections")
@@ -64,11 +82,11 @@ export function CollectionsBoard() {
 
   return (
     <div className="space-y-5">
-      <section className="from-hero via-hero to-primary/35 text-hero-foreground rounded-[28px] border bg-linear-to-r px-6 py-6">
+      <section className="from-hero via-hero to-primary/35 text-hero-foreground rounded-[28px] border bg-linear-to-r p-6">
         <p className="text-primary text-[11px] font-semibold tracking-[0.28em] uppercase">
           {t("title")}
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
+        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
           {t("title")}
         </h1>
         <p className="text-hero-muted mt-2 max-w-2xl text-sm">
@@ -77,7 +95,7 @@ export function CollectionsBoard() {
       </section>
 
       <section className="bg-card rounded-[28px] border p-5 shadow-sm">
-        <h2 className="text-foreground mb-3 flex items-center gap-2 text-lg font-black">
+        <h2 className="text-foreground mb-3 flex items-center gap-2 text-lg font-semibold">
           <FolderPlus className="size-4" />
           {t("createTitle")}
         </h2>
@@ -112,7 +130,7 @@ export function CollectionsBoard() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="text-foreground truncate text-lg font-black">
+                  <h3 className="text-foreground truncate text-lg font-semibold">
                     {item.name}
                   </h3>
                   {item.description ? (
@@ -128,8 +146,7 @@ export function CollectionsBoard() {
                 {t("postsCount")}
               </p>
               <p className="text-muted-foreground mt-1 text-xs">
-                {t("updated")}:{" "}
-                {new Date(item.updatedAt).toLocaleDateString(locale)}
+                {t("updated")}: {formatDate(item.updatedAt, locale)}
               </p>
               <div className="mt-4 flex items-center justify-between gap-2">
                 <Button

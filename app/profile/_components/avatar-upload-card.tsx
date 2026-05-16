@@ -20,7 +20,7 @@ export default function AvatarUploadCard() {
 
   const mutation = useMutation(trpc.user.avatarUpdate.mutationOptions())
 
-  const router = useRouter()
+  const { refresh } = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string>()
@@ -46,7 +46,7 @@ export default function AvatarUploadCard() {
       await mutation.mutateAsync({ objectKey })
 
       toast.success(t("updated"))
-      router.refresh()
+      refresh()
     } catch (error) {
       console.error(error)
       setPreviewUrl(undefined)
@@ -105,7 +105,7 @@ export default function AvatarUploadCard() {
             <span className="bg-background/80 text-muted-foreground mb-2 rounded-full px-3 py-1 text-[11px] font-medium tracking-[0.14em] uppercase shadow-sm md:hidden">
               {t("badge")}
             </span>
-            <p className="text-foreground text-xl font-black tracking-tight sm:text-2xl">
+            <p className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">
               {data.name}
             </p>
             <p className="text-muted-foreground mt-1 max-w-60 truncate text-sm sm:max-w-70 md:max-w-none">

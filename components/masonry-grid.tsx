@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useMemo } from "react"
+import { useMemo } from "react"
 import { useWindowSize } from "react-use"
 
 import { cn } from "@/lib/utils"
@@ -13,13 +13,13 @@ function defaultGetColumnCount(width: number) {
 
 export function MasonryGrid<T extends { id: string | number }>({
   items,
-  renderItem,
+  itemNode,
   columnCount = defaultGetColumnCount,
   gapClassName = "gap-2 md:gap-4",
   className,
 }: {
   items: T[]
-  renderItem: (item: T, index: number) => React.ReactNode
+  itemNode: (item: T, index: number) => React.ReactNode
   columnCount?: number | ((width: number) => number)
   gapClassName?: string
   className?: string
@@ -46,6 +46,22 @@ export function MasonryGrid<T extends { id: string | number }>({
     return result
   }, [items, resolvedColumnCount])
 
+  const renderedColumns = columns.map((columnItems) => {
+    const columnKey = columnItems.map(({ item }) => item.id).join(":")
+    const renderedItems = columnItems.map(({ item, index }) => (
+      <div key={item.id}>{itemNode(item, index)}</div>
+    ))
+
+    return (
+      <div
+        key={columnKey}
+        className={cn("flex min-w-0 flex-1 basis-0 flex-col", gapClassName)}
+      >
+        {renderedItems}
+      </div>
+    )
+  })
+
   return (
     <div
       className={cn(
@@ -54,18 +70,7 @@ export function MasonryGrid<T extends { id: string | number }>({
         className,
       )}
     >
-      {columns.map((columnItems, colIndex) => (
-        <div
-          key={colIndex}
-          className={cn("flex min-w-0 flex-1 basis-0 flex-col", gapClassName)}
-        >
-          {columnItems.map(({ item, index }) => (
-            <Fragment key={`${item.id}:${index}`}>
-              {renderItem(item, index)}
-            </Fragment>
-          ))}
-        </div>
-      ))}
+      {renderedColumns}
     </div>
   )
 }

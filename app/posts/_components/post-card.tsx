@@ -67,7 +67,7 @@ export function PostCard({
 
         <h2
           className={cn(
-            "font-black tracking-[-0.03em]",
+            "font-semibold tracking-[-0.03em]",
             featured
               ? "line-clamp-1 text-xl md:text-2xl"
               : "line-clamp-1 text-base",

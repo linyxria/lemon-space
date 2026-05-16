@@ -2,9 +2,9 @@
 
 import { useRouter } from "@bprogress/next/app"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useTheme } from "@teispace/next-themes"
 import { useLocale } from "next-intl"
-import { useTheme } from "next-themes"
-import { createContext, useContext, useEffect, useRef } from "react"
+import { createContext, use, useEffect, useRef } from "react"
 
 import { useHydrated } from "@/hooks/hydration"
 import { authClient } from "@/lib/auth-client"
@@ -41,7 +41,7 @@ export default function PreferencesProvider({
   children: React.ReactNode
 }) {
   const trpc = useTRPC()
-  const router = useRouter()
+  const { refresh } = useRouter()
   const locale = useLocale() as AppLocale
   const queryClient = useQueryClient()
   const { setTheme: setNextTheme, theme: nextTheme } = useTheme()
@@ -90,8 +90,8 @@ export default function PreferencesProvider({
 
     hasAppliedRemoteLocaleRef.current = true
     document.cookie = `${LOCALE_COOKIE_KEY}=${nextLocale}; path=/; max-age=31536000; samesite=lax`
-    router.refresh()
-  }, [locale, preferencesQuery.data?.locale, router])
+    refresh()
+  }, [locale, preferencesQuery.data?.locale, refresh])
 
   useEffect(() => {
     if (!remoteTheme) return
@@ -139,7 +139,7 @@ export default function PreferencesProvider({
       })
     }
 
-    router.refresh()
+    refresh()
   }
 
   return (
@@ -157,7 +157,7 @@ export default function PreferencesProvider({
 }
 
 export function usePreferences() {
-  const context = useContext(PreferencesContext)
+  const context = use(PreferencesContext)
   if (!context) {
     throw new Error("usePreferences must be used within PreferencesProvider")
   }

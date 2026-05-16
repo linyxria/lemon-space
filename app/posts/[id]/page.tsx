@@ -1,4 +1,5 @@
 import { CalendarDays, Edit3 } from "lucide-react"
+import type { Metadata } from "next"
 import { headers } from "next/headers"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -13,6 +14,25 @@ import { caller } from "@/trpc/server"
 
 import { PostActions } from "../_components/post-actions"
 
+const postDateFormatter = new Intl.DateTimeFormat("zh-CN", {
+  dateStyle: "medium",
+  timeZone: "UTC",
+})
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const post = await caller.post.byId({ id }).catch(() => null)
+
+  return {
+    title: post?.title ?? "Post",
+    description: post?.excerpt ?? "Read this Lemon Space post.",
+  }
+}
+
 export default async function PostPage({
   params,
 }: {
@@ -25,6 +45,10 @@ export default async function PostPage({
   ])
 
   if (!post) notFound()
+
+  const publishedDate = post.publishedAt
+    ? postDateFormatter.format(new Date(post.publishedAt))
+    : "尚未发布"
 
   return (
     <article className="mx-auto max-w-4xl space-y-7">
@@ -46,7 +70,7 @@ export default async function PostPage({
             </Badge>
           ) : null}
         </div>
-        <h1 className="text-4xl font-black tracking-tighter md:text-6xl">
+        <h1 className="text-4xl font-semibold tracking-tighter md:text-6xl">
           {post.title}
         </h1>
         <p className="text-muted-foreground text-lg leading-8">
@@ -65,9 +89,7 @@ export default async function PostPage({
               <p className="text-sm font-semibold">{post.author.name}</p>
               <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
                 <CalendarDays className="size-3.5" />
-                {post.publishedAt
-                  ? new Date(post.publishedAt).toLocaleDateString("zh-CN")
-                  : "尚未发布"}
+                {publishedDate}
                 <span>·</span>
                 {post.readingTime} 分钟阅读
               </p>

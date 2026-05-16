@@ -46,5 +46,4 @@ const isAuthed = t.middleware(({ next, ctx }) => {
 
 export const router = t.router
 export const procedure = t.procedure
-export const createCallerFactory = t.createCallerFactory
 export const protectedProcedure = t.procedure.use(isAuthed)

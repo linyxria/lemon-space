@@ -64,7 +64,7 @@ export function MyGalleryGrid() {
   return (
     <MasonryGrid
       items={data}
-      renderItem={(item, index) => (
+      itemNode={(item, index) => (
         <ImageCard {...item} loading={index < 8 ? "eager" : "lazy"} />
       )}
     />
@@ -85,7 +85,7 @@ export function MyGalleryHeading({
           <ImageIcon className="size-3.5" />
           Gallery
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">{title}</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">{title}</h1>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-6">
           {description}
         </p>

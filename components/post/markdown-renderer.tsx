@@ -1,13 +1,18 @@
 import { cn } from "@/lib/utils"
 
-function renderInline(text: string) {
+function inlineNodes(text: string) {
   const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g)
+  const seenParts = new Map<string, number>()
 
-  return parts.map((part, index) => {
+  return parts.map((part) => {
+    const count = seenParts.get(part) ?? 0
+    seenParts.set(part, count + 1)
+    const key = `${part}-${count}`
+
     if (part.startsWith("`") && part.endsWith("`")) {
       return (
         <code
-          key={`${part}-${index}`}
+          key={key}
           className="bg-muted text-foreground rounded px-1.5 py-0.5 font-mono text-[0.9em]"
         >
           {part.slice(1, -1)}
@@ -16,7 +21,7 @@ function renderInline(text: string) {
     }
 
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={`${part}-${index}`}>{part.slice(2, -2)}</strong>
+      return <strong key={key}>{part.slice(2, -2)}</strong>
     }
 
     return part
@@ -54,7 +59,7 @@ export function MarkdownRenderer({
 
       nodes.push(
         <pre
-          key={`code-${index}`}
+          key={`code-${codeLines.join("\n")}`}
           className="bg-foreground text-background overflow-x-auto rounded-lg p-4 text-sm leading-6"
         >
           <code>{codeLines.join("\n")}</code>
@@ -65,9 +70,10 @@ export function MarkdownRenderer({
     }
 
     if (line.startsWith("### ")) {
+      const children = inlineNodes(line.slice(4))
       nodes.push(
-        <h3 key={`h3-${index}`} className="pt-4 text-xl font-black">
-          {renderInline(line.slice(4))}
+        <h3 key={`h3-${line}`} className="pt-4 text-xl font-semibold">
+          {children}
         </h3>,
       )
       index += 1
@@ -75,9 +81,10 @@ export function MarkdownRenderer({
     }
 
     if (line.startsWith("## ")) {
+      const children = inlineNodes(line.slice(3))
       nodes.push(
-        <h2 key={`h2-${index}`} className="pt-6 text-2xl font-black">
-          {renderInline(line.slice(3))}
+        <h2 key={`h2-${line}`} className="pt-6 text-2xl font-semibold">
+          {children}
         </h2>,
       )
       index += 1
@@ -85,9 +92,10 @@ export function MarkdownRenderer({
     }
 
     if (line.startsWith("# ")) {
+      const children = inlineNodes(line.slice(2))
       nodes.push(
-        <h2 key={`h1-${index}`} className="pt-6 text-3xl font-black">
-          {renderInline(line.slice(2))}
+        <h2 key={`h1-${line}`} className="pt-6 text-3xl font-semibold">
+          {children}
         </h2>,
       )
       index += 1
@@ -103,14 +111,16 @@ export function MarkdownRenderer({
         index += 1
       }
 
+      const quoteNodes = quoteLines.map((quote) => (
+        <p key={quote}>{inlineNodes(quote)}</p>
+      ))
+
       nodes.push(
         <blockquote
-          key={`quote-${index}`}
-          className="border-primary bg-primary/5 text-foreground rounded-r-lg border-l-4 px-4 py-3"
+          key={`quote-${quoteLines.join("\n")}`}
+          className="border-primary/20 bg-primary/5 text-foreground rounded-lg border px-4 py-3"
         >
-          {quoteLines.map((quote, quoteIndex) => (
-            <p key={`${quote}-${quoteIndex}`}>{renderInline(quote)}</p>
-          ))}
+          {quoteNodes}
         </blockquote>,
       )
       continue
@@ -125,19 +135,25 @@ export function MarkdownRenderer({
         index += 1
       }
 
+      const itemNodes = items.map((item) => (
+        <li key={item}>{inlineNodes(item)}</li>
+      ))
+
       nodes.push(
-        <ul key={`list-${index}`} className="list-disc space-y-2 pl-6">
-          {items.map((item) => (
-            <li key={item}>{renderInline(item)}</li>
-          ))}
+        <ul
+          key={`list-${items.join("\n")}`}
+          className="list-disc space-y-2 pl-6"
+        >
+          {itemNodes}
         </ul>,
       )
       continue
     }
 
+    const children = inlineNodes(line)
     nodes.push(
-      <p key={`p-${index}`} className="text-foreground/90 leading-8">
-        {renderInline(line)}
+      <p key={`p-${line}`} className="text-foreground/90 leading-8">
+        {children}
       </p>,
     )
     index += 1

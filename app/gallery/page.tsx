@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
@@ -6,6 +7,11 @@ import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 import { GalleryList } from "./_components/gallery-list"
 import { HomeShowcase } from "./_components/home-showcase"
 import { TagBar } from "./_components/tag-bar"
+
+export const metadata: Metadata = {
+  title: "Gallery",
+  description: "Explore visual references and uploaded images.",
+}
 
 export default async function GalleryPage({
   searchParams,

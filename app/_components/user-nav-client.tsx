@@ -74,7 +74,7 @@ export default function UserNavClient() {
     retry: false,
     refetchOnWindowFocus: false,
   })
-  const router = useRouter()
+  const { refresh } = useRouter()
   const t = useTranslations("UserNav")
   const tCommon = useTranslations("Common")
   const locale = useLocale()
@@ -90,7 +90,7 @@ export default function UserNavClient() {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.refresh()
+          refresh()
         },
       },
     })

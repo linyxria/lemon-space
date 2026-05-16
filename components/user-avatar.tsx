@@ -1,18 +1,13 @@
 import Image from "next/image"
 import { useState } from "react"
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  type AvatarProps,
-} from "./ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 
 export default function UserAvatar({
   name,
   image,
   ...props
-}: AvatarProps & {
+}: React.ComponentProps<typeof Avatar> & {
   name: string
   image: string | null | undefined
 }) {
