@@ -1,4 +1,5 @@
 import { Bookmark, Clock3, Eye, Heart } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
@@ -36,14 +37,20 @@ export function PostCard({
     >
       <Link
         href={`/posts/${post.id}`}
+        aria-label={`阅读文章：${post.title}`}
         className={cn("bg-muted relative block overflow-hidden", "min-h-full")}
       >
         {post.coverImageUrl ? (
-          <span
-            role="img"
-            aria-label={post.title}
-            className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105"
-            style={{ backgroundImage: `url(${post.coverImageUrl})` }}
+          <Image
+            src={post.coverImageUrl}
+            alt=""
+            fill
+            className="object-cover transition duration-500 group-hover:scale-105"
+            sizes={
+              featured
+                ? "(max-width: 768px) 120px, 160px"
+                : "(max-width: 768px) 88px, 120px"
+            }
           />
         ) : (
           <div className="from-primary/20 via-background to-muted absolute inset-0 bg-linear-to-br" />

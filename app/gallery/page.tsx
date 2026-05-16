@@ -1,12 +1,12 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 
-import { Skeleton } from "@/components/ui/skeleton"
 import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
 import { GalleryList } from "./_components/gallery-list"
 import { HomeShowcase } from "./_components/home-showcase"
 import { TagBar } from "./_components/tag-bar"
+import GalleryLoading from "./loading"
 
 export const metadata: Metadata = {
   title: "Gallery",
@@ -39,16 +39,7 @@ export default async function GalleryPage({
   return (
     <div className="space-y-4">
       <HydrateClient>
-        <Suspense
-          fallback={
-            <div className="flex w-full max-w-3xl flex-col gap-4">
-              <Skeleton className="h-4 w-2/5" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/5" />
-            </div>
-          }
-        >
+        <Suspense fallback={<GalleryLoading />}>
           <HomeShowcase />
           <TagBar selected={tag} keyword={q} sort={resolvedSort} />
           <GalleryList tag={tag} q={q} sort={resolvedSort} />

@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Copy, Download, ExternalLink, X } from "lucide-react"
 import { domAnimation, LazyMotion, m } from "motion/react"
+import dynamic from "next/dynamic"
 import Image from "next/image"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
@@ -15,6 +16,11 @@ import { useTRPC } from "@/trpc/client"
 import { useGallery } from "./gallery-provider"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
+
+const AmbientImage = dynamic(
+  () => import("@layout-kit/react").then((module) => module.AmbientImage),
+  { ssr: false },
+)
 
 export interface ModalAssetData {
   id: string
@@ -126,28 +132,41 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
           <div className="grid h-full grid-rows-[auto_1fr] md:grid-cols-[minmax(0,1.25fr)_minmax(22rem,0.75fr)] md:grid-rows-1">
             {/* 4. 图片展示区：桌面双栏左侧主视觉 */}
             <div className="bg-hero relative h-[40dvh] min-h-60 overflow-hidden md:h-full md:min-h-0">
-              {/* 底层氛围模糊图 */}
-              <Image
+              <AmbientImage
                 src={asset.url}
-                alt="blur-bg"
-                fill
-                className="scale-125 object-cover opacity-40 blur-3xl"
-                aria-hidden="true"
-                sizes="(max-width: 768px) 100vw, 68vw"
-              />
-
-              {/* 主图：使用自然宽高，最大化可视区域 */}
-              <div className="relative z-10 flex h-full w-full items-center justify-center p-3 sm:p-5 md:p-8">
-                <Image
-                  src={asset.url}
-                  alt={asset.title}
-                  width={asset.width ?? 1600}
-                  height={asset.height ?? 900}
-                  priority
-                  className="h-auto max-h-full w-auto max-w-full rounded-xl object-contain shadow-[0_20px_50px_-26px_rgba(0,0,0,0.65)]"
-                  sizes="(max-width: 768px) 100vw, 68vw"
-                />
-              </div>
+                alt={asset.title}
+                fit="cover"
+                autoColor={false}
+                backgroundColor="var(--hero)"
+                backdropBlur="48px"
+                backdropScale="1.18"
+                overlayColor="rgb(0 0 0 / 18%)"
+                padding="clamp(0.75rem, 2vw, 2rem)"
+                imageRadius="0.75rem"
+                className="h-full w-full"
+              >
+                <div slot="backdrop" className="relative h-full w-full">
+                  <Image
+                    src={asset.url}
+                    alt=""
+                    fill
+                    aria-hidden="true"
+                    sizes="(max-width: 768px) 100vw, 68vw"
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
+                <div className="cover relative h-full w-full">
+                  <Image
+                    src={asset.url}
+                    alt={asset.title}
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 68vw"
+                    className="rounded-xl shadow-[0_20px_50px_-26px_rgba(0,0,0,0.65)]"
+                    style={{ objectFit: "contain" }}
+                  />
+                </div>
+              </AmbientImage>
             </div>
 
             {/* 5. 右侧信息栏 */}

@@ -1,8 +1,8 @@
 "use client"
 
 import { useRouter } from "@bprogress/next/app"
-import { Search, X } from "lucide-react"
-import { useState } from "react"
+import { LoaderCircle, Search, X } from "lucide-react"
+import { useState, useTransition } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,7 @@ export function PostSearch({
 }) {
   const { push } = useRouter()
   const [value, setValue] = useState(keyword ?? "")
+  const [isNavigating, startNavigation] = useTransition()
 
   const handleSubmit = (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -25,7 +26,9 @@ export function PostSearch({
     if (nextKeyword) params.set("q", nextKeyword)
     if (tag) params.set("tag", tag)
 
-    push(params.toString() ? `/posts?${params}` : "/posts")
+    startNavigation(() => {
+      push(params.toString() ? `/posts?${params}` : "/posts")
+    })
   }
 
   return (
@@ -49,7 +52,8 @@ export function PostSearch({
           </button>
         ) : null}
       </div>
-      <Button type="submit" className="h-10 px-4">
+      <Button type="submit" className="h-10 px-4" disabled={isNavigating}>
+        {isNavigating ? <LoaderCircle className="size-4 animate-spin" /> : null}
         搜索
       </Button>
     </form>

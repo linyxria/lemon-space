@@ -2,10 +2,16 @@
 
 import { useRouter } from "@bprogress/next/app"
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { ArrowUpWideNarrow, Search, Sparkles, X } from "lucide-react"
+import {
+  ArrowUpWideNarrow,
+  LoaderCircle,
+  Search,
+  Sparkles,
+  X,
+} from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { useState, useTransition } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -47,6 +53,7 @@ export function TagBar({
   const tCommon = useTranslations("Common")
   const { data } = useSuspenseQuery(trpc.asset.tags.queryOptions())
   const [inputValue, setInputValue] = useState(keyword ?? "")
+  const [isNavigating, startNavigation] = useTransition()
   const { push } = useRouter()
   const sortOptions = [
     { value: "latest", label: tCommon("latest") },
@@ -59,14 +66,16 @@ export function TagBar({
     event.preventDefault()
     const nextKeyword = inputValue.trim()
 
-    push(
-      buildGalleryHref({
-        tag: selected,
-        q: nextKeyword || undefined,
-        sort,
-      }),
-      { scroll: false },
-    )
+    startNavigation(() => {
+      push(
+        buildGalleryHref({
+          tag: selected,
+          q: nextKeyword || undefined,
+          sort,
+        }),
+        { scroll: false },
+      )
+    })
   }
 
   return (
@@ -93,7 +102,14 @@ export function TagBar({
                 </button>
               ) : null}
             </div>
-            <Button type="submit" className="h-10 rounded-2xl px-4">
+            <Button
+              type="submit"
+              className="h-10 rounded-2xl px-4"
+              disabled={isNavigating}
+            >
+              {isNavigating ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : null}
               {t("search")}
             </Button>
           </form>
@@ -105,6 +121,7 @@ export function TagBar({
                 <Badge
                   key={option.value}
                   variant={sort === option.value ? "default" : "outline"}
+                  aria-current={sort === option.value ? "page" : undefined}
                   render={
                     <Link
                       href={buildGalleryHref({
@@ -157,8 +174,9 @@ export function TagBar({
           <div className="mb-2 flex w-max items-center gap-1 pb-2 md:gap-2">
             <Link
               href={buildGalleryHref({ q: keyword, sort })}
+              aria-current={!selected ? "page" : undefined}
               className={cn(
-                "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm",
+                "inline-flex min-h-9 items-center rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm",
                 !selected
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent",
@@ -173,8 +191,9 @@ export function TagBar({
                 <Link
                   key={tag.id}
                   href={buildGalleryHref({ tag: tag.slug, q: keyword, sort })}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm",
+                    "inline-flex min-h-9 items-center rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-300 md:px-5 md:py-2 md:text-sm",
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent",

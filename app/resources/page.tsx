@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { headers } from "next/headers"
 import { Suspense } from "react"
 
-import { Skeleton } from "@/components/ui/skeleton"
 import { auth } from "@/lib/auth"
 import {
   TECH_RESOURCE_CATEGORIES,
@@ -11,6 +10,7 @@ import {
 import { HydrateClient, prefetch, trpc } from "@/trpc/server"
 
 import { ResourceExplorer } from "./_components/resource-explorer"
+import { ResourcesSkeleton } from "./_components/resources-skeleton"
 
 export const metadata: Metadata = {
   title: "Resources",
@@ -85,21 +85,5 @@ export default async function ResourcesPage({
         <ResourceExplorer filter={filter} q={q} tag={tag} signedIn={signedIn} />
       </Suspense>
     </HydrateClient>
-  )
-}
-
-function ResourcesSkeleton() {
-  return (
-    <div className="space-y-6">
-      <Skeleton className="h-80 w-full rounded-xl" />
-      <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <Skeleton className="h-120 rounded-xl" />
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-64 rounded-xl" />
-          ))}
-        </div>
-      </div>
-    </div>
   )
 }

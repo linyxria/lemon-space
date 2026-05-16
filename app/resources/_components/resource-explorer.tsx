@@ -150,6 +150,7 @@ export function ResourceExplorer({
   const { push } = useRouter()
   const pathname = usePathname()
   const [keyword, setKeyword] = useState(q ?? "")
+  const [isNavigating, startNavigation] = useTransition()
   const [panelState, setPanelState] = useState<
     | { mode: "create"; resource?: undefined }
     | { mode: "edit"; resource: ResourceItem }
@@ -218,7 +219,9 @@ export function ResourceExplorer({
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    push(buildResourceHref({ filter, q: keyword.trim(), tag }))
+    startNavigation(() => {
+      push(buildResourceHref({ filter, q: keyword.trim(), tag }))
+    })
   }
 
   return (
@@ -230,6 +233,7 @@ export function ResourceExplorer({
         featuredCount={featuredResources.length}
         signedIn={signedIn}
         totalCount={totalCount}
+        isSearching={isNavigating}
         onKeywordChange={setKeyword}
         onSubmitSearch={submitSearch}
       />
@@ -280,6 +284,7 @@ function ResourceHero({
   resourceCount,
   signedIn,
   totalCount,
+  isSearching,
   onKeywordChange,
   onSubmitSearch,
 }: {
@@ -289,6 +294,7 @@ function ResourceHero({
   resourceCount: number
   signedIn: boolean
   totalCount: number
+  isSearching: boolean
   onKeywordChange: (value: string) => void
   onSubmitSearch: (event: React.FormEvent<HTMLFormElement>) => void
 }) {
@@ -325,9 +331,13 @@ function ResourceHero({
                 className="text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/35 h-10 border-transparent bg-transparent pl-9"
               />
             </div>
-            <Button size="lg" className="h-10 px-4">
-              搜索
-              <ArrowUpRight className="size-4" />
+            <Button size="lg" className="h-10 px-4" disabled={isSearching}>
+              {isSearching ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <ArrowUpRight className="size-4" />
+              )}
+              {isSearching ? "搜索中" : "搜索"}
             </Button>
           </form>
         </div>
@@ -633,6 +643,7 @@ function FilterLink({
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "group flex min-h-12 items-center justify-between gap-3 rounded-lg border px-3 py-2.5 transition-all active:translate-y-px",
         active
@@ -694,7 +705,7 @@ function FeaturedResourceCard({
       </p>
       <div className="mt-5 flex flex-wrap gap-2">
         {resource.tags.slice(0, 5).map((tag) => (
-          <Badge key={tag.id} variant="outline">
+          <Badge key={tag.id} variant="outline" className="h-6 px-2.5">
             #{tag.name}
           </Badge>
         ))}
@@ -772,9 +783,10 @@ function ResourceCard({
         ))}
       </div>
 
-      <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
+      <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
         <Button
           size="sm"
+          className="h-10"
           nativeButton={false}
           render={
             <a
@@ -790,6 +802,7 @@ function ResourceCard({
         <Button
           size="sm"
           variant="outline"
+          className="h-10"
           nativeButton={false}
           render={<a href={resource.url} target="_blank" rel="noreferrer" />}
         >
@@ -797,7 +810,12 @@ function ResourceCard({
           <LinkIcon className="size-3.5" />
         </Button>
         {resource.canEdit ? (
-          <Button size="sm" variant="ghost" onClick={() => onEdit(resource)}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="col-span-2 h-10"
+            onClick={() => onEdit(resource)}
+          >
             <Pencil className="size-3.5" />
             编辑
           </Button>
@@ -900,7 +918,7 @@ function ResourceManager({ onCreate }: { onCreate: () => void }) {
         {data.slice(0, 4).map((resource) => (
           <div
             key={resource.id}
-            className="bg-background/70 flex items-center justify-between gap-3 rounded-xl border px-3 py-2"
+            className="bg-background/70 flex min-h-12 items-center justify-between gap-3 rounded-xl border px-3 py-2"
           >
             <div className="min-w-0">
               <p className="truncate text-sm font-bold">{resource.name}</p>
@@ -1034,8 +1052,8 @@ function ResourceEditorPanel({
   }
 
   return (
-    <div className="bg-foreground/20 fixed inset-0 z-40 flex justify-end p-3 backdrop-blur-sm sm:p-5">
-      <div className="bg-background flex h-full w-full max-w-2xl flex-col overflow-hidden rounded-xl border shadow-[0_20px_60px_-40px_rgba(0,0,0,0.35)]">
+    <div className="bg-foreground/20 fixed inset-0 z-40 flex justify-end p-2 backdrop-blur-sm sm:p-5">
+      <div className="bg-background flex h-full max-h-dvh w-full max-w-2xl flex-col overflow-hidden rounded-xl border shadow-[0_20px_60px_-40px_rgba(0,0,0,0.35)]">
         <div className="flex items-start justify-between gap-4 border-b p-5">
           <div>
             <p className="text-primary text-xs font-bold tracking-[0.24em] uppercase">
@@ -1045,7 +1063,7 @@ function ResourceEditorPanel({
               {state.mode === "create" ? "新增技术条目" : state.resource.name}
             </h2>
           </div>
-          <Button size="icon" variant="ghost" onClick={onClose}>
+          <Button size="icon-lg" variant="ghost" onClick={onClose}>
             <X className="size-4" />
           </Button>
         </div>
@@ -1087,7 +1105,7 @@ function ResourceEditorPanel({
                       event.target.value as TechResourceCategory,
                     )
                   }
-                  className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+                  className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-10 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
                 >
                   {TECH_RESOURCE_CATEGORIES.map((category) => (
                     <option key={category.id} value={category.id}>
@@ -1104,7 +1122,7 @@ function ResourceEditorPanel({
                   onChange={(event) =>
                     setValue("level", event.target.value as TechResourceLevel)
                   }
-                  className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+                  className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-10 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
                 >
                   {TECH_RESOURCE_LEVELS.map((level) => (
                     <option key={level} value={level}>
@@ -1121,7 +1139,7 @@ function ResourceEditorPanel({
                   onChange={(event) =>
                     setValue("status", event.target.value as TechResourceStatus)
                   }
-                  className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+                  className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-10 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
                 >
                   {TECH_RESOURCE_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -1186,9 +1204,10 @@ function ResourceEditorPanel({
                 type="button"
                 variant="destructive"
                 disabled={isDeleting || isSaving}
-                onClick={() =>
+                onClick={() => {
+                  if (!window.confirm("确定删除这个技术条目吗？")) return
                   deleteMutation.mutate({ resourceId: state.resource.id })
-                }
+                }}
               >
                 {isDeleting ? (
                   <LoaderCircle className="size-4 animate-spin" />
@@ -1201,10 +1220,19 @@ function ResourceEditorPanel({
               <span />
             )}
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                className="min-w-20"
+                onClick={onClose}
+              >
                 取消
               </Button>
-              <Button type="submit" disabled={isSaving || isDeleting}>
+              <Button
+                type="submit"
+                className="min-w-24"
+                disabled={isSaving || isDeleting}
+              >
                 {isSaving ? (
                   <LoaderCircle className="size-4 animate-spin" />
                 ) : null}
