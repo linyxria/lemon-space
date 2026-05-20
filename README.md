@@ -16,6 +16,28 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Email Delivery
+
+Lemon Space uses Resend for authentication emails, including email
+verification and password reset links.
+
+Required environment variables:
+
+```bash
+RESEND_API_KEY=
+AUTH_EMAIL_FROM="Lemon Space <noreply@your-domain.com>"
+AUTH_EMAIL_REPLY_TO=
+AUTH_REQUIRE_EMAIL_VERIFICATION=false
+```
+
+For local development, `RESEND_API_KEY` can stay empty. Auth links are printed
+to the server console instead, so password reset can be tested without sending
+real email.
+
+For production, verify the sending domain in Resend, set `RESEND_API_KEY` in
+the deployment secret manager, and make sure `AUTH_EMAIL_FROM` uses that
+verified domain.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

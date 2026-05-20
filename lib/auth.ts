@@ -2,7 +2,10 @@ import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 
 import { db } from "@/db"
-import { sendVerificationEmail } from "@/lib/auth-email"
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from "@/lib/auth-email"
 
 function isEmailVerificationEnabled() {
   return process.env.AUTH_REQUIRE_EMAIL_VERIFICATION === "true"
@@ -17,6 +20,14 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendPasswordResetEmail({
+        email: user.email,
+        name: user.name,
+        resetUrl: url,
+      })
+    },
   },
   ...(requireEmailVerification
     ? {

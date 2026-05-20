@@ -200,7 +200,41 @@
     "emailLabel": "Email",
     "emailPlaceholder": "Enter your email",
     "passwordLabel": "Password",
-    "passwordPlaceholder": "Enter your password"
+    "passwordPlaceholder": "Enter your password",
+    "forgotPassword": "Forgot password?"
+  },
+  "ForgotPassword": {
+    "brand": "Lemon ID",
+    "title": "Recover password",
+    "description": "Enter your account email and we will send a secure password reset link.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email",
+    "emailHint": "If this email is registered, you will receive a reset email.",
+    "submit": "Send reset email",
+    "submitting": "Sending...",
+    "sentToast": "If this email exists, a reset email has been sent.",
+    "sentInline": "Check the inbox for {email}, then open the link in the email to set a new password.",
+    "remembered": "Remembered it?",
+    "backToSignIn": "Back to sign in"
+  },
+  "ResetPassword": {
+    "brand": "Lemon ID",
+    "title": "Set new password",
+    "description": "Enter a new secure password. You can sign in again after saving it.",
+    "invalidTitle": "Reset link is invalid",
+    "invalidDescription": "This link may have expired or already been used. Request a new password reset email.",
+    "passwordLabel": "New password",
+    "passwordPlaceholder": "Enter a new password",
+    "passwordHint": "Use at least 8 characters.",
+    "confirmPasswordLabel": "Confirm new password",
+    "confirmPasswordPlaceholder": "Enter the new password again",
+    "passwordMismatch": "Passwords do not match.",
+    "submit": "Update password",
+    "submitting": "Updating...",
+    "success": "Password updated. Please sign in again.",
+    "requestNewLink": "Send a new reset email",
+    "remembered": "Remembered it?",
+    "backToSignIn": "Back to sign in"
   },
   "SignUp": {
     "title": "Create your account",
@@ -225,6 +259,22 @@
     "highlight1": "Collections synced",
     "highlight2": "Cross-device preferences",
     "highlight3": "Upload history at a glance"
+  },
+  "ForgotPasswordPage": {
+    "badge": "Account Recovery",
+    "title": "Recover your Lemon Space account",
+    "description": "The reset link is only sent to your account email. For privacy, the page shows the same result whether the email exists or not.",
+    "highlight1": "Email links expire automatically",
+    "highlight2": "No account existence leaks",
+    "highlight3": "Old sessions are revoked after reset"
+  },
+  "ResetPasswordPage": {
+    "badge": "Secure Reset",
+    "title": "Choose a new secure password",
+    "description": "After verifying through the email link, set a new password for your account.",
+    "highlight1": "Passwords are stored securely",
+    "highlight2": "Reset links are single-use",
+    "highlight3": "Return to sign in when done"
   },
   "SignUpPage": {
     "badge": "New Creator",

@@ -2,6 +2,7 @@
 
 import { useRouter } from "@bprogress/next/app"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
+import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -119,9 +120,17 @@ export default function SignInForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="password">
-                    {t("passwordLabel")}
-                  </FieldLabel>
+                  <div className="flex items-center justify-between gap-3">
+                    <FieldLabel htmlFor="password">
+                      {t("passwordLabel")}
+                    </FieldLabel>
+                    <Link
+                      href="/forgot-password"
+                      className="text-primary text-xs font-semibold underline-offset-4 hover:underline"
+                    >
+                      {t("forgotPassword")}
+                    </Link>
+                  </div>
                   <PasswordInput
                     {...field}
                     id="password"

@@ -200,7 +200,41 @@
     "emailLabel": "电子邮件地址",
     "emailPlaceholder": "请输入您的电子邮件地址",
     "passwordLabel": "密码",
-    "passwordPlaceholder": "请输入您的密码"
+    "passwordPlaceholder": "请输入您的密码",
+    "forgotPassword": "忘记密码？"
+  },
+  "ForgotPassword": {
+    "brand": "Lemon ID",
+    "title": "找回密码",
+    "description": "输入账户邮箱，我们会发送一个安全链接用于重置密码。",
+    "emailLabel": "电子邮件地址",
+    "emailPlaceholder": "请输入您的电子邮件地址",
+    "emailHint": "如果该邮箱已注册，你会收到一封重置邮件。",
+    "submit": "发送重置邮件",
+    "submitting": "发送中...",
+    "sentToast": "如果该邮箱存在，重置邮件已发送。",
+    "sentInline": "请检查 {email} 的收件箱，并通过邮件中的链接继续设置新密码。",
+    "remembered": "想起密码了？",
+    "backToSignIn": "返回登录"
+  },
+  "ResetPassword": {
+    "brand": "Lemon ID",
+    "title": "设置新密码",
+    "description": "输入一个新的安全密码，保存后即可重新登录。",
+    "invalidTitle": "重置链接无效",
+    "invalidDescription": "这个链接可能已过期或已被使用，请重新发送找回密码邮件。",
+    "passwordLabel": "新密码",
+    "passwordPlaceholder": "请输入新密码",
+    "passwordHint": "至少 8 个字符。",
+    "confirmPasswordLabel": "确认新密码",
+    "confirmPasswordPlaceholder": "请再次输入新密码",
+    "passwordMismatch": "两次输入的密码不一致。",
+    "submit": "更新密码",
+    "submitting": "更新中...",
+    "success": "密码已更新，请重新登录。",
+    "requestNewLink": "重新发送重置邮件",
+    "remembered": "想起密码了？",
+    "backToSignIn": "返回登录"
   },
   "SignUp": {
     "title": "创建你的账户",
@@ -225,6 +259,22 @@
     "highlight1": "收藏夹自动保存",
     "highlight2": "跨设备同步偏好",
     "highlight3": "上传记录随时回看"
+  },
+  "ForgotPasswordPage": {
+    "badge": "Account Recovery",
+    "title": "快速恢复你的 Lemon Space 账户",
+    "description": "重置链接只会发送到你的账户邮箱。为保护隐私，无论邮箱是否存在，页面都会显示相同的发送结果。",
+    "highlight1": "邮件链接限时有效",
+    "highlight2": "不会泄露账户是否存在",
+    "highlight3": "重置后旧会话会失效"
+  },
+  "ResetPasswordPage": {
+    "badge": "Secure Reset",
+    "title": "换一个新的安全密码",
+    "description": "通过邮件链接验证身份后，可以为账户设置新的登录密码。",
+    "highlight1": "密码会被安全加密保存",
+    "highlight2": "重置链接只能使用一次",
+    "highlight3": "完成后返回登录页"
   },
   "SignUpPage": {
     "badge": "New Creator",
