@@ -32,29 +32,33 @@ export function MasonryGrid<T extends { id: string | number }>({
     return Math.max(1, Math.floor(count))
   }, [columnCount, width])
 
+  const effectiveColumnCount = Math.min(
+    resolvedColumnCount,
+    Math.max(1, items.length),
+  )
+
   const columns = useMemo(() => {
     const result: Array<Array<{ item: T; index: number }>> = Array.from(
-      { length: resolvedColumnCount },
+      { length: effectiveColumnCount },
       () => [],
     )
 
     // Row-major distribution keeps visual reading order left-to-right.
     items.forEach((item, index) => {
-      result[index % resolvedColumnCount].push({ item, index })
+      result[index % effectiveColumnCount].push({ item, index })
     })
 
     return result
-  }, [items, resolvedColumnCount])
+  }, [items, effectiveColumnCount])
 
-  const renderedColumns = columns.map((columnItems) => {
-    const columnKey = columnItems.map(({ item }) => item.id).join(":")
+  const renderedColumns = columns.map((columnItems, columnIndex) => {
     const renderedItems = columnItems.map(({ item, index }) => (
       <div key={item.id}>{itemNode(item, index)}</div>
     ))
 
     return (
       <div
-        key={columnKey}
+        key={`column-${columnIndex}`}
         className={cn("flex min-w-0 flex-1 basis-0 flex-col", gapClassName)}
       >
         {renderedItems}
