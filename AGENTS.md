@@ -25,3 +25,7 @@ Do not reach for `useState` + `useEffect` as the first solution. Before adding a
 - Use `useSyncExternalStore` for external subscriptions when needed.
 
 Use effects mainly to synchronize with external systems that React does not control, such as browser APIs, sockets, timers, imperative third-party widgets, or analytics. If an effect only keeps two pieces of React state in sync, refactor it away.
+
+## Verification Without Build
+
+Do not use `build` commands as routine verification in this project unless the user explicitly asks for them. Network issues can make builds take a long time or fail for reasons unrelated to the change. Prefer faster local checks such as linting, type checking, targeted tests, or focused smoke checks when they are available.

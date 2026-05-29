@@ -1,1 +1,10 @@
-minimumReleaseAge: 0
+allowBuilds:
+  '@parcel/watcher': false
+  '@swc/core': false
+  esbuild: false
+  msw: false
+  sharp: false
+  unrs-resolver: false
+  
+minimumReleaseAgeExclude:
+  - '@layout-kit/react'
