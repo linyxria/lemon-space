@@ -116,6 +116,7 @@
     "uploadingShort": "Uploading",
     "uploadingLong": "Uploading...",
     "changeAvatar": "Change avatar",
+    "selectFile": "Select avatar image",
     "badge": "Profile",
     "description": "Upload a new avatar to make your creator profile more recognizable.",
     "formats": "Supports JPG, PNG, WebP and GIF"

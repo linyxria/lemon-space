@@ -142,15 +142,18 @@ export default function PreferencesProvider({
     refresh()
   }
 
+  const setTheme = (value: ThemePreference) =>
+    updatePreferences({ theme: value })
+
+  const contextValue = {
+    ...resolvedPreferences,
+    locale,
+    setTheme,
+    setLocale,
+  }
+
   return (
-    <PreferencesContext.Provider
-      value={{
-        ...resolvedPreferences,
-        locale,
-        setTheme: (value) => updatePreferences({ theme: value }),
-        setLocale,
-      }}
-    >
+    <PreferencesContext.Provider value={contextValue}>
       {children}
     </PreferencesContext.Provider>
   )

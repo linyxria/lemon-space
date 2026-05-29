@@ -60,7 +60,11 @@ export default function TagInput({
       {value?.map((tag) => (
         <Badge key={tag} className="flex max-w-full">
           <span className="flex-1 truncate">{tag}</span>
-          <button onClick={() => handmeRemove(tag)}>
+          <button
+            type="button"
+            aria-label={`Remove ${tag}`}
+            onClick={() => handmeRemove(tag)}
+          >
             <X size={12} />
           </button>
         </Badge>

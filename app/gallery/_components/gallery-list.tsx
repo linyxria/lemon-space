@@ -4,7 +4,7 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query"
 import { ImageIcon, LoaderCircle, UploadCloud } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useRef } from "react"
 
 import ImageCard from "@/components/image-card"
 import { MasonryGrid } from "@/components/masonry-grid"
@@ -41,21 +41,17 @@ export function GalleryList({
       ),
     )
 
-  const items = useMemo(() => {
-    const seen = new Set<string>()
+  const seen = new Set<string>()
 
-    const items: (typeof data.pages)[number]["items"] = []
+  const items: (typeof data.pages)[number]["items"] = []
 
-    for (const page of data.pages) {
-      for (const item of page.items) {
-        if (seen.has(item.id)) continue
-        seen.add(item.id)
-        items.push(item)
-      }
+  for (const page of data.pages) {
+    for (const item of page.items) {
+      if (seen.has(item.id)) continue
+      seen.add(item.id)
+      items.push(item)
     }
-
-    return items
-  }, [data])
+  }
 
   useEffect(() => {
     const node = loadMoreRef.current

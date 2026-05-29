@@ -586,13 +586,12 @@ export function RichTextEditor({
     if (!file || !editor || !onUploadImage) return
 
     setState({ uploading: true })
-    try {
-      const url = await onUploadImage(file)
-      editor.chain().focus().setImage({ src: url }).run()
-      setState({ panel: null })
-    } finally {
-      setState({ uploading: false })
-    }
+    await onUploadImage(file)
+      .then((url) => {
+        editor.chain().focus().setImage({ src: url }).run()
+        setState({ panel: null })
+      })
+      .finally(() => setState({ uploading: false }))
   }
 
   const insertMarkdown = () => {

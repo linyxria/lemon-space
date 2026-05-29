@@ -2,13 +2,10 @@
 
 import { AnimatePresence } from "motion/react"
 import { usePathname } from "next/navigation"
-import { createContext, use, useState } from "react"
+import { useState } from "react"
 
-import ImageModal, { type ModalAssetData } from "./image-modal"
-
-const GalleryContext = createContext<{
-  openAsset: (asset: ModalAssetData) => void
-} | null>(null)
+import { GalleryContext, type ModalAssetData } from "./gallery-context"
+import ImageModal from "./image-modal"
 
 export default function GalleryProvider({
   children,
@@ -32,9 +29,10 @@ export default function GalleryProvider({
     setModal(null)
   }
   const isModalOpen = modal?.pathname === pathname
+  const contextValue = { openAsset }
 
   return (
-    <GalleryContext.Provider value={{ openAsset: openAsset }}>
+    <GalleryContext.Provider value={contextValue}>
       {children}
       <AnimatePresence onExitComplete={handleExitComplete}>
         {isModalOpen && (
@@ -43,11 +41,4 @@ export default function GalleryProvider({
       </AnimatePresence>
     </GalleryContext.Provider>
   )
-}
-
-export const useGallery = () => {
-  const context = use(GalleryContext)
-  if (!context)
-    throw new Error("useGallery must be used within GalleryProvider")
-  return context
 }

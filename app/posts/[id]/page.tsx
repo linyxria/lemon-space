@@ -1,6 +1,7 @@
 import { CalendarDays, Edit3 } from "lucide-react"
 import type { Metadata } from "next"
 import { headers } from "next/headers"
+import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -120,11 +121,12 @@ export default async function PostPage({
 
       {post.coverImageUrl ? (
         <div className="relative aspect-video overflow-hidden rounded-lg border">
-          <span
-            role="img"
-            aria-label={post.title}
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${post.coverImageUrl})` }}
+          <Image
+            src={post.coverImageUrl}
+            alt={post.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 896px"
           />
         </div>
       ) : null}

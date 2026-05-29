@@ -118,33 +118,31 @@ export function PostEditor({ post }: { post?: EditorPost }) {
     if (!file) return
 
     setCoverUploading(true)
-    try {
-      const url = await uploadPostImage(file)
-      form.setValue("coverImageUrl", url, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
+    await uploadPostImage(file)
+      .then((url) => {
+        form.setValue("coverImageUrl", url, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        })
+        toast.success("封面已上传")
       })
-      toast.success("封面已上传")
-    } catch {
-      toast.error("封面上传失败")
-    } finally {
-      setCoverUploading(false)
-    }
+      .catch(() => toast.error("封面上传失败"))
+      .finally(() => setCoverUploading(false))
   }
 
   const handleEditorImageUpload = async (file: File) => {
     setEditorImageUploading(true)
-    try {
-      const url = await uploadPostImage(file)
-      toast.success("图片已插入")
-      return url
-    } catch {
-      toast.error("图片上传失败")
-      throw new Error("Image upload failed")
-    } finally {
-      setEditorImageUploading(false)
-    }
+    return uploadPostImage(file)
+      .then((url) => {
+        toast.success("图片已插入")
+        return url
+      })
+      .catch((error) => {
+        toast.error("图片上传失败")
+        throw error
+      })
+      .finally(() => setEditorImageUploading(false))
   }
 
   const handleSubmit = (status: "draft" | "published") =>

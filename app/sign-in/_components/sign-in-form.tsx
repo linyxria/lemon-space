@@ -154,20 +154,21 @@ export default function SignInForm({
                 variant="link"
                 size="sm"
                 disabled={resending}
-                onClick={async () => {
-                  try {
-                    setResending(true)
-                    await authClient.sendVerificationEmail({
+                onClick={() => {
+                  setResending(true)
+                  void authClient
+                    .sendVerificationEmail({
                       email: pendingVerificationEmail,
                       callbackURL,
                     })
-                    toast.success(t("verificationResent"))
-                  } catch (error) {
-                    console.error(error)
-                    toast.error(t("verificationResendFailed"))
-                  } finally {
-                    setResending(false)
-                  }
+                    .then(() => {
+                      toast.success(t("verificationResent"))
+                    })
+                    .catch((error) => {
+                      toast.error(t("verificationResendFailed"))
+                      console.error(error)
+                    })
+                    .finally(() => setResending(false))
                 }}
               >
                 {resending ? t("resending") : t("resendVerification")}

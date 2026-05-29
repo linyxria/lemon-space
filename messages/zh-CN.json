@@ -116,6 +116,7 @@
     "uploadingShort": "上传中",
     "uploadingLong": "上传中...",
     "changeAvatar": "更换头像",
+    "selectFile": "选择头像图片",
     "badge": "个人资料",
     "description": "上传一张新的头像，让你的个人主页更有辨识度。",
     "formats": "支持 JPG、PNG、WebP、GIF 等图片格式"

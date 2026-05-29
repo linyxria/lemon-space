@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { authClient } from "@/lib/auth-client"
 import { useTRPC } from "@/trpc/client"
 
-import { useGallery } from "./gallery-provider"
+import { useGallery } from "./gallery-context"
 import UserAvatar from "./user-avatar"
 
 const heartVariants = {
@@ -209,13 +209,6 @@ export default function ImageCard({
     gallery.openAsset({ id, title, url, width, height, tags })
   }
 
-  const handlePreviewKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") return
-
-    event.preventDefault()
-    openPreview()
-  }
-
   const likeButtonClassName = `ml-auto flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all active:scale-95 ${
     optimisticLike.isLiked
       ? "bg-primary/10 text-primary"
@@ -232,12 +225,10 @@ export default function ImageCard({
     <LazyMotion features={domAnimation}>
       <div className="bg-card group ring-border hover:ring-ring/40 relative w-full max-w-full min-w-0 overflow-hidden rounded-lg shadow-sm ring-1 transition-all hover:shadow-lg">
         {/* 图片区域容器 */}
-        <div
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           className="bg-muted relative block w-full cursor-zoom-in overflow-hidden text-left"
           onClick={openPreview}
-          onKeyDown={handlePreviewKeyDown}
           aria-label={title}
         >
           {/* 优雅核心：使用原生 CSS transition。
@@ -256,22 +247,21 @@ export default function ImageCard({
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           </div>
-
-          <div className="absolute inset-0 z-10 hidden items-start justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:flex">
-            <button
-              type="button"
-              onClick={handleLikeClick}
-              disabled={likeMutation.isPending || isLikeTransitionPending}
-              aria-label={likeLabel}
-              className={iconButtonClassName}
-            >
-              <AnimatedHeart
-                isLiked={optimisticLike.isLiked}
-                size={20}
-                strokeWidth={2}
-              />
-            </button>
-          </div>
+        </button>
+        <div className="pointer-events-none absolute inset-0 z-10 hidden items-start justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:flex">
+          <button
+            type="button"
+            onClick={handleLikeClick}
+            disabled={likeMutation.isPending || isLikeTransitionPending}
+            aria-label={likeLabel}
+            className={`pointer-events-auto ${iconButtonClassName}`}
+          >
+            <AnimatedHeart
+              isLiked={optimisticLike.isLiked}
+              size={20}
+              strokeWidth={2}
+            />
+          </button>
         </div>
         {/* 2. 底部作者栏 */}
         <div className="bg-card border-t px-3.5 py-2.5">

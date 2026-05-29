@@ -313,54 +313,49 @@ export default function UploadClient() {
   const handleUpload = async () => {
     if (files.length === 0) return
 
-    try {
-      setUploadState({
-        uploading: true,
-        progress: 0,
-        status: t("started"),
+    setUploadState({
+      uploading: true,
+      progress: 0,
+      status: t("started"),
+    })
+
+    // 初始化所有文件的进度
+    fileProgressRef.current = {}
+    files.forEach((_, i) => (fileProgressRef.current[i] = 0))
+
+    const totalFiles = files.length
+
+    const uploadTasks: Array<
+      Promise<{
+        title: string
+        objectKey: string
+        width: number
+        height: number
+      }>
+    > = []
+
+    files.forEach(({ origin: file }, index) => {
+      const dimensionsPromise = getImageDimensions(file)
+      const uploadPromise = uploadFile("assets", file, {
+        onProgress: (percent) => {
+          // 更新当前文件的进度
+          fileProgressRef.current[index] = percent
+
+          // 计算全局平均进度
+          const sum = Object.values(fileProgressRef.current).reduce(
+            (a, b) => a + b,
+            0,
+          )
+          const globalProgress = Math.round(sum / totalFiles)
+
+          // 留 1% 给最后的数据库同步状态
+          setUploadState({ progress: Math.min(globalProgress, 99) })
+        },
       })
 
-      // 初始化所有文件的进度
-      fileProgressRef.current = {}
-      files.forEach((_, i) => (fileProgressRef.current[i] = 0))
-
-      const totalFiles = files.length
-
-      const uploadTasks: Array<
-        Promise<{
-          title: string
-          objectKey: string
-          width: number
-          height: number
-        }>
-      > = []
-
-      for (const [index, { origin: file }] of files.entries()) {
-        const dimensionsPromise = getImageDimensions(file)
-        const uploadPromise = uploadFile("assets", file, {
-          onProgress: (percent) => {
-            // 更新当前文件的进度
-            fileProgressRef.current[index] = percent
-
-            // 计算全局平均进度
-            const sum = Object.values(fileProgressRef.current).reduce(
-              (a, b) => a + b,
-              0,
-            )
-            const globalProgress = Math.round(sum / totalFiles)
-
-            // 留 1% 给最后的数据库同步状态
-            setUploadState({ progress: Math.min(globalProgress, 99) })
-          },
-        })
-
-        uploadTasks.push(
-          (async () => {
-            const [{ objectKey }, dimensions] = await Promise.all([
-              uploadPromise,
-              dimensionsPromise,
-            ])
-
+      uploadTasks.push(
+        Promise.all([uploadPromise, dimensionsPromise]).then(
+          ([{ objectKey }, dimensions]) => {
             const finalTitle = formValues.title
               ? totalFiles > 1
                 ? `${formValues.title} - ${(index + 1).toString().padStart(2, "0")}`
@@ -375,30 +370,32 @@ export default function UploadClient() {
               width: dimensions.width,
               height: dimensions.height,
             }
-          })(),
-        )
-      }
+          },
+        ),
+      )
+    })
 
-      const assets = await Promise.all(uploadTasks)
+    await Promise.all(uploadTasks)
+      .then(async (assets) => {
+        setUploadState({
+          progress: 99,
+          status: t("syncing", { count: totalFiles }),
+        })
+        await createBatchMutation.mutateAsync({
+          assets,
+          tags: formValues.tags,
+        })
 
-      setUploadState({
-        progress: 99,
-        status: t("syncing", { count: totalFiles }),
+        setUploadState({ progress: 100, status: t("success") })
+
+        setTimeout(() => {
+          setUploadState(initialUploadState)
+        }, 2000)
       })
-      await createBatchMutation.mutateAsync({
-        assets,
-        tags: formValues.tags,
+      .catch((err) => {
+        console.error(err)
+        setUploadState({ status: t("error"), uploading: false })
       })
-
-      setUploadState({ progress: 100, status: t("success") })
-
-      setTimeout(() => {
-        setUploadState(initialUploadState)
-      }, 2000)
-    } catch (err) {
-      console.error(err)
-      setUploadState({ status: t("error"), uploading: false })
-    }
   }
 
   return (

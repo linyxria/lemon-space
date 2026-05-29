@@ -38,23 +38,24 @@ export default function AvatarUploadCard() {
 
     const localPreviewUrl = URL.createObjectURL(file)
 
-    try {
-      setUploading(true)
-      setPreviewUrl(localPreviewUrl)
+    setUploading(true)
+    setPreviewUrl(localPreviewUrl)
 
-      const { objectKey } = await uploadFile("avatars", file)
-      await mutation.mutateAsync({ objectKey })
-
-      toast.success(t("updated"))
-      refresh()
-    } catch (error) {
-      console.error(error)
-      setPreviewUrl(undefined)
-      toast.error(t("uploadFailed"))
-    } finally {
-      setUploading(false)
-      event.target.value = ""
-    }
+    await uploadFile("avatars", file)
+      .then(({ objectKey }) => mutation.mutateAsync({ objectKey }))
+      .then(() => {
+        toast.success(t("updated"))
+        refresh()
+      })
+      .catch((error) => {
+        setPreviewUrl(undefined)
+        console.error(error)
+        toast.error(t("uploadFailed"))
+      })
+      .finally(() => {
+        setUploading(false)
+        event.target.value = ""
+      })
   }
 
   return (
@@ -64,6 +65,7 @@ export default function AvatarUploadCard() {
       <input
         ref={inputRef}
         type="file"
+        aria-label={t("selectFile")}
         accept="image/*"
         className="hidden"
         onChange={handleSelectFile}

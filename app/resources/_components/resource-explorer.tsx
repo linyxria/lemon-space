@@ -29,7 +29,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useMemo, useState, useTransition } from "react"
+import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -188,20 +188,16 @@ export function ResourceExplorer({
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(listQuery)
-  const resources = useMemo(() => {
-    const seen = new Set<string>()
-    const uniqueResources: ResourceItem[] = []
+  const seen = new Set<string>()
+  const resources: ResourceItem[] = []
 
-    for (const page of data.pages) {
-      for (const resource of page.items) {
-        if (seen.has(resource.id)) continue
-        seen.add(resource.id)
-        uniqueResources.push(resource)
-      }
+  for (const page of data.pages) {
+    for (const resource of page.items) {
+      if (seen.has(resource.id)) continue
+      seen.add(resource.id)
+      resources.push(resource)
     }
-
-    return uniqueResources
-  }, [data.pages])
+  }
 
   const totalCount = categories.reduce(
     (count, category) => count + category.resourceCount,
@@ -718,6 +714,7 @@ function FeaturedResourceCard({
               href={resource.docsUrl ?? resource.url}
               target="_blank"
               rel="noreferrer"
+              aria-label={`打开 ${resource.name} 文档`}
             />
           }
         >
@@ -793,6 +790,7 @@ function ResourceCard({
               href={resource.docsUrl ?? resource.url}
               target="_blank"
               rel="noreferrer"
+              aria-label={`打开 ${resource.name} 文档`}
             />
           }
         >
@@ -804,7 +802,14 @@ function ResourceCard({
           variant="outline"
           className="h-10"
           nativeButton={false}
-          render={<a href={resource.url} target="_blank" rel="noreferrer" />}
+          render={
+            <a
+              href={resource.url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`打开 ${resource.name} 官网`}
+            />
+          }
         >
           官网
           <LinkIcon className="size-3.5" />

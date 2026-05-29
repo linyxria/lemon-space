@@ -1,6 +1,5 @@
 "use client"
 
-import { useMemo } from "react"
 import { useWindowSize } from "react-use"
 
 import { cn } from "@/lib/utils"
@@ -10,6 +9,17 @@ function defaultGetColumnCount(width: number) {
   if (width < 1024) return 3
   return 4
 }
+
+const COLUMN_KEYS = [
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+]
 
 export function MasonryGrid<T extends { id: string | number }>({
   items,
@@ -26,25 +36,19 @@ export function MasonryGrid<T extends { id: string | number }>({
 }) {
   const { width } = useWindowSize()
 
-  const resolvedColumnCount = useMemo(() => {
-    const count =
-      typeof columnCount === "function" ? columnCount(width) : columnCount
-    return Math.max(1, Math.floor(count))
-  }, [columnCount, width])
+  const count =
+    typeof columnCount === "function" ? columnCount(width) : columnCount
+  const resolvedColumnCount = Math.max(1, Math.floor(count))
 
-  const columns = useMemo(() => {
-    const result: Array<Array<{ item: T; index: number }>> = Array.from(
-      { length: resolvedColumnCount },
-      () => [],
-    )
+  const columns: Array<Array<{ item: T; index: number }>> = Array.from(
+    { length: resolvedColumnCount },
+    () => [],
+  )
 
-    // Row-major distribution keeps visual reading order left-to-right.
-    items.forEach((item, index) => {
-      result[index % resolvedColumnCount].push({ item, index })
-    })
-
-    return result
-  }, [items, resolvedColumnCount])
+  // Row-major distribution keeps visual reading order left-to-right.
+  items.forEach((item, index) => {
+    columns[index % resolvedColumnCount].push({ item, index })
+  })
 
   const renderedColumns = columns.map((columnItems, columnIndex) => {
     const renderedItems = columnItems.map(({ item, index }) => (
@@ -53,7 +57,7 @@ export function MasonryGrid<T extends { id: string | number }>({
 
     return (
       <div
-        key={`column-${columnIndex}`}
+        key={COLUMN_KEYS[columnIndex] ?? `column-${resolvedColumnCount}`}
         className={cn("flex min-w-0 flex-1 basis-0 flex-col", gapClassName)}
       >
         {renderedItems}

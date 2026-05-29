@@ -13,7 +13,7 @@ import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
 import { useTRPC } from "@/trpc/client"
 
-import { useGallery } from "./gallery-provider"
+import { type ModalAssetData, useGallery } from "./gallery-context"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 
@@ -21,15 +21,6 @@ const AmbientImage = dynamic(
   () => import("@layout-kit/react").then((module) => module.AmbientImage),
   { ssr: false },
 )
-
-export interface ModalAssetData {
-  id: string
-  title: string
-  url: string
-  width?: number
-  height?: number
-  tags?: string[]
-}
 
 interface ImageModalProps {
   asset: ModalAssetData | null
@@ -207,6 +198,7 @@ export default function ImageModal({ asset, onClose }: ImageModalProps) {
                         download
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label={t("download")}
                       />
                     }
                   >
