@@ -124,9 +124,7 @@ export default function ResetPasswordForm({
                       {fieldState.invalid ? (
                         <FieldError errors={[fieldState.error]} />
                       ) : (
-                        <FieldDescription>
-                          {t("passwordHint")}
-                        </FieldDescription>
+                        <FieldDescription>{t("passwordHint")}</FieldDescription>
                       )}
                     </Field>
                   )}
